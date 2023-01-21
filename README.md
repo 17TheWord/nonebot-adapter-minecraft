@@ -1,4 +1,4 @@
-[![nonebot-plugin-mcqq](https://socialify.git.ci/17TheWord/nonebot-adapter-spigot/image?description=1&font=Inter&forks=1&issues=1&logo=https%3A%2F%2Fwww.minecraft.net%2Fetc.clientlibs%2Fminecraft%2Fclientlibs%2Fmain%2Fresources%2Ffavicon.ico&name=1&owner=1&pattern=Solid&pulls=1&stargazers=1&theme=Light)](https://17theword.github.io/mc_qq/)
+[![nonebot-plugin-mcqq](https://socialify.git.ci/17TheWord/nonebot-adapter-spigot/image?description=1&font=Inter&forks=1&issues=1&name=1&owner=1&pattern=Solid&pulls=1&stargazers=1&theme=Light)](https://17theword.github.io/mc_qq/)
 
 # nonebot-adapter-spigot
 NoneBot2与MineCraft Server互通的适配器
