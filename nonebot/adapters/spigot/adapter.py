@@ -1,32 +1,25 @@
-import asyncio
-import contextlib
-import inspect
 import json
+import asyncio
+import inspect
+import contextlib
 from typing import Any, Dict, Optional, Generator, Type, List
 
-from nonebot.typing import overrides
-from nonebot.exception import WebSocketClosed
-from nonebot.utils import DataclassEncoder, escape_tag, logger_wrapper
+from nonebot.adapters import Adapter as BaseAdapter
 from nonebot.drivers import (
     URL,
     Driver,
-    Request,
-    Response,
     WebSocket,
-    ForwardDriver,
     ReverseDriver,
-    HTTPServerSetup,
     WebSocketServerSetup,
 )
-
-from nonebot.adapters import Adapter as BaseAdapter
+from nonebot.exception import WebSocketClosed
+from nonebot.typing import overrides
+from nonebot.utils import escape_tag, logger_wrapper
 
 from . import event
 from .bot import Bot
 from .collator import Collator
 from .event import Event
-from .config import Config
-from .message import Message, MessageSegment
 
 log = logger_wrapper("Spigot")
 
@@ -43,6 +36,7 @@ class Adapter(BaseAdapter):
         "Spigot",
         DEFAULT_MODELS,
         (
+            "post_type",
             "event_name",
         ),
     )

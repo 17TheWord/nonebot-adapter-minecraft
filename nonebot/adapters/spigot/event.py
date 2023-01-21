@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, Literal
 
+from nonebot.typing import overrides
 from pydantic import BaseModel
 from nonebot.adapters import Event as BaseEvent
 
@@ -7,19 +8,21 @@ from .message import Message
 
 
 class Event(BaseEvent):
+    post_type: str
     event_name: str
+    server_name: str
 
     def get_type(self) -> str:
-        return self.event_name
+        return self.post_type
 
     def get_event_name(self) -> str:
-        return self.event_name
+        return self.post_type
+
+    def get_message(self) -> "Message":
+        raise NotImplementedError
 
     def get_event_description(self) -> str:
         return str(self.dict())
-
-    def get_message(self) -> Message:
-        raise NotImplementedError
 
     def get_plaintext(self) -> str:
         raise NotImplementedError
@@ -50,21 +53,67 @@ class Player(BaseModel):
 # Message Events
 class MessageEvent(Event):
     """消息事件"""
-    server_name: str
-    event_name: str
-    message: Optional[dict] = None
+    post_type: Literal["message"]
     player: Player
+    message: Message
 
-    def get_message_data(self):
-        return self.message["data"]
+    @overrides(Event)
+    def get_message(self) -> Message:
+        return self.message
 
-    def get_message_type(self):
-        return self.message["type"]
+    def get_plaintext(self) -> str:
+        pass
+
+    def get_user_id(self) -> str:
+        pass
+
+    def get_session_id(self) -> str:
+        pass
 
 
 class AsyncPlayerChatEvent(MessageEvent):
     """聊天事件"""
-    server_name: str
-    event_name: str
-    message: Optional[dict] = None
+    event_name: Literal["AsyncPlayerChatEvent"]
+
+    @overrides(Event)
+    def get_event_description(self) -> str:
+        return f"Message from {self.player.nickname}@[Server:{self.server_name}]"
+
+
+class NoticeEvent(Event):
+    """通知事件"""
+    post_type: Literal["notice"]
     player: Player
+
+    # message: Message
+
+    def get_message(self) -> Message:
+        pass
+
+    def get_plaintext(self) -> str:
+        pass
+
+    def get_user_id(self) -> str:
+        pass
+
+    def get_session_id(self) -> str:
+        pass
+
+    @overrides(Event)
+    def get_event_description(self) -> str:
+        return f"Notice from {self.player.nickname}@[Server:{self.server_name}]"
+
+
+class PlayerJoinEvent(NoticeEvent):
+    """玩家加入事件"""
+    event_name: Literal["PlayerJoinEvent"]
+
+
+class PlayerQuitEvent(NoticeEvent):
+    """玩家离开事件"""
+    event_name: Literal["PlayerQuitEvent"]
+
+
+class PlayerDeathEvent(NoticeEvent):
+    """玩家死亡事件"""
+    event_name: Literal["PlayerDeathEvent"]

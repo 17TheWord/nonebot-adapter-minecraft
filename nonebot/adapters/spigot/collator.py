@@ -1,5 +1,4 @@
-"""
-Spigot 事件模型搜索树。
+"""Spigot 事件模型搜索树。
 
 FrontMatter:
     sidebar_position: 1

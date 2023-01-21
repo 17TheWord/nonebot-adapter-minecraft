@@ -1,12 +1,11 @@
 from typing import Union, Any
 
+from nonebot.adapters import Bot as BaseBot
+from nonebot.message import handle_event
 from nonebot.typing import overrides
 
-from nonebot.adapters import Bot as BaseBot
-
-from .event import Event, MessageEvent
+from .event import Event
 from .message import Message, MessageSegment
-from nonebot.message import handle_event
 
 
 class Bot(BaseBot):
@@ -18,7 +17,7 @@ class Bot(BaseBot):
             message: Union[str, Message, MessageSegment],
             **kwargs,
     ) -> Any:
-        ...
+        print(message)
 
     async def handle_event(self, event: Event) -> None:
         """处理收到的事件。"""
