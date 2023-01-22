@@ -3,6 +3,10 @@
 # nonebot-adapter-spigot
 NoneBot2与MineCraft Server互通的适配器
 
+## 使用
+
+前往 [nonebot-plugin-mcqq](https://github.com/17TheWord/nonebot-plugin-mcqq) 下载对应jar并按照文档使用
+
 ## 事件支持
 
 - 聊天 AsyncPlayerChatEvent
