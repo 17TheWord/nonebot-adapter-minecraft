@@ -66,7 +66,6 @@ class Adapter(BaseAdapter):
 
     async def _handle_ws(self, websocket: WebSocket) -> None:
         self_name = websocket.request.headers.get("x-self-name").encode('utf-8').decode('unicode_escape')
-        print(self_name)
 
         # check self_name
         if not self_name:

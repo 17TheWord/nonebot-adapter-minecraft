@@ -75,9 +75,9 @@ class AsyncPlayerChatEvent(MessageEvent):
     """聊天事件"""
     event_name: Literal["AsyncPlayerChatEvent"]
 
-    # @overrides(Event)
-    # def get_event_description(self) -> str:
-    #     return f"Message from {self.player.nickname}@[Server:{self.server_name}]: {self.message}"
+    @overrides(Event)
+    def get_event_description(self) -> str:
+        return f"Message from {self.player.nickname}@[Server:{self.server_name}]: {self.message}"
 
 
 class NoticeEvent(Event):
@@ -99,33 +99,33 @@ class NoticeEvent(Event):
     def get_session_id(self) -> str:
         pass
 
-    # @overrides(Event)
-    # def get_event_description(self) -> str:
-    #     return f"Notice from {self.player.nickname}@[Server:{self.server_name}]"
+    @overrides(Event)
+    def get_event_description(self) -> str:
+        return f"Notice from {self.player.nickname}@[Server:{self.server_name}]"
 
 
 class PlayerJoinEvent(NoticeEvent):
     """玩家加入事件"""
     event_name: Literal["PlayerJoinEvent"]
 
-    # @overrides(Event)
-    # def get_event_description(self) -> str:
-    #     return f"Notice Join from {self.player.nickname}@[Server:{self.server_name}]: Join"
+    @overrides(Event)
+    def get_event_description(self) -> str:
+        return f"Notice Join from {self.player.nickname}@[Server:{self.server_name}]: Join"
 
 
 class PlayerQuitEvent(NoticeEvent):
     """玩家离开事件"""
     event_name: Literal["PlayerQuitEvent"]
 
-    # @overrides(Event)
-    # def get_event_description(self) -> str:
-    #     return f"Notice Quit from {self.player.nickname}@[Server:{self.server_name}]: Quit"
+    @overrides(Event)
+    def get_event_description(self) -> str:
+        return f"Notice Quit from {self.player.nickname}@[Server:{self.server_name}]: Quit"
 
 
 class PlayerDeathEvent(NoticeEvent):
     """玩家死亡事件"""
     event_name: Literal["PlayerDeathEvent"]
 
-    # @overrides(Event)
-    # def get_event_description(self) -> str:
-    #     return f"Notice Joined from {self.player.nickname}@[Server:{self.server_name}]: Death"
+    @overrides(Event)
+    def get_event_description(self) -> str:
+        return f"Notice Joined from {self.player.nickname}@[Server:{self.server_name}]: Death"
