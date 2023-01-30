@@ -18,8 +18,9 @@ from nonebot.utils import escape_tag, logger_wrapper
 
 from . import event
 from .bot import Bot
-from .collator import Collator
 from .event import Event
+from .collator import Collator
+from .utils import get_connections
 
 log = logger_wrapper("Spigot")
 
@@ -64,21 +65,23 @@ class Adapter(BaseAdapter):
         pass
 
     async def _handle_ws(self, websocket: WebSocket) -> None:
-        self_name = websocket.request.headers.get("x-self-name")
+        self_name = websocket.request.headers.get("x-self-name").encode('utf-8').decode('unicode_escape')
+        print(self_name)
 
         # check self_name
         if not self_name:
             log("WARNING", "Missing X-Self-ID Header")
-            await websocket.close(1008, "Missing X-Self-ID Header")
+            await websocket.close(1008, "Missing X-Self-Name Header")
             return
         elif self_name in self.bots:
             log("WARNING", f"There's already a bot {self_name}, ignored")
-            await websocket.close(1008, "Duplicate X-Self-ID")
+            await websocket.close(1008, "Duplicate X-Self-Name")
             return
 
         await websocket.accept()
         bot = Bot(self, self_name)
         self.connections[self_name] = websocket
+        get_connections[self_name] = websocket
         self.bot_connect(bot)
 
         log("INFO", f"<y>Bot {escape_tag(self_name)}</y> connected")
@@ -145,3 +148,6 @@ class Adapter(BaseAdapter):
                 f"Raw: {escape_tag(str(json_data))}</bg #f8bbd0></r>",
                 e,
             )
+
+    def get_connections(self):
+        return self.connections

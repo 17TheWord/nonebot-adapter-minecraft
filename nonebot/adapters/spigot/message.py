@@ -21,14 +21,14 @@ class MessageSegment(BaseMessageSegment):
     def get_message_class(cls) -> Type["Message"]:
         return Message
 
-    @staticmethod
-    def text(msg: str):
-        return MessageSegment("text", {"message": msg})
-
     @overrides(BaseMessageSegment)
     def is_text(self) -> bool:
         """当前消息段是否为纯文本"""
         return True
+
+    @staticmethod
+    def text(msg: str):
+        return MessageSegment("text", {"message": msg})
 
 
 class Message(BaseMessage):
