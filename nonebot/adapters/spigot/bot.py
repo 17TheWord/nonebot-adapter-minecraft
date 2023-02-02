@@ -27,7 +27,18 @@ class Bot(BaseBot):
             message: Union[str, Message, MessageSegment],
             **kwargs,
     ) -> Any:
-        await get_connections[event.server_name].send_text(data=message)
+        messageList = []
+        if isinstance(message, str):
+            messageList.append(MessageSegment.text(message).data)
+        elif isinstance(message, MessageSegment):
+            messageList.append(message.data)
+        elif isinstance(message, Message):
+            for msg in message:
+                messageList.append(msg.data)
+        else:
+            return
+        messageDict = '{"message": ' + str(messageList) + '}'
+        await get_connections[event.server_name].send_text(data=messageDict)
 
     async def handle_event(self, event: Event) -> None:
         """处理收到的事件。"""
