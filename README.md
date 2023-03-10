@@ -3,6 +3,8 @@
 # nonebot-adapter-spigot
 NoneBot2与MineCraft Server互通的适配器
 
+推荐使用功能较为完整的 [`青岚 Bot`](https://github.com/17TheWord/qinglan_bot)
+
 ## 使用
 
 下载基于Spigot服务端的插件 [`MC_QQ_Spigot_1.14+.jar`](https://github.com/17TheWord/nonebot-adapter-spigot/raw/main/MC_QQ_Spigot_1.14.jar) 并安装
