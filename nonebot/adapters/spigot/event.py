@@ -122,7 +122,7 @@ class PlayerQuitEvent(NoticeEvent):
         return f"Notice Quit from {self.player.nickname}@[Server:{self.server_name}]: Quit"
 
 
-class PlayerDeathEvent(NoticeEvent):
+class PlayerDeathEvent(MessageEvent):
     """玩家死亡事件"""
     event_name: Literal["PlayerDeathEvent"]
 

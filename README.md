@@ -7,7 +7,7 @@ NoneBot2与MineCraft Server互通的适配器
 
 ## 使用
 
-下载基于Spigot服务端的插件 [`MC_QQ_Spigot_1.14+.jar`](https://github.com/17TheWord/nonebot-adapter-spigot/raw/main/MC_QQ_Spigot_1.14.jar) 并安装
+前往[插件版本 Release](https://github.com/17TheWord/nonebot-plugin-mcqq/releases)下载基于Spigot服务端的插件 `MC_QQ_Spigot_1.14+.jar` 并安装
 
 ## 事件支持
 

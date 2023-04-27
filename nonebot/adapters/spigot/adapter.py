@@ -19,8 +19,8 @@ from nonebot.utils import escape_tag, logger_wrapper
 from . import event
 from .bot import Bot
 from .event import Event
+from .utils import get_msg
 from .collator import Collator
-from .utils import get_connections
 
 log = logger_wrapper("Spigot")
 
@@ -62,48 +62,55 @@ class Adapter(BaseAdapter):
 
     @overrides(BaseAdapter)
     async def _call_api(self, bot: Bot, api: str, **data: Any) -> Any:
-        pass
+        websocket = self.connections.get(bot.self_id, None)
+        log("DEBUG", f"Calling API <y>{api}</y>")
+        if websocket:
+            if api == "send_msg":
+                data = get_msg(data["message"])
+            print(data)
+            await websocket.send(json.dumps(data))
+        log("WARNING", f"Bot {escape_tag(bot.self_id)} not connected")
+        return
 
     async def _handle_ws(self, websocket: WebSocket) -> None:
-        self_name = websocket.request.headers.get("x-self-name").encode('utf-8').decode('unicode_escape')
+        self_id = websocket.request.headers.get("x-self-name").encode('utf-8').decode('unicode_escape')
 
-        # check self_name
-        if not self_name:
+        # check self_id
+        if not self_id:
             log("WARNING", "Missing X-Self-ID Header")
             await websocket.close(1008, "Missing X-Self-Name Header")
             return
-        elif self_name in self.bots:
-            log("WARNING", f"There's already a bot {self_name}, ignored")
+        elif self_id in self.bots:
+            log("WARNING", f"There's already a bot {self_id}, ignored")
             await websocket.close(1008, "Duplicate X-Self-Name")
             return
 
         await websocket.accept()
-        bot = Bot(self, self_name)
-        self.connections[self_name] = websocket
-        get_connections[self_name] = websocket
+        bot = Bot(self, self_id)
+        self.connections[self_id] = websocket
         self.bot_connect(bot)
 
-        log("INFO", f"<y>Bot {escape_tag(self_name)}</y> connected")
+        log("INFO", f"<y>Bot {escape_tag(self_id)}</y> connected")
 
         try:
             while True:
                 data = await websocket.receive()
                 json_data = json.loads(data)
-                if event := self.json_to_event(json_data, self_name):
+                if event := self.json_to_event(json_data, self_id):
                     asyncio.create_task(bot.handle_event(event))
         except WebSocketClosed as e:
-            log("WARNING", f"WebSocket for Bot {escape_tag(self_name)} closed by peer")
+            log("WARNING", f"WebSocket for Bot {escape_tag(self_id)} closed by peer")
         except Exception as e:
             log(
                 "ERROR",
                 "<r><bg #f8bbd0>Error while process data from websocket "
-                f"for bot {escape_tag(self_name)}.</bg #f8bbd0></r>",
+                f"for bot {escape_tag(self_id)}.</bg #f8bbd0></r>",
                 e,
             )
         finally:
             with contextlib.suppress(Exception):
                 await websocket.close()
-            self.connections.pop(self_name, None)
+            self.connections.pop(self_id, None)
             self.bot_disconnect(bot)
 
     @classmethod
@@ -114,14 +121,14 @@ class Adapter(BaseAdapter):
         yield from cls.event_models.get_model(data)
 
     @classmethod
-    def json_to_event(cls, json_data: Any, self_name: Optional[str] = None) -> Optional[Event]:
+    def json_to_event(cls, json_data: Any, self_id: Optional[str] = None) -> Optional[Event]:
         """将 json 数据转换为 Event 对象。
 
         如果为 API 调用返回数据且提供了 Event 对应 Bot，则将数据存入 ResultStore。
 
         参数:
             json_data: json 数据
-            self_name: 当前 Event 对应的 Bot
+            self_id: 当前 Event 对应的 Bot
 
         返回:
             Event 对象，如果解析失败或为 API 调用返回数据，则返回 None
@@ -147,6 +154,3 @@ class Adapter(BaseAdapter):
                 f"Raw: {escape_tag(str(json_data))}</bg #f8bbd0></r>",
                 e,
             )
-
-    def get_connections(self):
-        return self.connections

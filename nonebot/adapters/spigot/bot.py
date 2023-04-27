@@ -1,15 +1,24 @@
-from typing import Union, Any, TYPE_CHECKING
+from typing import Union, Any, TYPE_CHECKING, Callable
 
 from nonebot.adapters import Bot as BaseBot
 from nonebot.message import handle_event
 from nonebot.typing import overrides
 
-from .utils import get_connections
 from .event import Event
 from .message import Message, MessageSegment
 
 if TYPE_CHECKING:
     from nonebot.internal.adapter import Adapter
+
+
+@overrides(BaseBot)
+async def send(
+        bot: "Bot",
+        event: Event,
+        message: Union[str, Message, MessageSegment],
+        **kwargs,
+) -> Any:
+    return await bot.send_msg(message=message)
 
 
 class Bot(BaseBot):
@@ -20,6 +29,14 @@ class Bot(BaseBot):
         self.self_id: str = self_name
         """机器人 ID"""
 
+    send_handler: Callable[
+        ["Bot", Event, Union[str, Message, MessageSegment]], Any
+    ] = send
+
+    async def handle_event(self, event: Event) -> None:
+        """处理收到的事件。"""
+        await handle_event(self, event)
+
     @overrides(BaseBot)
     async def send(
             self,
@@ -27,19 +44,4 @@ class Bot(BaseBot):
             message: Union[str, Message, MessageSegment],
             **kwargs,
     ) -> Any:
-        messageList = []
-        if isinstance(message, str):
-            messageList.append(MessageSegment.text(message).data)
-        elif isinstance(message, MessageSegment):
-            messageList.append(message.data)
-        elif isinstance(message, Message):
-            for msg in message:
-                messageList.append(msg.data)
-        else:
-            return
-        messageDict = '{"message": ' + str(messageList) + '}'
-        await get_connections[event.server_name].send_text(data=messageDict)
-
-    async def handle_event(self, event: Event) -> None:
-        """处理收到的事件。"""
-        await handle_event(self, event)
+        return await self.__class__.send_handler(self, event, message, **kwargs)

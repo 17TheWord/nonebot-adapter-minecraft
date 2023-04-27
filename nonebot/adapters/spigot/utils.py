@@ -1,5 +1,17 @@
-from typing import Dict
+from typing import Union
 
-from nonebot.drivers import WebSocket
+from .message import Message, MessageSegment
 
-get_connections: Dict[str, WebSocket] = {}
+
+def get_msg(message: Union[str, Message, MessageSegment]):
+    messageList = []
+    if isinstance(message, str):
+        messageList.append(MessageSegment.text(message).data)
+    elif isinstance(message, MessageSegment):
+        messageList.append(message.data)
+    elif isinstance(message, Message):
+        for msg in message:
+            messageList.append(msg.data)
+    else:
+        return None
+    return {"message": messageList}
