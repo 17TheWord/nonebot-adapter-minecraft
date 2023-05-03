@@ -4,6 +4,7 @@ import inspect
 import contextlib
 from typing import Any, Dict, Optional, Generator, Type, List
 
+import aiomcrcon
 from nonebot.adapters import Adapter as BaseAdapter
 from nonebot.drivers import (
     URL,
@@ -18,6 +19,7 @@ from nonebot.utils import escape_tag, logger_wrapper
 
 from . import event
 from .bot import Bot
+from .config import Config
 from .event import Event
 from .utils import get_msg
 from .collator import Collator
@@ -46,6 +48,7 @@ class Adapter(BaseAdapter):
     @overrides(BaseAdapter)
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
+        self.minecraft_config: Config = Config(**self.config.dict())
         self.connections: Dict[str, WebSocket] = {}
         self._setup()
 
@@ -86,7 +89,18 @@ class Adapter(BaseAdapter):
             return
 
         await websocket.accept()
-        bot = Bot(self, self_id)
+
+        rcon = None
+        if server := self.minecraft_config.minecraft_server_rcon.get(self_id):
+            if server.enable_rcon:
+                rcon = aiomcrcon.Client("localhost", server.rcon_port, server.rcon_password)
+                log("INFO", f"Connecting to RCON server for <y>Bot {escape_tag(self_id)}</y>")
+            else:
+                log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> is not enabled")
+        else:
+            log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> not found, Rcon is disabled")
+
+        bot = Bot(self, self_id, rcon)
         self.connections[self_id] = websocket
         self.bot_connect(bot)
 

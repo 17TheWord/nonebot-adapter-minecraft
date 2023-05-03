@@ -3,20 +3,20 @@ from typing import Literal
 from .baseevent import BasePlayer, BaseChatEvent, BaseDeathEvent, BaseJoinEvent, BaseQuitEvent
 
 
-class ForgePlayer(BasePlayer):
+class Player(BasePlayer):
     uuid: str
 
 
-class ForgeServerChatEvent(BaseChatEvent):
+class ServerChatEvent(BaseChatEvent):
     event_name: Literal["ForgeServerChatEvent"]
-    player: ForgePlayer
+    player: Player
 
 
-class ForgePlayerLoggedInEvent(BaseJoinEvent):
+class PlayerLoggedInEvent(BaseJoinEvent):
     event_name: Literal["ForgePlayerLoggedInEvent"]
-    player: ForgePlayer
+    player: Player
 
 
-class ForgePlayerLoggedOutEvent(BaseQuitEvent):
+class PlayerLoggedOutEvent(BaseQuitEvent):
     event_name: Literal["ForgePlayerLoggedOutEvent"]
-    player: ForgePlayer
+    player: Player

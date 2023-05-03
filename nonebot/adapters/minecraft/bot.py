@@ -1,5 +1,6 @@
-from typing import Union, Any, TYPE_CHECKING, Callable
+from typing import Union, Any, TYPE_CHECKING, Callable, Optional
 
+from aiomcrcon import Client
 from nonebot.adapters import Bot as BaseBot
 from nonebot.message import handle_event
 from nonebot.typing import overrides
@@ -23,11 +24,12 @@ async def send(
 
 class Bot(BaseBot):
     @overrides(BaseBot)
-    def __init__(self, adapter: "Adapter", self_name: str):
+    def __init__(self, adapter: "Adapter", self_name: str, rcon: Optional[Client] = None):
         self.adapter: "Adapter" = adapter
         """协议适配器实例"""
         self.self_id: str = self_name
         """机器人 ID"""
+        self.rcon: Optional[Client] = rcon
 
     send_handler: Callable[
         ["Bot", Event, Union[str, Message, MessageSegment]], Any

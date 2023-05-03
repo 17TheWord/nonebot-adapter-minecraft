@@ -10,7 +10,7 @@ class Address(BaseModel):
     port: int
 
 
-class SpigotPlayer(BasePlayer):
+class Player(BasePlayer):
     """玩家信息"""
     uuid: str
     display_name: str
@@ -38,22 +38,22 @@ class SpigotPlayer(BasePlayer):
 class AsyncPlayerChatEvent(BaseChatEvent):
     """聊天事件"""
     event_name: Literal["AsyncPlayerChatEvent"]
-    player: SpigotPlayer
+    player: Player
 
 
 class PlayerDeathEvent(BaseDeathEvent):
     """玩家死亡事件"""
     event_name: Literal["PlayerDeathEvent"]
-    player: SpigotPlayer
+    player: Player
 
 
 class PlayerJoinEvent(BaseJoinEvent):
     """玩家加入事件"""
     event_name: Literal["PlayerJoinEvent"]
-    player: SpigotPlayer
+    player: Player
 
 
 class PlayerQuitEvent(BaseQuitEvent):
     """玩家离开事件"""
     event_name: Literal["PlayerQuitEvent"]
-    player: SpigotPlayer
+    player: Player
