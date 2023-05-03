@@ -125,6 +125,7 @@ class Adapter(BaseAdapter):
             )
         finally:
             with contextlib.suppress(Exception):
+                await self._close_rcon(self_id=self_id, rcon=rcon)
                 await websocket.close()
             self.connections.pop(self_id, None)
             self.bot_disconnect(bot)
@@ -181,3 +182,9 @@ class Adapter(BaseAdapter):
         except aiomcrcon.IncorrectPasswordError as e:
             log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON", e)
         return False
+
+    @classmethod
+    async def _close_rcon(cls, self_id: str, rcon: aiomcrcon.Client):
+        if rcon:
+            await rcon.close()
+            log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> closed")
