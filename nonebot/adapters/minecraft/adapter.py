@@ -95,6 +95,8 @@ class Adapter(BaseAdapter):
             if server.enable_rcon:
                 rcon = aiomcrcon.Client("localhost", server.rcon_port, server.rcon_password)
                 log("INFO", f"Connecting to RCON server for <y>Bot {escape_tag(self_id)}</y>")
+                if await self._connect_rcon(self_id=self_id, rcon=rcon):
+                    log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> connected")
             else:
                 log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> is not enabled")
         else:
@@ -110,7 +112,6 @@ class Adapter(BaseAdapter):
             while True:
                 data = await websocket.receive()
                 json_data = json.loads(data)
-                print(json_data)
                 if event := self.json_to_event(json_data, self_id):
                     asyncio.create_task(bot.handle_event(event))
         except WebSocketClosed as e:
@@ -169,3 +170,14 @@ class Adapter(BaseAdapter):
                 f"Raw: {escape_tag(str(json_data))}</bg #f8bbd0></r>",
                 e,
             )
+
+    @classmethod
+    async def _connect_rcon(cls, self_id: str, rcon: aiomcrcon.Client):
+        try:
+            await rcon.connect()
+            return True
+        except aiomcrcon.RCONConnectionError as e:
+            log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON", e)
+        except aiomcrcon.IncorrectPasswordError as e:
+            log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON", e)
+        return False

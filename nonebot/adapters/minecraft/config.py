@@ -4,7 +4,6 @@ from pydantic import Extra, BaseModel, Field
 
 
 class Server(BaseModel):
-    server_name: str
     enable_rcon: bool = False
     rcon_port: int
     rcon_password: str
