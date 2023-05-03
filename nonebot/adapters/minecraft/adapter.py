@@ -93,7 +93,11 @@ class Adapter(BaseAdapter):
         rcon = None
         if server := self.minecraft_config.minecraft_server_rcon.get(self_id):
             if server.enable_rcon:
-                rcon = aiomcrcon.Client("localhost", server.rcon_port, server.rcon_password)
+                rcon = aiomcrcon.Client(
+                    websocket.__dict__["websocket"].__dict__["scope"]["client"][0],
+                    server.rcon_port,
+                    server.rcon_password
+                )
                 log("INFO", f"Connecting to RCON server for <y>Bot {escape_tag(self_id)}</y>")
                 if await self._connect_rcon(self_id=self_id, rcon=rcon):
                     log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> connected")
