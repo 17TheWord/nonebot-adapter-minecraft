@@ -5,7 +5,7 @@ from nonebot.internal.adapter.message import TMS
 from nonebot.typing import overrides
 
 
-class MessageSegment(BaseMessageSegment):
+class MessageSegment(BaseMessageSegment["Message"]):
 
     @classmethod
     @overrides(BaseMessageSegment)
@@ -25,9 +25,11 @@ class MessageSegment(BaseMessageSegment):
         )
         return "{msgType=" + f"{type_}{',' if params else ''}{params}" + "}"
 
+    @overrides(BaseMessageSegment)
     def __add__(self, other) -> "Message":
         return Message(self) + other
 
+    @overrides(BaseMessageSegment)
     def __radd__(self, other) -> "Message":
         return Message(other) + self
 
@@ -49,11 +51,12 @@ class MessageSegment(BaseMessageSegment):
         return MessageSegment("video", {"msgType": "video", "msgData": url})
 
 
-class Message(BaseMessage):
+class Message(BaseMessage[MessageSegment]):
 
     @classmethod
-    def get_segment_class(cls) -> Type[TMS]:
-        pass
+    @overrides
+    def get_segment_class(cls) -> Type[MessageSegment]:
+        return MessageSegment
 
     @staticmethod
     @overrides(BaseMessage)

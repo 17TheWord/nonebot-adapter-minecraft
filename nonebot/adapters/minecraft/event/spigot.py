@@ -1,44 +1,61 @@
 from typing import Literal, Optional
 
-from pydantic import BaseModel
+from nonebot.typing import overrides
 
-from .baseevent import BasePlayer, BaseChatEvent, BaseDeathEvent, BaseJoinEvent, BaseQuitEvent
-
-
-class Address(BaseModel):
-    address: str
-    port: int
+from .base import (
+    BasePlayer,
+    BaseChatEvent,
+    BaseJoinEvent,
+    BaseQuitEvent,
+    BaseDeathEvent,
+    BasePlayerCommandEvent
+)
 
 
 class Player(BasePlayer):
     """玩家信息"""
-    uuid: str
-    display_name: str
-    player_list_name: str
-    is_health_scaled: bool
-    address: Address
-    is_sprinting: bool
-    walk_speed: float
-    fly_speed: float
-    is_sneaking: bool
-    level: int
-    is_flying: bool
+    uuid: Optional[str] = None
+    display_name: Optional[str] = None
+    player_list_name: Optional[str] = None
+    is_health_scaled: Optional[bool] = None
+    address: Optional[str] = None
+    is_sprinting: Optional[bool] = None
+    walk_speed: Optional[float] = None
+    fly_speed: Optional[float] = None
+    is_sneaking: Optional[bool] = None
+    level: Optional[int] = None
+    is_flying: Optional[bool] = None
     ping: Optional[int] = None
     """Spigot API 1.12.2 Player 无 ping 属性"""
-    allow_flight: bool
-    locale: str
-    health_scale: float
-    player_time_offset: int
-    exp: float
-    total_exp: int
-    player_time: int
-    is_player_time_relative: bool
+    allow_flight: Optional[bool] = None
+    locale: Optional[str] = None
+    health_scale: Optional[float] = None
+    player_time_offset: Optional[int] = None
+    exp: Optional[float] = None
+    total_exp: Optional[int] = None
+    player_time: Optional[int] = None
+    is_player_time_relative: Optional[bool] = None
+    is_op: Optional[bool] = None
 
 
 class AsyncPlayerChatEvent(BaseChatEvent):
     """聊天事件"""
     event_name: Literal["AsyncPlayerChatEvent"]
     player: Player
+
+    @overrides(BaseChatEvent)
+    def get_event_description(self) -> str:
+        return f"Message from @{self.player.nickname} on [Server:{self.server_name}]: {self.message}"
+
+
+class PlayerCommandPreprocessEvent(BasePlayerCommandEvent):
+    """玩家命令事件"""
+    event_name: Literal["PlayerCommandPreprocessEvent"]
+    player: Player
+
+    @overrides(BaseChatEvent)
+    def get_event_description(self) -> str:
+        return f"Command from @{self.player.nickname} on [Server:{self.server_name}]: {self.message}"
 
 
 class PlayerDeathEvent(BaseDeathEvent):
