@@ -1,10 +1,21 @@
-from typing import Literal
+from typing import Literal, Optional
 
-from .baseevent import BasePlayer, BaseChatEvent, BaseDeathEvent, BaseJoinEvent, BaseQuitEvent
+from .base import (
+    BasePlayer,
+    BaseChatEvent,
+    BaseJoinEvent,
+    BaseQuitEvent,
+    BaseDeathEvent
+)
 
 
 class Player(BasePlayer):
-    uuid: str
+    nickname: Optional[str] = None
+    uuid: Optional[str] = None
+    ipAddress: Optional[str] = None
+    level: Optional[str] = None
+    """地图？"""
+    speed: Optional[float] = None
 
 
 class ServerChatEvent(BaseChatEvent):
@@ -19,4 +30,9 @@ class PlayerLoggedInEvent(BaseJoinEvent):
 
 class PlayerLoggedOutEvent(BaseQuitEvent):
     event_name: Literal["ForgePlayerLoggedOutEvent"]
+    player: Player
+
+
+class ForgePlayerRespawnEvent(BaseDeathEvent):
+    event_name: Literal["ForgePlayerRespawnEvent"]
     player: Player
