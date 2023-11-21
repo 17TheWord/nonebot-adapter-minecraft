@@ -19,6 +19,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
+        'mcqq-tool>=1.0.2',
         'aio-mc-rcon>=3.2.0',
         'nonebot2>=2.0.0',
         'websockets>=10.3',
