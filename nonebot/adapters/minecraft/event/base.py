@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Literal, Optional
 
-from nonebot import escape_tag
+from nonebot.utils import escape_tag
 from nonebot.adapters import Event as BaseEvent
 from nonebot.typing import overrides
 from pydantic import BaseModel
@@ -9,6 +9,7 @@ from ..message import Message
 
 
 class Event(BaseEvent):
+    timestamp: int
     post_type: str
     event_name: str
     server_name: str
@@ -55,6 +56,10 @@ class BasePlayer(BaseModel):
 # Message Events
 class MessageEvent(Event):
     """消息事件"""
+
+    message_id: Optional[str] = ""
+    to_me: Optional[bool] = False
+    ori_message: Optional[Message] = None
     post_type: Literal["message"]
     player: BasePlayer
     message: Message
@@ -74,6 +79,7 @@ class MessageEvent(Event):
 
 class BaseChatEvent(MessageEvent):
     """聊天事件"""
+
     sub_type: Literal["chat"]
 
     @overrides(Event)
@@ -83,6 +89,7 @@ class BaseChatEvent(MessageEvent):
 
 class BasePlayerCommandEvent(MessageEvent):
     """玩家命令事件"""
+
     sub_type: Literal["player_command"]
 
     @overrides(Event)
@@ -92,6 +99,7 @@ class BasePlayerCommandEvent(MessageEvent):
 
 class BaseDeathEvent(MessageEvent):
     """死亡事件"""
+
     sub_type: Literal["death"]
 
     @overrides(Event)
@@ -101,6 +109,7 @@ class BaseDeathEvent(MessageEvent):
 
 class NoticeEvent(Event):
     """通知事件"""
+
     post_type: Literal["notice"]
     player: BasePlayer
 
@@ -111,6 +120,7 @@ class NoticeEvent(Event):
 
 class BaseJoinEvent(NoticeEvent):
     """加入事件"""
+
     sub_type: Literal["join"]
 
     @overrides(NoticeEvent)
@@ -120,6 +130,7 @@ class BaseJoinEvent(NoticeEvent):
 
 class BaseQuitEvent(NoticeEvent):
     """玩家离开事件"""
+
     sub_type: Literal["quit"]
 
     @overrides(NoticeEvent)
