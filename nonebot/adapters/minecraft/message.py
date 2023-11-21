@@ -1,12 +1,24 @@
 from typing import Iterable, Optional, Type
 
-from nonebot.adapters import Message as BaseMessage, MessageSegment as BaseMessageSegment
-from nonebot.internal.adapter.message import TMS
+from nonebot.adapters import (
+    Message as BaseMessage,
+    MessageSegment as BaseMessageSegment,
+)
 from nonebot.typing import overrides
+
+from mcqq_tool.model import (
+    TextColor,
+    ClickEvent,
+    HoverEvent,
+    TextComponent,
+    ActionBarComponent,
+    BaseComponent,
+    ChatImageMod,
+    SendTitleItem,
+)
 
 
 class MessageSegment(BaseMessageSegment["Message"]):
-
     @classmethod
     @overrides(BaseMessageSegment)
     def get_message_class(cls) -> Type["Message"]:
@@ -17,13 +29,10 @@ class MessageSegment(BaseMessageSegment["Message"]):
         data = self.data.copy()
 
         if type_ == "text":
-            # return str({"msgType": "text", "msgData": data["msgData"]})
-            return data["msgData"]
+            return data["text"]
 
-        params = ",".join(
-            [f"{k}={str(v)}" for k, v in data.items() if v is not None]
-        )
-        return "{msgType=" + f"{type_}{',' if params else ''}{params}" + "}"
+        params = ",".join([f"{k}={str(v)}" for k, v in data.items() if v is not None])
+        return "{msg_type=" + f"{type_}{',' if params else ''}{params}" + "}"
 
     @overrides(BaseMessageSegment)
     def __add__(self, other) -> "Message":
@@ -39,20 +48,104 @@ class MessageSegment(BaseMessageSegment["Message"]):
         return True
 
     @staticmethod
-    def text(msg: str):
-        return MessageSegment("text", {"msgType": "text", "msgData": msg})
+    def text(
+        text: Optional[str] = None,
+        color: Optional[TextColor] = TextColor.WHITE,
+        font: Optional[str] = None,
+        bold: Optional[bool] = False,
+        italic: Optional[bool] = False,
+        underlined: Optional[bool] = False,
+        strikethrough: Optional[bool] = False,
+        obfuscated: Optional[bool] = False,
+        insertion: Optional[str] = None,
+        click_event: Optional[ClickEvent] = None,
+        hover_event: Optional[HoverEvent] = None,
+    ):
+        text_component = TextComponent(
+            text=text,
+            color=color,
+            font=font,
+            bold=bold,
+            italic=italic,
+            underlined=underlined,
+            strikethrough=strikethrough,
+            obfuscated=obfuscated,
+            insertion=insertion,
+            click_event=click_event,
+            hover_event=hover_event,
+        )
+
+        return MessageSegment("text", text_component.dict())
 
     @staticmethod
-    def image(url: str):
-        return MessageSegment("image", {"msgType": "image", "msgData": url})
+    def title(
+        title: str,
+        subtitle: Optional[str] = None,
+        fadein: Optional[int] = 10,
+        stay: Optional[int] = 70,
+        fadeout: Optional[int] = 20,
+    ):
+        title_component = SendTitleItem(
+            title=title, subtitle=subtitle, fadein=fadein, stay=stay, fadeout=fadeout
+        )
+
+        return MessageSegment("title", title_component.dict())
 
     @staticmethod
-    def video(url: str):
-        return MessageSegment("video", {"msgType": "video", "msgData": url})
+    def actionbar(
+        text: Optional[str] = None,
+        color: Optional[TextColor] = TextColor.WHITE,
+        font: Optional[str] = None,
+        bold: Optional[bool] = False,
+        italic: Optional[bool] = False,
+        underlined: Optional[bool] = False,
+        strikethrough: Optional[bool] = False,
+        obfuscated: Optional[bool] = False,
+        insertion: Optional[str] = None,
+    ):
+        actionbar_component = ActionBarComponent(
+            text=text,
+            color=color,
+            font=font,
+            bold=bold,
+            italic=italic,
+            underlined=underlined,
+            strikethrough=strikethrough,
+            obfuscated=obfuscated,
+            insertion=insertion,
+        )
+        return MessageSegment("actionbar", actionbar_component.dict())
+
+    @staticmethod
+    def chat_image_mod(
+        url: str,
+        name: Optional[str] = "图片",
+        color: Optional[TextColor] = TextColor.WHITE,
+        font: Optional[str] = None,
+        bold: Optional[bool] = False,
+        italic: Optional[bool] = False,
+        underlined: Optional[bool] = False,
+        strikethrough: Optional[bool] = False,
+        obfuscated: Optional[bool] = False,
+        insertion: Optional[str] = None,
+    ):
+        chat_image_model = ChatImageMod(url=url, name=name)
+
+        base_component = BaseComponent(
+            text=str(chat_image_model),
+            color=color,
+            font=font,
+            bold=bold,
+            italic=italic,
+            underlined=underlined,
+            strikethrough=strikethrough,
+            obfuscated=obfuscated,
+            insertion=insertion,
+        )
+        return MessageSegment("chat_image_mod", base_component.dict())
 
 
 class Message(BaseMessage[MessageSegment]):
-
     @classmethod
     @overrides
     def get_segment_class(cls) -> Type[MessageSegment]:
