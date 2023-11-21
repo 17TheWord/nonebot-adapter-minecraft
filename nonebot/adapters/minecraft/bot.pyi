@@ -1,5 +1,5 @@
 from re import A
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from nonebot.adapters import Bot as BaseBot
 
@@ -18,13 +18,15 @@ class Bot(BaseBot):
         self, event: Event, message: Union[str, Message, MessageSegment], **kwargs
     ) -> Any: ...
     async def send_actionbar(
-        self, event: Event, message: Union[str, Message, MessageSegment], **kwargs
+        self, message: Union[str, Message, MessageSegment], **kwargs
     ) -> Any: ...
     async def send_title(
         self,
-        event: Event,
         title: str,
-        message: Union[str, Message, MessageSegment],
+        subtitle: Optional[str] = None,
+        fadein: Optional[int] = 10,
+        stay: Optional[int] = 70,
+        fadeout: Optional[int] = 20,
         **kwargs,
     ) -> Any: ...
     async def send_msg(
