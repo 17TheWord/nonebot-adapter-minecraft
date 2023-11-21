@@ -4,7 +4,7 @@ import inspect
 import contextlib
 from typing import Any, Dict, Optional, Generator, Type, List
 
-import aiomcrcon
+from aiomcrcon import Client as RCONClient
 from nonebot.adapters import Adapter as BaseAdapter
 from nonebot.drivers import (
     URL,
@@ -15,16 +15,23 @@ from nonebot.drivers import (
 )
 from nonebot.exception import WebSocketClosed
 from nonebot.typing import overrides
-from nonebot.utils import escape_tag, logger_wrapper
+from nonebot.utils import escape_tag
+
+from mcqq_tool.model.return_body import (
+    WebSocketSendBody,
+    MessageList,
+    SendActionBarBody,
+    SendTitleBody,
+    SendTitleItem,
+)
 
 from . import event
 from .bot import Bot
-from .config import Config
 from .event import Event
-from .utils import get_msg
+from .config import Config
 from .collator import Collator
-
-log = logger_wrapper("Minecraft")
+from .utils import log, get_msg, get_actionbar_msg
+from .exception import MinecraftRCONConnectionError, MinecraftRCONIncorrectPasswordError
 
 DEFAULT_MODELS: List[Type[Event]] = []
 for model_name in dir(event):
@@ -69,21 +76,41 @@ class Adapter(BaseAdapter):
         websocket = self.connections.get(bot.self_id, None)
         log("DEBUG", f"Calling API <y>{api}</y>")
         if websocket:
+            websocket_send_body = WebSocketSendBody()
             if api == "send_msg":
-                data = get_msg(data["message"])
-            await websocket.send(json.dumps(data))
-        log("WARNING", f"Bot {escape_tag(bot.self_id)} not connected")
+                websocket_send_body.api = "broadcast"
+                websocket_send_body.data = MessageList(message_list=get_msg(**data))
+            elif api == "send_title":
+                websocket_send_body.api = "send_title"
+                send_title_item = SendTitleItem(
+                    title=data.get("title"),
+                    subtitle=data.get("subtitle"),
+                    fadein=data.get("fadein") if data.get("fadein") else 10,
+                    stay=data.get("stay") if data.get("stay") else 70,
+                    fadeout=data.get("fadeout") if data.get("fadeout") else 20,
+                )
+                websocket_send_body.data = SendTitleBody(send_title=send_title_item)
+            elif api == "send_actionbar":
+                websocket_send_body.api = "actionbar"
+                websocket_send_body.data = SendActionBarBody(
+                    message_list=get_actionbar_msg(**data)
+                )
+
+            await websocket.send(websocket_send_body.json(ensure_ascii=False))
         return
 
     async def _handle_ws(self, websocket: WebSocket) -> None:
-        self_id = websocket.request.headers.get("x-self-name").encode('utf-8').decode('unicode_escape')
+        ori_self_id = websocket.request.headers.get("x-self-name")
 
-        # check self_id
-        if not self_id:
+        # check ori_self_id
+        if not ori_self_id:
             log("WARNING", "Missing X-Self-ID Header")
             await websocket.close(1008, "Missing X-Self-Name Header")
             return
-        elif self_id in self.bots:
+
+        self_id = ori_self_id.encode("utf-8").decode("unicode_escape")
+
+        if self_id in self.bots:
             log("WARNING", f"There's already a bot {self_id}, ignored")
             await websocket.close(1008, "Duplicate X-Self-Name")
             return
@@ -93,18 +120,30 @@ class Adapter(BaseAdapter):
         rcon = None
         if server := self.minecraft_config.minecraft_server_rcon.get(self_id):
             if server.enable_rcon:
-                rcon = aiomcrcon.Client(
+                rcon = RCONClient(
                     websocket.__dict__["websocket"].__dict__["scope"]["client"][0],
                     server.rcon_port,
-                    server.rcon_password
+                    server.rcon_password,
                 )
-                log("INFO", f"Connecting to RCON server for <y>Bot {escape_tag(self_id)}</y>")
+                log(
+                    "INFO",
+                    f"Connecting to RCON server for <y>Bot {escape_tag(self_id)}</y>",
+                )
                 if await self._connect_rcon(self_id=self_id, rcon=rcon):
-                    log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> connected")
+                    log(
+                        "INFO",
+                        f"RCON server for <y>Bot {escape_tag(self_id)}</y> connected",
+                    )
             else:
-                log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> is not enabled")
+                log(
+                    "INFO",
+                    f"RCON server for <y>Bot {escape_tag(self_id)}</y> is not enabled",
+                )
         else:
-            log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> not found, Rcon is disabled")
+            log(
+                "INFO",
+                f"RCON server for <y>Bot {escape_tag(self_id)}</y> not found, Rcon is disabled",
+            )
 
         bot = Bot(self, self_id, rcon)
         self.connections[self_id] = websocket
@@ -135,7 +174,7 @@ class Adapter(BaseAdapter):
             self.bot_disconnect(bot)
 
     @classmethod
-    async def _close_rcon(cls, self_id: str, rcon: aiomcrcon.Client):
+    async def _close_rcon(cls, self_id: str, rcon: Optional[RCONClient] = None):
         if rcon:
             await rcon.close()
             log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> closed")
@@ -148,7 +187,9 @@ class Adapter(BaseAdapter):
         yield from cls.event_models.get_model(data)
 
     @classmethod
-    def json_to_event(cls, json_data: Any, self_id: Optional[str] = None) -> Optional[Event]:
+    def json_to_event(
+            cls, json_data: Any, self_id: Optional[str] = None
+    ) -> Optional[Event]:
         """将 json 数据转换为 Event 对象。
 
         如果为 API 调用返回数据且提供了 Event 对应 Bot，则将数据存入 ResultStore。
@@ -183,12 +224,20 @@ class Adapter(BaseAdapter):
             )
 
     @classmethod
-    async def _connect_rcon(cls, self_id: str, rcon: aiomcrcon.Client):
+    async def _connect_rcon(cls, self_id: str, rcon: RCONClient):
         try:
             await rcon.connect()
             return True
-        except aiomcrcon.RCONConnectionError as e:
-            log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON", e)
-        except aiomcrcon.IncorrectPasswordError as e:
-            log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON", e)
+        except MinecraftRCONConnectionError as e:
+            log(
+                "ERROR",
+                f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON",
+                e,
+            )
+        except MinecraftRCONIncorrectPasswordError as e:
+            log(
+                "ERROR",
+                f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON",
+                e,
+            )
         return False
