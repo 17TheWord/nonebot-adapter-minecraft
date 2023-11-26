@@ -27,3 +27,11 @@ from .minecraft import (
     MinecraftPlayerJoinEvent,
     MinecraftPlayerQuitEvent
 )
+from .fabric import (
+    Player as FabricPlayer,
+    FabricServerMessageEvent,
+    FabricServerCommandMessageEvent,
+    FabricServerLivingEntityAfterDeathEvent,
+    FabricServerPlayConnectionJoinEvent,
+    FabricServerPlayConnectionDisconnectEvent
+)
