@@ -8,10 +8,10 @@ NoneBot2 与 MineCraft Server互通的适配器
 
 ## 服务端支持
 
-- 原版（读取日志并正则匹配）
-- Spigot（插件）
-- Forge（读取日志并正则匹配、Mod）
-- Fabric（读取日志并正则匹配）
+- 原版：[日志读取程序](https://github.com/17TheWord/nonebot-plugin-mcqq)
+- Spigot：[插件](https://github.com/17TheWord/MC_QQ_Spigot) (主要更新)
+- Forge：[日志读取程序](https://github.com/17TheWord/nonebot-plugin-mcqq)、[Forge Mod](https://github.com/17TheWord/MC_QQ_Forge)
+- Fabric：[日志读取程序](https://github.com/17TheWord/nonebot-plugin-mcqq)、[Fabric Mod](https://github.com/17TheWord/MC_QQ_Fabric)
 
 ## Rcon支持
 
@@ -24,9 +24,6 @@ NoneBot2 与 MineCraft Server互通的适配器
 
 # 特别感谢
 
-- [@yanyongyu](https://github.com/yanyongyu) ：首先感谢万能的DDL。
-- [@SK-415](https://github.com/SK-415) ：感谢SK佬给予许多优秀的建议和耐心的解答。
-- [@zhz-红石头](https://github.com/zhzhongshi) ：感谢红石头在代码上的帮助
 - [NoneBot2](https://github.com/nonebot/nonebot2) ：插件使用的开发框架。
 - [go-cqhttp](https://github.com/Mrs4s/go-cqhttp) ：稳定完善的 CQHTTP 实现。
 
