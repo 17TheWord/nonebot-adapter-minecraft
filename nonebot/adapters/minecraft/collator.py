@@ -1,8 +1,8 @@
-"""Spigot 事件模型搜索树。
+"""Minecraft 事件模型搜索树。
 
 FrontMatter:
     sidebar_position: 1
-    description: spigot.collator 模块
+    description: minecraft.collator 模块
 """
 from typing import Any, Dict, List, Type, Tuple, Union, Generic, TypeVar, Optional
 
