@@ -8,27 +8,27 @@ log = logger_wrapper("Minecraft")
 
 
 def get_msg(message: Union[str, Message, MessageSegment]):
-    messageList = []
+    message_list = []
     if isinstance(message, str):
-        messageList.append(MessageSegment.text(message).data)
+        message_list.append(MessageSegment.text(message).data)
     elif isinstance(message, MessageSegment):
-        messageList.append(message.data)
+        message_list.append(message.data)
     elif isinstance(message, Message):
         for msg in message:
-            messageList.append(msg.data)
+            message_list.append(msg.data)
     else:
         return None
-    return messageList
+    return message_list
 
 
 def get_actionbar_msg(message: Union[str, Message, MessageSegment]):
-    messageList = []
+    message_list = []
     if isinstance(message, str):
-        messageList.append(MessageSegment.actionbar(message).data)
+        message_list.append(MessageSegment.actionbar(message).data)
     elif isinstance(message, MessageSegment) and message.type == "actionbar":
-        messageList.append(message.data)
+        message_list.append(message.data)
     elif isinstance(message, Message):
         return message
     else:
         return None
-    return messageList
+    return message_list
