@@ -6,14 +6,14 @@ from nonebot.adapters import (
 )
 from nonebot.typing import overrides
 
-from mcqq_tool.model import (
+from .model import (
     TextColor,
     ClickEvent,
     HoverEvent,
     TextComponent,
     ActionBarComponent,
     BaseComponent,
-    ChatImageMod,
+    ChatImageModComponent,
     SendTitleItem,
 )
 
@@ -49,21 +49,21 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @staticmethod
     def text(
-        text: Optional[str] = None,
-        color: Optional[TextColor] = TextColor.WHITE,
-        font: Optional[str] = None,
-        bold: Optional[bool] = False,
-        italic: Optional[bool] = False,
-        underlined: Optional[bool] = False,
-        strikethrough: Optional[bool] = False,
-        obfuscated: Optional[bool] = False,
-        insertion: Optional[str] = None,
-        click_event: Optional[ClickEvent] = None,
-        hover_event: Optional[HoverEvent] = None,
+            text: Optional[str] = None,
+            color: Optional[TextColor] = TextColor.WHITE,
+            font: Optional[str] = None,
+            bold: Optional[bool] = False,
+            italic: Optional[bool] = False,
+            underlined: Optional[bool] = False,
+            strikethrough: Optional[bool] = False,
+            obfuscated: Optional[bool] = False,
+            insertion: Optional[str] = None,
+            click_event: Optional[ClickEvent] = None,
+            hover_event: Optional[HoverEvent] = None,
     ):
         text_component = TextComponent(
             text=text,
-            color=color,
+            color=color.value,  # todo fix
             font=font,
             bold=bold,
             italic=italic,
@@ -79,11 +79,11 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @staticmethod
     def title(
-        title: str,
-        subtitle: Optional[str] = None,
-        fadein: Optional[int] = 10,
-        stay: Optional[int] = 70,
-        fadeout: Optional[int] = 20,
+            title: str,
+            subtitle: Optional[str] = None,
+            fadein: Optional[int] = 10,
+            stay: Optional[int] = 70,
+            fadeout: Optional[int] = 20,
     ):
         title_component = SendTitleItem(
             title=title, subtitle=subtitle, fadein=fadein, stay=stay, fadeout=fadeout
@@ -93,19 +93,19 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @staticmethod
     def actionbar(
-        text: Optional[str] = None,
-        color: Optional[TextColor] = TextColor.WHITE,
-        font: Optional[str] = None,
-        bold: Optional[bool] = False,
-        italic: Optional[bool] = False,
-        underlined: Optional[bool] = False,
-        strikethrough: Optional[bool] = False,
-        obfuscated: Optional[bool] = False,
-        insertion: Optional[str] = None,
+            text: Optional[str] = None,
+            color: Optional[TextColor] = TextColor.WHITE,
+            font: Optional[str] = None,
+            bold: Optional[bool] = False,
+            italic: Optional[bool] = False,
+            underlined: Optional[bool] = False,
+            strikethrough: Optional[bool] = False,
+            obfuscated: Optional[bool] = False,
+            insertion: Optional[str] = None,
     ):
         actionbar_component = ActionBarComponent(
             text=text,
-            color=color,
+            color=color.value,
             font=font,
             bold=bold,
             italic=italic,
@@ -118,18 +118,18 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @staticmethod
     def chat_image_mod(
-        url: str,
-        name: Optional[str] = "图片",
-        color: Optional[TextColor] = TextColor.WHITE,
-        font: Optional[str] = None,
-        bold: Optional[bool] = False,
-        italic: Optional[bool] = False,
-        underlined: Optional[bool] = False,
-        strikethrough: Optional[bool] = False,
-        obfuscated: Optional[bool] = False,
-        insertion: Optional[str] = None,
+            url: str,
+            name: Optional[str] = "图片",
+            color: Optional[TextColor] = TextColor.WHITE,
+            font: Optional[str] = None,
+            bold: Optional[bool] = False,
+            italic: Optional[bool] = False,
+            underlined: Optional[bool] = False,
+            strikethrough: Optional[bool] = False,
+            obfuscated: Optional[bool] = False,
+            insertion: Optional[str] = None,
     ):
-        chat_image_model = ChatImageMod(url=url, name=name)
+        chat_image_model = ChatImageModComponent(url=url, name=name)
 
         base_component = BaseComponent(
             text=str(chat_image_model),

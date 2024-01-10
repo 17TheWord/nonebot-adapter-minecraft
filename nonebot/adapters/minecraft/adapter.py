@@ -17,12 +17,12 @@ from nonebot.exception import WebSocketClosed
 from nonebot.typing import overrides
 from nonebot.utils import escape_tag
 
-from mcqq_tool.model.return_body import (
-    WebSocketSendBody,
+from .model import (
     MessageList,
-    SendActionBarBody,
-    SendTitleBody,
     SendTitleItem,
+    SendTitleBody,
+    SendActionBarBody,
+    WebSocketSendBody,
 )
 
 from . import event
