@@ -1,12 +1,12 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from pydantic import Extra, BaseModel, Field
 
 
 class Server(BaseModel):
-    enable_rcon: bool = False
-    rcon_port: int
-    rcon_password: str
+    enable_rcon: Optional[bool] = False
+    rcon_port: Optional[int] = 25575
+    rcon_password: Optional[str] = "password"
 
 
 class Config(BaseModel):
