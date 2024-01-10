@@ -35,15 +35,15 @@ def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
     if m := re.search(rf"^({nickname_regex})([\s,，]*|$)", first_text, re.IGNORECASE):
         log("DEBUG", f"User is calling me {m[1]}")
         event.to_me = True
-        first_msg_seg.data["text"] = first_text[m.end() :]
+        first_msg_seg.data["text"] = first_text[m.end():]
 
 
 @overrides(BaseBot)
 async def send(
-    bot: "Bot",
-    event: Event,
-    message: Union[str, Message, MessageSegment],
-    **kwargs,
+        bot: "Bot",
+        event: Event,
+        message: Union[str, Message, MessageSegment],
+        **kwargs,
 ) -> Any:
     return await bot.send_msg(message=message)
 
@@ -51,7 +51,7 @@ async def send(
 class Bot(BaseBot):
     @overrides(BaseBot)
     def __init__(
-        self, adapter: "Adapter", self_id: str, rcon: Optional[Client] = None
+            self, adapter: "Adapter", self_id: str, rcon: Optional[Client] = None
     ):
         self.adapter: "Adapter" = adapter
         """协议适配器实例"""
@@ -72,9 +72,9 @@ class Bot(BaseBot):
 
     @overrides(BaseBot)
     async def send(
-        self,
-        event: Event,
-        message: Union[str, Message, MessageSegment],
-        **kwargs,
+            self,
+            event: Event,
+            message: Union[str, Message, MessageSegment],
+            **kwargs,
     ) -> Any:
         return await self.__class__.send_handler(self, event, message, **kwargs)

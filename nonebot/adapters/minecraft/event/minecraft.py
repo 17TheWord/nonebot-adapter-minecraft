@@ -1,12 +1,15 @@
 from typing import Literal
 
-from mcqq_tool.event.minecraft import Player
-
 from .base import (
+    BasePlayer,
     BaseChatEvent,
     BaseJoinEvent,
     BaseQuitEvent
 )
+
+
+class Player(BasePlayer):
+    """原版 玩家信息"""
 
 
 class MinecraftPlayerChatEvent(BaseChatEvent):
