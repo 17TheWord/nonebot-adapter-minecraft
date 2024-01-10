@@ -1,13 +1,21 @@
-from typing import Literal
-
-from mcqq_tool.event.forge import Player
+from typing import Literal, Optional
 
 from .base import (
+    BasePlayer,
     BaseChatEvent,
     BaseJoinEvent,
     BaseQuitEvent,
     BaseDeathEvent
 )
+
+
+class Player(BasePlayer):
+    """Forge Player"""
+    uuid: Optional[str] = None
+    ipAddress: Optional[str] = None
+    level: Optional[str] = None
+    """地图？"""
+    speed: Optional[float] = None
 
 
 class ServerChatEvent(BaseChatEvent):
