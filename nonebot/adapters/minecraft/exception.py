@@ -1,9 +1,4 @@
 from typing import Optional
-from aiomcrcon.errors import (
-    RCONConnectionError,
-    ClientNotConnectedError,
-    IncorrectPasswordError,
-)
 from nonebot.drivers import Response
 from nonebot.exception import AdapterException
 from nonebot.exception import ActionFailed as BaseActionFailed
@@ -38,27 +33,6 @@ class ActionFailed(
         self.code: Optional[int] = None
         self.message: Optional[str] = None
         self.data: Optional[dict] = None
-
-
-class MinecraftRCONConnectionError(
-    MinecraftAdapterException, RCONConnectionError
-):
-    def __init__(self, msg: Optional[str] = None, error: Optional[Exception] = None):
-        super().__init__(msg, error)
-
-
-class MinecraftRCONClientNotConnectedError(
-    MinecraftAdapterException, ClientNotConnectedError
-):
-    def __init__(self) -> None:
-        super().__init__()
-
-
-class MinecraftRCONIncorrectPasswordError(
-    MinecraftAdapterException, IncorrectPasswordError
-):
-    def __init__(self):
-        super().__init__()
 
 
 class UnauthorizedException(ActionFailed):
