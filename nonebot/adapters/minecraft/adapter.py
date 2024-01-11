@@ -4,7 +4,7 @@ import inspect
 import contextlib
 from typing import Any, Dict, Optional, Generator, Type, List
 
-from aiomcrcon import Client as RCONClient
+from aiomcrcon import Client as RCONClient, RCONConnectionError, IncorrectPasswordError
 from nonebot.adapters import Adapter as BaseAdapter
 from nonebot.drivers import (
     URL,
@@ -31,7 +31,6 @@ from .event import Event
 from .config import Config
 from .collator import Collator
 from .utils import log, get_msg, get_actionbar_msg
-from .exception import MinecraftRCONConnectionError, MinecraftRCONIncorrectPasswordError
 
 DEFAULT_MODELS: List[Type[Event]] = []
 for model_name in dir(event):
@@ -228,16 +227,8 @@ class Adapter(BaseAdapter):
         try:
             await rcon.connect()
             return True
-        except MinecraftRCONConnectionError as e:
-            log(
-                "ERROR",
-                f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON",
-                e,
-            )
-        except MinecraftRCONIncorrectPasswordError as e:
-            log(
-                "ERROR",
-                f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON",
-                e,
-            )
+        except RCONConnectionError as e:
+            log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON: <r>Connection Error</r>")
+        except IncorrectPasswordError as e:
+            log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON: <r>Incorrect Password</r>")
         return False
