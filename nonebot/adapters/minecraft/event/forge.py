@@ -5,7 +5,8 @@ from .base import (
     BaseChatEvent,
     BaseJoinEvent,
     BaseQuitEvent,
-    BaseDeathEvent
+    BaseDeathEvent,
+    BasePlayerCommandEvent
 )
 
 
@@ -33,6 +34,11 @@ class PlayerLoggedOutEvent(BaseQuitEvent):
     player: Player
 
 
-class ForgePlayerRespawnEvent(BaseDeathEvent):
-    event_name: Literal["ForgePlayerRespawnEvent"]
+class PlayerDeathEvent(BaseDeathEvent):
+    event_name: Literal["ForgePlayerDeathEvent"]
+    player: Player
+
+
+class PlayerCommandEvent(BasePlayerCommandEvent):
+    event_name: Literal["ForgeCommandEvent"]
     player: Player
