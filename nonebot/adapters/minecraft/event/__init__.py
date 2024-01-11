@@ -19,7 +19,9 @@ from .forge import (
     Player as ForgePlayer,
     ServerChatEvent as ForgeServerChatEvent,
     PlayerLoggedInEvent as ForgePlayerLoggedInEvent,
-    PlayerLoggedOutEvent as ForgePlayerLoggedOutEvent
+    PlayerLoggedOutEvent as ForgePlayerLoggedOutEvent,
+    PlayerDeathEvent as ForgePlayerDeathEvent,
+    PlayerCommandEvent as ForgePlayerCommandEvent,
 )
 from .minecraft import (
     Player as MinecraftPlayer,
