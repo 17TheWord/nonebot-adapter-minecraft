@@ -21,7 +21,7 @@ class Event(BaseEvent):
 
     @overrides(BaseEvent)
     def get_event_name(self) -> str:
-        return self.post_type
+        return self.event_name
 
     @overrides(BaseEvent)
     def get_event_description(self) -> str:
@@ -84,7 +84,7 @@ class BaseChatEvent(MessageEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"Message from @{self.player.nickname} on [Server:{self.server_name}]: {self.message}"
+        return f"Message from @{self.player.nickname} on [{self.server_name}]: {self.message}"
 
 
 class BasePlayerCommandEvent(MessageEvent):
@@ -94,7 +94,7 @@ class BasePlayerCommandEvent(MessageEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"Command from @{self.player.nickname} on [Server:{self.server_name}]: {self.message}"
+        return f"Command from @{self.player.nickname} on [{self.server_name}]: {self.message}"
 
 
 class BaseDeathEvent(MessageEvent):
@@ -104,7 +104,7 @@ class BaseDeathEvent(MessageEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"@{self.player.nickname} Died on [Server:{self.server_name}]"
+        return f"@{self.player.nickname} Died on [{self.server_name}]: {self.message}"
 
 
 class NoticeEvent(Event):
@@ -115,7 +115,7 @@ class NoticeEvent(Event):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"Notice from @{self.player.nickname} on [Server:{self.server_name}]"
+        return f"Notice from @{self.player.nickname} on [{self.server_name}]"
 
 
 class BaseJoinEvent(NoticeEvent):
@@ -125,7 +125,7 @@ class BaseJoinEvent(NoticeEvent):
 
     @overrides(NoticeEvent)
     def get_event_description(self) -> str:
-        return f"@{self.player.nickname} Joined [Server:{self.server_name}]"
+        return f"@{self.player.nickname} Joined [{self.server_name}]"
 
 
 class BaseQuitEvent(NoticeEvent):
@@ -135,4 +135,4 @@ class BaseQuitEvent(NoticeEvent):
 
     @overrides(NoticeEvent)
     def get_event_description(self) -> str:
-        return f"@{self.player.nickname} Quit [Server:{self.server_name}]"
+        return f"@{self.player.nickname} Quit [{self.server_name}]"
