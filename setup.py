@@ -16,9 +16,9 @@ setuptools.setup(
     package_data={
         'nonebot.adapters.minecraft': ['bot.pyi'],
     },
+    license="MIT",  # 项目许可证
     classifiers=[
         "Programming Language :: Python :: 3.9",  # 使用Python3.10
-        "License :: OSI Approved :: GNU Affero General Public License v3",  # 开源协议
         "Operating System :: OS Independent",
     ],
     install_requires=[
