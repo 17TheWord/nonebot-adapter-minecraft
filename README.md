@@ -1,6 +1,14 @@
-# nonebot-adapter-minecraft
+<p align="center">
+  <img src="https://raw.githubusercontent.com/17TheWord/nonebot-adapter-minecraft/main/assets/logo.png" width="200" height="200" alt="nonebot-adapter-minecraft">
+</p>
 
-NoneBot2 与 MineCraft Server互通的适配器
+<div align="center">
+
+# NoneBot-Adapter-Minecraft
+
+_✨ Minecraft 协议适配 ✨_
+
+</div>
 
 ## 使用
 
