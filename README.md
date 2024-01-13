@@ -24,7 +24,7 @@ NoneBot2 与 MineCraft Server互通的适配器
 
 # 特别感谢
 
-- [NoneBot2](https://github.com/nonebot/nonebot2) ：插件使用的开发框架。
+- [NoneBot2](https://github.com/nonebot/nonebot2)：开发框架。
 
 ## 贡献与支持
 
