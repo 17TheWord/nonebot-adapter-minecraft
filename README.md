@@ -32,7 +32,7 @@ _✨ Minecraft 协议适配 ✨_
 
 # 特别感谢
 
-- [NoneBot2](https://github.com/nonebot/nonebot2) ：插件使用的开发框架。
+- [NoneBot2](https://github.com/nonebot/nonebot2)：开发框架。
 
 ## 贡献与支持
 
@@ -41,6 +41,6 @@ _✨ Minecraft 协议适配 ✨_
 有意见或者建议也欢迎提交 [Issues](https://github.com/17TheWord/nonebot-adapter-minecraft/issues)
 和 [Pull requests](https://github.com/17TheWord/nonebot-adapter-minecraft/pulls) 。
 
-## 许可证
+## 开源许可
 
-本项目使用 [GNU AGPLv3](https://choosealicense.com/licenses/agpl-3.0/) 作为开源许可证。
+本项目使用 [MIT](./LICENSE) 作为开源许可证。
