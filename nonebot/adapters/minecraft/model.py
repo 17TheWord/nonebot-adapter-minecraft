@@ -31,6 +31,9 @@ class TextColor(Enum):
     YELLOW = "yellow"
     WHITE = "white"
 
+    def __str__(self):
+        return self.value
+
 
 class BaseComponent(BaseModel):
     """
@@ -67,6 +70,9 @@ class ClickAction(Enum):
     CHANGE_PAGE = "change_page"  # 仅用于书翻页
     COPY_TO_CLIPBOARD = "copy_to_clipboard"
 
+    def __str__(self):
+        return self.value
+
 
 class ClickEvent(BaseModel):
     """
@@ -85,6 +91,9 @@ class HoverAction(Enum):
     SHOW_TEXT = "show_text"
     SHOW_ITEM = "show_item"
     SHOW_ENTITY = "show_entity"
+
+    def __str__(self):
+        return self.value
 
 
 class HoverItem(BaseModel):
@@ -133,7 +142,7 @@ class ChatImageModComponent(BaseModel):
     """
 
     url: Optional[str] = None
-    name: Optional[str] = "[图片]"
+    name: Optional[str] = "图片"
 
     def __str__(self):
         return f"[[CICode,url={self.url},name={self.name}]]"
@@ -202,6 +211,9 @@ class RconFontEnum(Enum):
 
     DEFAULT = "minecraft:default"
 
+    def __str__(self):
+        return self.value
+
 
 class RconClickEvent(ClickEvent):
     """
@@ -229,19 +241,16 @@ class RconBaseComponent(BaseComponent):
         """
         return self.text
 
-    def get_component(self) -> str:
+    def get_component(self) -> dict:
         """
-        获取组件格式的消息
+        获取组件格式的消息，同时对空值进行过滤
         :return: component
         """
         temp_dict = {}
         for i in self.__dict__:
             if self.__dict__[i]:
-                if isinstance(self.__dict__[i], TextColor):
-                    temp_dict[i] = self.__dict__[i].value
-                else:
-                    temp_dict[i] = self.__dict__[i]
-        return json.dumps(temp_dict)
+                temp_dict[i] = str(self.__dict__[i])
+        return temp_dict
 
 
 class RconHoverEvent(BaseModel):
@@ -262,14 +271,6 @@ class RconTextComponent(RconBaseComponent):
     hover_event: Optional[RconHoverEvent] = None
 
 
-class RconSendBody(BaseModel):
-    """
-    rcon 发送消息的body
-    """
-
-    message: List[RconTextComponent] = []
-
-
 __all__ = [
     "TextColor",
     "HoverItem",
@@ -280,7 +281,6 @@ __all__ = [
     "MessageList",
     "HoverAction",
     "RconFontEnum",
-    "RconSendBody",
     "TextComponent",
     "BaseComponent",
     "SendTitleItem",
