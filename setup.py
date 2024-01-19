@@ -4,21 +4,21 @@ with open("README.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="nonebot-adapter-minecraft",  # 项目名称，保证它的唯一性，不要跟已存在的包名冲突即可
-    version="1.0.7",  # 程序版本
-    author="17TheWord",  # 项目作者
-    author_email="17theword@gmail.com",  # 作者邮件
-    description="NoneBot2与MineCraft Server互通的适配器",  # 项目的一句话描述
-    long_description=long_description,  # 加长版描述？
-    long_description_content_type="text/markdown",  # 描述使用Markdown
-    url="https://github.com/17TheWord/nonebot-adapter-minecraft",  # 项目地址
-    packages=setuptools.find_namespace_packages(),  # 无需修改
+    name="nonebot-adapter-minecraft",
+    version="1.0.7",
+    author="17TheWord",
+    author_email="17theword@gmail.com",
+    description="NoneBot2与MineCraft Server互通的适配器",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/MineGraphCN/nonebot-adapter-minecraft",
+    packages=setuptools.find_namespace_packages(),
     package_data={
         'nonebot.adapters.minecraft': ['bot.pyi'],
     },
-    license="MIT",  # 项目许可证
+    license="MIT",
     classifiers=[
-        "Programming Language :: Python :: 3.9",  # 使用Python3.10
+        "Programming Language :: Python :: 3.9",
         "Operating System :: OS Independent",
     ],
     install_requires=[
