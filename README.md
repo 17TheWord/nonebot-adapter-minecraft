@@ -23,7 +23,7 @@ _✨ Minecraft 协议适配 ✨_
 
 ## Rcon支持
 
-对于非插件端采用 `WebSocket` + `Rcon` 方式与服务端通信，需要在服务端开启 `Rcon` 功能
+对于命令采用 `rcon` 发送，`rcon` 库为 `aio-mc-rcon`
 
 ## 其他
 

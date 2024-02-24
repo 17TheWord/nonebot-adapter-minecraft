@@ -7,11 +7,12 @@ FrontMatter:
 from typing import Any, Dict, List, Type, Tuple, Union, Generic, TypeVar, Optional
 
 from pygtrie import StringTrie
-from pydantic.fields import ModelField
+from nonebot.compat import ModelField, model_fields
 from nonebot.utils import logger_wrapper
-from pydantic.typing import is_literal_type, all_literal_values
+from nonebot.typing import origin_is_literal, all_literal_values
 
 from nonebot.adapters import Event
+from typing_extensions import get_origin
 
 E = TypeVar("E", bound=Event)
 SEPARATOR = "/"
@@ -94,12 +95,12 @@ class Collator(Generic[E]):
         return all(truthy) or not any(truthy[truthy.index(False):])
 
     def _get_model_field(self, model: Type[E], field: str) -> Optional[ModelField]:
-        return model.__fields__.get(field, None)
+        return next((f for f in model_fields(model) if f.name == field), None)
 
     def _get_literal_field_default(self, field: ModelField) -> Optional[str]:
-        if not is_literal_type(field.outer_type_):
+        if not origin_is_literal(get_origin(field.annotation)):
             return
-        allowed_values = all_literal_values(field.outer_type_)
+        allowed_values = all_literal_values(field.annotation)
         if len(allowed_values) > 1:
             return
         return allowed_values[0]

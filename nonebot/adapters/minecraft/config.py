@@ -1,6 +1,6 @@
 from typing import Dict, Optional
 
-from pydantic import Extra, BaseModel, Field
+from pydantic import BaseModel, Field
 
 
 class Server(BaseModel):
@@ -11,7 +11,3 @@ class Server(BaseModel):
 
 class Config(BaseModel):
     minecraft_server_rcon: Dict[str, Server] = Field(default_factory=dict)
-
-    class Config:
-        extra = Extra.ignore
-        allow_population_by_field_name = True
