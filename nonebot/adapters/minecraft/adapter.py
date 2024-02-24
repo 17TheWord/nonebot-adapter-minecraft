@@ -105,7 +105,7 @@ class Adapter(BaseAdapter):
 
         # check ori_self_id
         if not ori_self_id:
-            log("WARNING", "Missing X-Self-ID Header")
+            log("WARNING", "Missing X-Self-Name Header")
             await websocket.close(1008, "Missing X-Self-Name Header")
             return
 
@@ -179,6 +179,15 @@ class Adapter(BaseAdapter):
         if rcon:
             await rcon.close()
             log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> closed")
+
+    @classmethod
+    def add_custom_model(cls, *model: Type[Event]) -> None:
+        """插入或覆盖一个自定义的 Event 类型。
+
+        参数:
+            model: 自定义的 Event 类型
+        """
+        cls.event_models.add_model(*model)
 
     @classmethod
     def get_event_model(
