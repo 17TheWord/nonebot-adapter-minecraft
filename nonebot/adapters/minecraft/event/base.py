@@ -1,5 +1,6 @@
 from typing import Literal, Optional
 
+from nonebot.compat import model_dump, PYDANTIC_V2, ConfigDict
 from nonebot.utils import escape_tag
 from nonebot.adapters import Event as BaseEvent
 from nonebot.typing import overrides
@@ -25,7 +26,7 @@ class Event(BaseEvent):
 
     @overrides(BaseEvent)
     def get_event_description(self) -> str:
-        return escape_tag(str(self.dict()))
+        return escape_tag(str(model_dump(self)))
 
     @overrides(BaseEvent)
     def get_message(self) -> "Message":
@@ -43,14 +44,25 @@ class Event(BaseEvent):
     def is_tome(self) -> bool:
         return False
 
+    if PYDANTIC_V2:
+        model_config = ConfigDict(extra="allow")
+    else:
+
+        class Config(ConfigDict):
+            extra = "allow"
+
 
 # Models
 class BasePlayer(BaseModel):
     # 玩家信息
     nickname: str
 
-    class Config:
-        extra = "allow"
+    if PYDANTIC_V2:
+        model_config = ConfigDict(extra="allow")
+    else:
+
+        class Config(ConfigDict):
+            extra = "allow"
 
 
 # Message Events

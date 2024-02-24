@@ -5,7 +5,9 @@ import contextlib
 from typing import Any, Dict, Optional, Generator, Type, List
 
 from aiomcrcon import Client as RCONClient, RCONConnectionError, IncorrectPasswordError
+from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
+from nonebot.compat import type_validate_python
 from nonebot.drivers import (
     URL,
     Driver,
@@ -54,7 +56,7 @@ class Adapter(BaseAdapter):
     @overrides(BaseAdapter)
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
-        self.minecraft_config: Config = Config(**self.config.dict())
+        self.minecraft_config: Config = get_plugin_config(Config)
         self.connections: Dict[str, WebSocket] = {}
         self._setup()
 
@@ -206,12 +208,12 @@ class Adapter(BaseAdapter):
         try:
             for model in cls.get_event_model(json_data):
                 try:
-                    event = model.parse_obj(json_data)
+                    event = type_validate_python(model, json_data)
                     break
                 except Exception as e:
                     log("DEBUG", "Event Parser Error", e)
             else:
-                event = Event.parse_obj(json_data)
+                event = type_validate_python(Event, json_data)
 
             return event
         except Exception as e:
