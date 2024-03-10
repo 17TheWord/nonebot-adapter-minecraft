@@ -4,7 +4,7 @@ import inspect
 import contextlib
 from typing import Any, Dict, Optional, Generator, Type, List
 
-from aiomcrcon import Client as RCONClient, RCONConnectionError, IncorrectPasswordError
+from aiomcrcon import Client as RCONClient, RCONConnectionError, IncorrectPasswordError # type: ignore
 from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
 from nonebot.compat import type_validate_python
@@ -97,7 +97,7 @@ class Adapter(BaseAdapter):
                     message_list=get_actionbar_msg(**data)
                 )
 
-            await websocket.send(websocket_send_body.json(ensure_ascii=False))
+            await websocket.send(websocket_send_body.model_dump_json())
         return
 
     async def _handle_ws(self, websocket: WebSocket) -> None:
@@ -105,7 +105,7 @@ class Adapter(BaseAdapter):
 
         # check ori_self_id
         if not ori_self_id:
-            log("WARNING", "Missing X-Self-ID Header")
+            log("WARNING", "Missing X-Self-Name Header")
             await websocket.close(1008, "Missing X-Self-Name Header")
             return
 
@@ -158,7 +158,7 @@ class Adapter(BaseAdapter):
                 json_data = json.loads(data)
                 if event := self.json_to_event(json_data, self_id):
                     asyncio.create_task(bot.handle_event(event))
-        except WebSocketClosed as e:
+        except WebSocketClosed:
             log("WARNING", f"WebSocket for Bot {escape_tag(self_id)} closed by peer")
         except Exception as e:
             log(
@@ -179,6 +179,15 @@ class Adapter(BaseAdapter):
         if rcon:
             await rcon.close()
             log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> closed")
+
+    @classmethod
+    def add_custom_model(cls, *model: Type[Event]) -> None:
+        """插入或覆盖一个自定义的 Event 类型。
+
+        参数:
+            model: 自定义的 Event 类型
+        """
+        cls.event_models.add_model(*model)
 
     @classmethod
     def get_event_model(
@@ -229,8 +238,8 @@ class Adapter(BaseAdapter):
         try:
             await rcon.connect()
             return True
-        except RCONConnectionError as e:
+        except RCONConnectionError:
             log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON: <r>Connection Error</r>")
-        except IncorrectPasswordError as e:
+        except IncorrectPasswordError:
             log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON: <r>Incorrect Password</r>")
         return False

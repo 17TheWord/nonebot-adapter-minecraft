@@ -1,5 +1,6 @@
 from .base import (
     Event,
+    BasePlayer,
     MessageEvent,
     NoticeEvent,
     BaseChatEvent,
