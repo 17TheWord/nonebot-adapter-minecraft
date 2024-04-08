@@ -1,4 +1,4 @@
-from .event import *  # noqa: F403
+from .event import *
 from .bot import Bot as Bot
 from .utils import log as log
 from .adapter import Adapter as Adapter

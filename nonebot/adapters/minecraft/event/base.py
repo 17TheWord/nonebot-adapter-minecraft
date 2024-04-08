@@ -96,7 +96,7 @@ class BaseChatEvent(MessageEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"Message from @{self.player.nickname} on [{self.server_name}]: {self.message}"
+        return f"Message from @{self.player.nickname} on [{self.server_name}]: {self.message}"  # noqa: E501
 
 
 class BasePlayerCommandEvent(MessageEvent):
@@ -106,7 +106,7 @@ class BasePlayerCommandEvent(MessageEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"Command from @{self.player.nickname} on [{self.server_name}]: {self.message}"
+        return f"Command from @{self.player.nickname} on [{self.server_name}]: {self.message}"  # noqa: E501
 
 
 class BaseDeathEvent(MessageEvent):

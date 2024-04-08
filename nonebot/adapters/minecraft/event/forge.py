@@ -6,12 +6,13 @@ from .base import (
     BaseJoinEvent,
     BaseQuitEvent,
     BaseDeathEvent,
-    BasePlayerCommandEvent
+    BasePlayerCommandEvent,
 )
 
 
 class Player(BasePlayer):
     """Forge Player"""
+
     uuid: Optional[str] = None
     ipAddress: Optional[str] = None
     level: Optional[str] = None
