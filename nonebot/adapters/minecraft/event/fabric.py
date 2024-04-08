@@ -6,12 +6,13 @@ from .base import (
     BaseDeathEvent,
     BaseJoinEvent,
     BaseQuitEvent,
-    BasePlayerCommandEvent
+    BasePlayerCommandEvent,
 )
 
 
 class Player(BasePlayer):
     """Fabric Player"""
+
     uuid: Optional[str] = None
     ip: Optional[str] = None
     display_name: Optional[str] = None
@@ -29,31 +30,36 @@ class Player(BasePlayer):
     is_swimming: Optional[bool] = None
 
 
-class FabricServerMessageEvent(BaseChatEvent):
+class ServerMessageEvent(BaseChatEvent):
     """Fabric FabricServerMessageEvent API"""
+
     event_name: Literal["FabricServerMessageEvent"]
     player: Player
 
 
-class FabricServerCommandMessageEvent(BasePlayerCommandEvent):
+class ServerCommandMessageEvent(BasePlayerCommandEvent):
     """Fabric FabricServerCommandMessageEvent API"""
+
     event_name: Literal["FabricServerCommandMessageEvent"]
     player: Player
 
 
-class FabricServerLivingEntityAfterDeathEvent(BaseDeathEvent):
+class ServerLivingEntityAfterDeathEvent(BaseDeathEvent):
     """Fabric FabricServerLivingEntityAfterDeathEvent API"""
+
     event_name: Literal["FabricServerLivingEntityAfterDeathEvent"]
     player: Player
 
 
-class FabricServerPlayConnectionJoinEvent(BaseJoinEvent):
+class ServerPlayConnectionJoinEvent(BaseJoinEvent):
     """Fabric FabricServerPlayConnectionJoinEvent API"""
+
     event_name: Literal["FabricServerPlayConnectionJoinEvent"]
     player: Player
 
 
-class FabricServerPlayConnectionDisconnectEvent(BaseQuitEvent):
+class ServerPlayConnectionDisconnectEvent(BaseQuitEvent):
     """Fabric FabricServerPlayConnectionDisconnectEvent API"""
+
     event_name: Literal["FabricServerPlayConnectionDisconnectEvent"]
     player: Player

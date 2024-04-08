@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Union
 
 from pydantic import BaseModel
 
@@ -100,7 +100,7 @@ class HoverItem(BaseModel):
     悬停事件中的物品
     """
 
-    id: Optional[str] = None
+    id: Optional[Union[str, int]] = None
     count: Optional[int] = None
     tag: Optional[str] = None
 

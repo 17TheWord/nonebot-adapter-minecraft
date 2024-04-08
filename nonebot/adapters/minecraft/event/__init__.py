@@ -6,7 +6,7 @@ from .base import (
     BaseChatEvent,
     BaseDeathEvent,
     BaseJoinEvent,
-    BaseQuitEvent
+    BaseQuitEvent,
 )
 from .spigot import (
     Player as SpigotPlayer,
@@ -26,15 +26,15 @@ from .forge import (
 )
 from .minecraft import (
     Player as MinecraftPlayer,
-    MinecraftPlayerChatEvent,
-    MinecraftPlayerJoinEvent,
-    MinecraftPlayerQuitEvent
+    PlayerChatEvent as MinecraftPlayerChatEvent,
+    PlayerJoinEvent as MinecraftPlayerJoinEvent,
+    PlayerQuitEvent as MinecraftPlayerQuitEvent,
 )
 from .fabric import (
     Player as FabricPlayer,
-    FabricServerMessageEvent,
-    FabricServerCommandMessageEvent,
-    FabricServerLivingEntityAfterDeathEvent,
-    FabricServerPlayConnectionJoinEvent,
-    FabricServerPlayConnectionDisconnectEvent
+    ServerMessageEvent as FabricServerMessageEvent,
+    ServerMessageEvent as FabricServerCommandMessageEvent,
+    ServerLivingEntityAfterDeathEvent as FabricServerLivingEntityAfterDeathEvent,
+    ServerPlayConnectionJoinEvent as FabricServerPlayConnectionJoinEvent,
+    ServerPlayConnectionDisconnectEvent as FabricServerPlayConnectionDisconnectEvent,
 )
