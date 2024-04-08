@@ -9,15 +9,15 @@ packages = [{ include = "nonebot" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pre-commit = "^3.7.0"
 aio-mc-rcon = "^3.2.2"
 pydantic = ">=1.10.0,<3.0.0,!=2.5.0,!=2.5.1"
 nonebot2 = { version = "^2.2.0", extras = ["fastapi"] }
 
 [tool.poetry.group.test.dependencies]
 isort = "^5.10.1"
-pytest-cov = "^4.0.0"
 nonebug = "^0.3.5"
+pytest-cov = "^4.0.0"
+pre-commit = "^3.7.0"
 pytest-asyncio = "^0.23.0"
 nonebot2 = { version = "^2.2.0", extras = ["fastapi"] }
 
