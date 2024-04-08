@@ -9,6 +9,7 @@ packages = [{ include = "nonebot" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+pre-commit = "^3.7.0"
 aio-mc-rcon = "^3.2.2"
 pydantic = ">=1.10.0,<3.0.0,!=2.5.0,!=2.5.1"
 nonebot2 = { version = "^2.2.0", extras = ["fastapi"] }
