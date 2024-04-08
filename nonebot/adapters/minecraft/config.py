@@ -7,6 +7,7 @@ class Server(BaseModel):
     enable_rcon: bool = False
     rcon_port: int = 25575
     rcon_password: str = "password"
+    timeout: float = 2.0
 
 
 class Config(BaseModel):

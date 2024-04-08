@@ -4,7 +4,12 @@ import inspect
 import contextlib
 from typing import Any, Dict, Optional, Generator, Type, List
 
-from aiomcrcon import Client as RCONClient, RCONConnectionError, IncorrectPasswordError # type: ignore
+from aiomcrcon import (
+    Client as RCONClient,
+    RCONConnectionError as BaseRCONConnectionError,
+    IncorrectPasswordError as BaseIncorrectPasswordError,
+    ClientNotConnectedError as BaseClientNotConnectedError
+)
 from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
 from nonebot.compat import type_validate_python
@@ -33,6 +38,7 @@ from .event import Event
 from .config import Config
 from .collator import Collator
 from .utils import log, get_msg, get_actionbar_msg
+from .exception import IncorrectPasswordError, ClientNotConnectedError, RCONConnectionError
 
 DEFAULT_MODELS: List[Type[Event]] = []
 for model_name in dir(event):
@@ -68,7 +74,7 @@ class Adapter(BaseAdapter):
     def _setup(self) -> None:
         if isinstance(self.driver, ReverseDriver):
             ws_setup = WebSocketServerSetup(
-                URL("/minecraft/ws"), self.get_name(), self._handle_ws
+                URL("/minecraft/ws"), f"{self.get_name()} WS", self._handle_ws
             )
             self.setup_websocket_server(ws_setup)
 
@@ -96,6 +102,12 @@ class Adapter(BaseAdapter):
                 websocket_send_body.data = SendActionBarBody(
                     message_list=get_actionbar_msg(**data)
                 )
+            elif api == "send_rcon_cmd":
+                try:
+                    await bot.rcon.send_cmd(data.get("command"))
+                except BaseClientNotConnectedError:
+                    raise ClientNotConnectedError()
+                return
 
             await websocket.send(websocket_send_body.model_dump_json())
         return
@@ -120,30 +132,38 @@ class Adapter(BaseAdapter):
 
         rcon = None
         if server := self.minecraft_config.minecraft_server_rcon.get(self_id):
+            rcon = RCONClient(
+                websocket.__dict__["websocket"].__dict__["scope"]["client"][0],
+                server.rcon_port,
+                server.rcon_password,
+            )
             if server.enable_rcon:
-                rcon = RCONClient(
-                    websocket.__dict__["websocket"].__dict__["scope"]["client"][0],
-                    server.rcon_port,
-                    server.rcon_password,
-                )
                 log(
                     "INFO",
-                    f"Connecting to RCON server for <y>Bot {escape_tag(self_id)}</y>",
+                    f"<y>Connecting</y> RCON for <y>Bot {escape_tag(self_id)}</y>",
                 )
-                if await self._connect_rcon(self_id=self_id, rcon=rcon):
+                try:
+                    await rcon.connect(timeout=server.timeout)
+                except BaseIncorrectPasswordError:
+                    raise IncorrectPasswordError()
+                except BaseClientNotConnectedError:
+                    raise ClientNotConnectedError()
+                except BaseRCONConnectionError as e:
+                    raise RCONConnectionError(e.message, e.error)
+                else:
                     log(
                         "INFO",
-                        f"RCON server for <y>Bot {escape_tag(self_id)}</y> connected",
+                        f"RCON for <y>Bot {escape_tag(self_id)}</y> <g>connected</g>",
                     )
             else:
                 log(
                     "INFO",
-                    f"RCON server for <y>Bot {escape_tag(self_id)}</y> is not enabled",
+                    f"RCON for <y>Bot {escape_tag(self_id)}</y> is not enabled, will not connect",
                 )
         else:
             log(
                 "INFO",
-                f"RCON server for <y>Bot {escape_tag(self_id)}</y> not found, Rcon is disabled",
+                f"RCON configuration for <y>Bot {escape_tag(self_id)}</y> not found, will not connect",
             )
 
         bot = Bot(self, self_id, rcon)
@@ -170,15 +190,11 @@ class Adapter(BaseAdapter):
         finally:
             with contextlib.suppress(Exception):
                 await websocket.close()
-                await self._close_rcon(self_id=self_id, rcon=rcon)
+                if rcon:
+                    await rcon.close()
+                    log("INFO", f"RCON for <y>Bot {escape_tag(self_id)}</y> closed")
             self.connections.pop(self_id, None)
             self.bot_disconnect(bot)
-
-    @classmethod
-    async def _close_rcon(cls, self_id: str, rcon: Optional[RCONClient] = None):
-        if rcon:
-            await rcon.close()
-            log("INFO", f"RCON server for <y>Bot {escape_tag(self_id)}</y> closed")
 
     @classmethod
     def add_custom_model(cls, *model: Type[Event]) -> None:
@@ -232,14 +248,3 @@ class Adapter(BaseAdapter):
                 f"Raw: {escape_tag(str(json_data))}</bg #f8bbd0></r>",
                 e,
             )
-
-    @classmethod
-    async def _connect_rcon(cls, self_id: str, rcon: RCONClient):
-        try:
-            await rcon.connect()
-            return True
-        except RCONConnectionError:
-            log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON: <r>Connection Error</r>")
-        except IncorrectPasswordError:
-            log("ERROR", f"<y>Bot {escape_tag(self_id)}</y> failed to connect to RCON: <r>Incorrect Password</r>")
-        return False

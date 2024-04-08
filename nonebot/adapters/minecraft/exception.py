@@ -1,4 +1,10 @@
 from typing import Optional
+
+from aiomcrcon.errors import (
+    RCONConnectionError as BaseRCONConnectionError,
+    IncorrectPasswordError as BaseIncorrectPasswordError,
+    ClientNotConnectedError as BaseClientNotConnectedError
+)
 from nonebot.drivers import Response
 from nonebot.exception import AdapterException
 from nonebot.exception import ActionFailed as BaseActionFailed
@@ -33,6 +39,25 @@ class ActionFailed(
         self.code: Optional[int] = None
         self.message: Optional[str] = None
         self.data: Optional[dict] = None
+
+
+class RCONConnectionError(NetworkError, BaseRCONConnectionError):
+    def __init__(self, msg: Optional[str] = None, error: Optional[Exception] = None):
+        self.msg = msg
+        self.message = msg
+        self.error = error
+
+
+class IncorrectPasswordError(NetworkError, BaseIncorrectPasswordError):
+    def __init__(self):
+        super().__init__()
+        self.msg = "The password provided to the client was incorrect according to the server."
+
+
+class ClientNotConnectedError(NetworkError, BaseClientNotConnectedError):
+    def __init__(self):
+        super().__init__()
+        self.msg = "The client isn't connected. (Looks like you forgot to call the connect() coroutine!)"
 
 
 class UnauthorizedException(ActionFailed):
