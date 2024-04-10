@@ -11,7 +11,7 @@ from .base import (
 
 
 class Player(BasePlayer):
-    """玩家信息"""
+    """Spigot Player"""
     uuid: Optional[str] = None
     display_name: Optional[str] = None
     player_list_name: Optional[str] = None

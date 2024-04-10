@@ -33,25 +33,30 @@ class Player(BasePlayer):
 
 
 class ServerChatEvent(BaseChatEvent):
+    """Forge ServerChatEvent"""
     event_name: Literal["ServerChatEvent"]
     player: Player
 
 
 class PlayerLoggedInEvent(BaseJoinEvent):
+    """Forge PlayerLoggedInEvent"""
     event_name: Literal["PlayerLoggedInEvent"]
     player: Player
 
 
 class PlayerLoggedOutEvent(BaseQuitEvent):
+    """Forge PlayerLoggedOutEvent"""
     event_name: Literal["PlayerLoggedOutEvent"]
     player: Player
 
 
 class PlayerDeathEvent(BaseDeathEvent):
+    """Forge PlayerDeathEvent"""
     event_name: Literal["PlayerDeathEvent"]
     player: Player
 
 
 class PlayerCommandEvent(BasePlayerCommandEvent):
+    """Forge CommandEvent"""
     event_name: Literal["CommandEvent"]
     player: Player
