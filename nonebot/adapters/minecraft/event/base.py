@@ -10,6 +10,7 @@ from ..message import Message
 
 
 class Event(BaseEvent):
+    """事件基类"""
     timestamp: int
     post_type: str
     event_name: str
@@ -54,8 +55,9 @@ class Event(BaseEvent):
 
 # Models
 class BasePlayer(BaseModel):
-    # 玩家信息
+    """玩家基类"""
     nickname: str
+    is_op: Optional[bool] = None
 
     if PYDANTIC_V2:
         model_config = ConfigDict(extra="allow")

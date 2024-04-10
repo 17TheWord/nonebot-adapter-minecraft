@@ -4,7 +4,7 @@ from .base import BasePlayer, BaseChatEvent, BaseJoinEvent, BaseQuitEvent
 
 
 class Player(BasePlayer):
-    """原版 玩家信息"""
+    """原版 Player"""
 
 
 class PlayerChatEvent(BaseChatEvent):
