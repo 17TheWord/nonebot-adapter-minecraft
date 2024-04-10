@@ -33,30 +33,35 @@ class Player(BasePlayer):
 
 
 class ServerChatEvent(BaseChatEvent):
-    """Forge ServerChatEvent"""
+    """Forge 聊天事件"""
+
     event_name: Literal["ServerChatEvent"]
     player: Player
 
 
 class PlayerLoggedInEvent(BaseJoinEvent):
-    """Forge PlayerLoggedInEvent"""
+    """Forge 玩家加入事件"""
+
     event_name: Literal["PlayerLoggedInEvent"]
     player: Player
 
 
 class PlayerLoggedOutEvent(BaseQuitEvent):
-    """Forge PlayerLoggedOutEvent"""
+    """Forge 玩家离开事件"""
+
     event_name: Literal["PlayerLoggedOutEvent"]
     player: Player
 
 
 class PlayerDeathEvent(BaseDeathEvent):
-    """Forge PlayerDeathEvent"""
+    """Forge 玩家死亡事件"""
+
     event_name: Literal["PlayerDeathEvent"]
     player: Player
 
 
 class PlayerCommandEvent(BasePlayerCommandEvent):
-    """Forge CommandEvent"""
+    """Forge 玩家命令事件"""
+
     event_name: Literal["CommandEvent"]
     player: Player

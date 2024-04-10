@@ -31,35 +31,35 @@ class Player(BasePlayer):
 
 
 class ServerMessageEvent(BaseChatEvent):
-    """Fabric FabricServerMessageEvent API"""
+    """Fabric 聊天事件"""
 
-    event_name: Literal["FabricServerMessageEvent"]
+    event_name: Literal["ServerMessageEvent"]
     player: Player
 
 
 class ServerCommandMessageEvent(BasePlayerCommandEvent):
-    """Fabric FabricServerCommandMessageEvent API"""
+    """Fabric 玩家命令事件"""
 
-    event_name: Literal["FabricServerCommandMessageEvent"]
+    event_name: Literal["ServerCommandMessageEvent"]
     player: Player
 
 
 class ServerLivingEntityAfterDeathEvent(BaseDeathEvent):
-    """Fabric FabricServerLivingEntityAfterDeathEvent API"""
+    """ServerLivingEntityAfterDeathEvent API"""
 
-    event_name: Literal["FabricServerLivingEntityAfterDeathEvent"]
+    event_name: Literal["ServerLivingEntityAfterDeathEvent"]
     player: Player
 
 
 class ServerPlayConnectionJoinEvent(BaseJoinEvent):
-    """Fabric FabricServerPlayConnectionJoinEvent API"""
+    """ServerPlayConnectionJoinEvent API"""
 
-    event_name: Literal["FabricServerPlayConnectionJoinEvent"]
+    event_name: Literal["ServerPlayConnectionJoinEvent"]
     player: Player
 
 
 class ServerPlayConnectionDisconnectEvent(BaseQuitEvent):
-    """Fabric FabricServerPlayConnectionDisconnectEvent API"""
+    """ServerPlayConnectionDisconnectEvent API"""
 
-    event_name: Literal["FabricServerPlayConnectionDisconnectEvent"]
+    event_name: Literal["ServerPlayConnectionDisconnectEvent"]
     player: Player

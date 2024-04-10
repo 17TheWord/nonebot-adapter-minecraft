@@ -6,12 +6,13 @@ from .base import (
     BaseJoinEvent,
     BaseQuitEvent,
     BaseDeathEvent,
-    BasePlayerCommandEvent
+    BasePlayerCommandEvent,
 )
 
 
 class Player(BasePlayer):
     """Spigot Player"""
+
     uuid: Optional[str] = None
     display_name: Optional[str] = None
     player_list_name: Optional[str] = None
@@ -37,30 +38,35 @@ class Player(BasePlayer):
 
 
 class AsyncPlayerChatEvent(BaseChatEvent):
-    """聊天事件"""
+    """Spigot 聊天事件"""
+
     event_name: Literal["AsyncPlayerChatEvent"]
     player: Player
 
 
 class PlayerCommandPreprocessEvent(BasePlayerCommandEvent):
-    """玩家命令事件"""
+    """Spigot 玩家命令事件"""
+
     event_name: Literal["PlayerCommandPreprocessEvent"]
     player: Player
 
 
 class PlayerDeathEvent(BaseDeathEvent):
-    """玩家死亡事件"""
+    """Spigot 玩家死亡事件"""
+
     event_name: Literal["PlayerDeathEvent"]
     player: Player
 
 
 class PlayerJoinEvent(BaseJoinEvent):
-    """玩家加入事件"""
+    """Spigot 玩家加入事件"""
+
     event_name: Literal["PlayerJoinEvent"]
     player: Player
 
 
 class PlayerQuitEvent(BaseQuitEvent):
-    """玩家离开事件"""
+    """Spigot 玩家离开事件"""
+
     event_name: Literal["PlayerQuitEvent"]
     player: Player
