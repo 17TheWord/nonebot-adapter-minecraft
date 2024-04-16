@@ -104,10 +104,9 @@ class Adapter(BaseAdapter):
                 )
             elif api == "send_rcon_cmd":
                 try:
-                    await bot.rcon.send_cmd(data.get("command"))
+                    return await bot.rcon.send_cmd(data.get("command"))
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
-                return
 
             await websocket.send(websocket_send_body.model_dump_json())
         return
