@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any, Optional, Tuple, Union
 
 from nonebot.adapters import Bot as BaseBot
 
@@ -39,4 +39,4 @@ class Bot(BaseBot):
             **kwargs,
     ) -> Any: ...
 
-    async def send_rcon_cmd(self, command: str) -> Any: ...
+    async def send_rcon_cmd(self, command: str) -> Tuple[str, int]: ...
