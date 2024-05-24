@@ -131,7 +131,7 @@ class Adapter(BaseAdapter):
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
     async def _forward_ws(self, server_name: str, url: URL) -> None:
-        headers = {"x-self-name": server_name}
+        headers = {"x-self-name": ''.join(f'\\u{ord(c):04x}' for c in server_name)}
         if self.minecraft_config.minecraft_access_token:
             headers["Authorization"] = (
                 f"Bearer {self.minecraft_config.minecraft_access_token}"
@@ -148,6 +148,15 @@ class Adapter(BaseAdapter):
                         f"WebSocket Connection to {escape_tag(str(url))} established",
                     )
                     # 连接 Rcon
+                    rcon = await self._connect_rcon(server_name, url.host)
+                    if not bot:
+                        bot = Bot(self, server_name, rcon)
+                        self.bot_connect(bot)
+                        self.connections[server_name] = ws
+                        log(
+                            "INFO",
+                            f"<y>Bot {escape_tag(server_name)}</y> connected",
+                        )
                     try:
                         while True:
                             data = await ws.receive()
@@ -155,15 +164,6 @@ class Adapter(BaseAdapter):
                             event = self.json_to_event(json_data)
                             if not event:
                                 continue
-                            if not bot:
-                                self_id = event.event_name
-                                bot = Bot(self, str(self_id))
-                                self.bot_connect(bot)
-                                self.connections[str(self_id)] = ws
-                                log(
-                                    "INFO",
-                                    f"<y>Bot {escape_tag(str(self_id))}</y> connected",
-                                )
                             asyncio.create_task(bot.handle_event(event))
                     except WebSocketClosed as e:
                         log(
@@ -184,6 +184,8 @@ class Adapter(BaseAdapter):
                         )
                     finally:
                         if bot:
+                            if rcon:
+                                await rcon.close()
                             self.connections.pop(bot.self_id, None)
                             self.bot_disconnect(bot)
                             bot = None
@@ -231,6 +233,44 @@ class Adapter(BaseAdapter):
             await websocket.send(websocket_send_body.model_dump_json())
         return
 
+    async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
+        if server := self.minecraft_config.minecraft_server_rcon.get(server_name):
+            rcon = RCONClient(
+                server_host,
+                server.rcon_port,
+                server.rcon_password,
+            )
+            if server.enable_rcon:
+                log(
+                    "INFO",
+                    f"<y>Connecting</y> RCON for <y>Bot {escape_tag(server_name)}</y>",
+                )
+                try:
+                    await rcon.connect(timeout=server.timeout)
+                except BaseIncorrectPasswordError:
+                    raise IncorrectPasswordError()
+                except BaseClientNotConnectedError:
+                    raise ClientNotConnectedError()
+                except BaseRCONConnectionError as e:
+                    raise RCONConnectionError(e.message, e.error)
+                else:
+                    log(
+                        "INFO",
+                        f"RCON for <y>Bot {escape_tag(server_name)}</y> <g>connected</g>",
+                    )
+                    return rcon
+            else:
+                log(
+                    "INFO",
+                    f"RCON for <y>Bot {escape_tag(server_name)}</y> is not enabled, will not connect",
+                )
+        else:
+            log(
+                "INFO",
+                f"RCON configuration for <y>Bot {escape_tag(server_name)}</y> not found, will not connect",
+            )
+        return None
+
     async def _handle_ws(self, websocket: WebSocket) -> None:
         ori_self_id = websocket.request.headers.get("x-self-name")
 
@@ -261,41 +301,7 @@ class Adapter(BaseAdapter):
 
         await websocket.accept()
 
-        rcon = None
-        if server := self.minecraft_config.minecraft_server_rcon.get(self_id):
-            rcon = RCONClient(
-                websocket.__dict__["websocket"].__dict__["scope"]["client"][0],
-                server.rcon_port,
-                server.rcon_password,
-            )
-            if server.enable_rcon:
-                log(
-                    "INFO",
-                    f"<y>Connecting</y> RCON for <y>Bot {escape_tag(self_id)}</y>",
-                )
-                try:
-                    await rcon.connect(timeout=server.timeout)
-                except BaseIncorrectPasswordError:
-                    raise IncorrectPasswordError()
-                except BaseClientNotConnectedError:
-                    raise ClientNotConnectedError()
-                except BaseRCONConnectionError as e:
-                    raise RCONConnectionError(e.message, e.error)
-                else:
-                    log(
-                        "INFO",
-                        f"RCON for <y>Bot {escape_tag(self_id)}</y> <g>connected</g>",
-                    )
-            else:
-                log(
-                    "INFO",
-                    f"RCON for <y>Bot {escape_tag(self_id)}</y> is not enabled, will not connect",
-                )
-        else:
-            log(
-                "INFO",
-                f"RCON configuration for <y>Bot {escape_tag(self_id)}</y> not found, will not connect",
-            )
+        rcon = await self._connect_rcon(self_id, websocket.__dict__["websocket"].__dict__["scope"]["client"][0])
 
         bot = Bot(self, self_id, rcon)
         self.connections[self_id] = websocket
@@ -338,14 +344,14 @@ class Adapter(BaseAdapter):
 
     @classmethod
     def get_event_model(
-        cls, data: Dict[str, Any]
+            cls, data: Dict[str, Any]
     ) -> Generator[Type[Event], None, None]:
         """根据事件获取对应 `Event Model` 及 `FallBack Event Model` 列表。"""
         yield from cls.event_models.get_model(data)
 
     @classmethod
     def json_to_event(
-        cls, json_data: Any, self_id: Optional[str] = None
+            cls, json_data: Any, self_id: Optional[str] = None
     ) -> Optional[Event]:
         """将 json 数据转换为 Event 对象。
 

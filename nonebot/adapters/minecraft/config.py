@@ -2,8 +2,6 @@ from typing import Dict, Optional, List
 
 from pydantic import BaseModel, Field
 
-from .utils import WSUrl
-
 
 class Server(BaseModel):
     enable_rcon: bool = False
