@@ -131,7 +131,7 @@ class Adapter(BaseAdapter):
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
     async def _forward_ws(self, server_name: str, url: URL) -> None:
-        headers = {"x-self-name": ''.join(f'\\u{ord(c):04x}' for c in server_name)}
+        headers = {"x-self-name": "".join(f"\\u{ord(c):04x}" for c in server_name)}
         if self.minecraft_config.minecraft_access_token:
             headers["Authorization"] = (
                 f"Bearer {self.minecraft_config.minecraft_access_token}"
