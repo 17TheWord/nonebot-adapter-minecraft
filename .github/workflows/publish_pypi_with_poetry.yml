@@ -2,7 +2,8 @@ name: Publish to PyPI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
     types: [opened, synchronize]
 
@@ -11,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v2
         with:
           python-version: 3.9
 
@@ -26,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-root --no-dev
 
-      - name: Build package
-        run: poetry build
-
-      - name: Publish to PyPI
+      - name: Build and publish
         if: github.event_name == 'push'
         run: poetry publish --build
