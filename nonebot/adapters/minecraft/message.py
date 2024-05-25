@@ -1,20 +1,19 @@
-from typing import Iterable, Optional, Type
+from typing import Type, Iterable, Optional
 
-from nonebot.adapters import (
-    Message as BaseMessage,
-    MessageSegment as BaseMessageSegment,
-)
 from nonebot.typing import overrides
+
+from nonebot.adapters import Message as BaseMessage
+from nonebot.adapters import MessageSegment as BaseMessageSegment
 
 from .model import (
     TextColor,
     ClickEvent,
     HoverEvent,
+    BaseComponent,
+    SendTitleItem,
     TextComponent,
     ActionBarComponent,
-    BaseComponent,
     ChatImageModComponent,
-    SendTitleItem,
 )
 
 
