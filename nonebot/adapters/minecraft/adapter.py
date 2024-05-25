@@ -12,7 +12,7 @@ from aiomcrcon import (
 )
 from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
-from nonebot.compat import type_validate_python
+from nonebot.compat import type_validate_python, PYDANTIC_V2
 from nonebot.drivers import (
     URL,
     Driver,
@@ -230,7 +230,12 @@ class Adapter(BaseAdapter):
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
 
-            await websocket.send(websocket_send_body.model_dump_json())
+            if PYDANTIC_V2:
+                json_data = protocol_data.model_dump_json()
+            else:
+                json_data = protocol_data.json()
+
+            await websocket.send(json_data)
         return
 
     async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
