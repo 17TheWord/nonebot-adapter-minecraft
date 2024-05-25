@@ -131,7 +131,10 @@ class Adapter(BaseAdapter):
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
     async def _forward_ws(self, server_name: str, url: URL) -> None:
-        headers = {"x-self-name": "".join(f"\\u{ord(c):04x}" for c in server_name)}
+        headers = {
+            "x-self-name": "".join(f"\\u{ord(c):04x}" for c in server_name),
+            "x-client-origin": "nonebot",
+        }
         if self.minecraft_config.minecraft_access_token:
             headers["Authorization"] = (
                 f"Bearer {self.minecraft_config.minecraft_access_token}"
@@ -286,6 +289,12 @@ class Adapter(BaseAdapter):
             return
 
         self_id = ori_self_id.encode("utf-8").decode("unicode_escape")
+
+        if client_origin := websocket.request.headers.get("x-client-origin"):
+            if client_origin == "nonebot":
+                log("WARNING", "X-Client-Origin Header cannot be nonebot")
+                await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
+                return
 
         if self.minecraft_config.minecraft_access_token:
             access_token = websocket.request.headers.get("Authorization")
