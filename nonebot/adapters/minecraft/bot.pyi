@@ -1,10 +1,9 @@
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Tuple, Union, Optional
 
 from nonebot.adapters import Bot as BaseBot
 
 from .event import Event, MessageEvent
 from .message import Message, MessageSegment
-
 
 def _check_nickname(bot: Bot, event: MessageEvent): ...
 

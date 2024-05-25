@@ -6,8 +6,10 @@ FrontMatter:
 """
 
 from typing import Union
+
 from nonebot.permission import Permission
-from .event import MessageEvent, NoticeEvent
+
+from .event import NoticeEvent, MessageEvent
 
 
 async def _is_op(event: Union[MessageEvent, NoticeEvent]) -> bool:

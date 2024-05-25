@@ -4,15 +4,15 @@ FrontMatter:
     sidebar_position: 1
     description: minecraft.collator 模块
 """
+from typing_extensions import get_origin
 from typing import Any, Dict, List, Type, Tuple, Union, Generic, TypeVar, Optional
 
 from pygtrie import StringTrie
-from nonebot.compat import ModelField, model_fields
 from nonebot.utils import logger_wrapper
+from nonebot.compat import ModelField, model_fields
 from nonebot.typing import origin_is_literal, all_literal_values
 
 from nonebot.adapters import Event
-from typing_extensions import get_origin
 
 E = TypeVar("E", bound=Event)
 SEPARATOR = "/"

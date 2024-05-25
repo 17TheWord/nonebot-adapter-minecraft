@@ -3,9 +3,9 @@ from typing import Literal, Optional
 from .base import (
     BasePlayer,
     BaseChatEvent,
-    BaseDeathEvent,
     BaseJoinEvent,
     BaseQuitEvent,
+    BaseDeathEvent,
     BasePlayerCommandEvent,
 )
 

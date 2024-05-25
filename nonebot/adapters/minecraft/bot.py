@@ -1,10 +1,11 @@
 import re
-from typing import Union, Any, TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Any, Union, Callable, Optional
 
 from aiomcrcon import Client
-from nonebot.adapters import Bot as BaseBot
-from nonebot.message import handle_event
 from nonebot.typing import overrides
+from nonebot.message import handle_event
+
+from nonebot.adapters import Bot as BaseBot
 
 from .utils import log
 from .event import Event, MessageEvent

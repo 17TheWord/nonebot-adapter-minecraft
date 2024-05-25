@@ -2,37 +2,28 @@ import json
 import asyncio
 import inspect
 import contextlib
-from typing import Any, Dict, Optional, Generator, Type, List
+from typing import Any, Dict, List, Type, Optional, Generator
 
-from aiomcrcon import (
-    Client as RCONClient,
-    RCONConnectionError as BaseRCONConnectionError,
-    IncorrectPasswordError as BaseIncorrectPasswordError,
-    ClientNotConnectedError as BaseClientNotConnectedError,
-)
-from nonebot import get_plugin_config
-from nonebot.adapters import Adapter as BaseAdapter
-from nonebot.compat import type_validate_python
+from nonebot.typing import overrides
+from nonebot.utils import escape_tag
+from aiomcrcon import Client as RCONClient
+from nonebot.exception import WebSocketClosed
+from nonebot.compat import PYDANTIC_V2, type_validate_python
+from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
+from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
+from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
 from nonebot.drivers import (
     URL,
     Driver,
     Request,
     ASGIMixin,
     WebSocket,
-    WebSocketServerSetup,
     WebSocketClientMixin,
+    WebSocketServerSetup,
 )
-from nonebot.exception import WebSocketClosed
-from nonebot.typing import overrides
-from nonebot.utils import escape_tag
 
-from .model import (
-    MessageList,
-    SendTitleItem,
-    SendTitleBody,
-    SendActionBarBody,
-    WebSocketSendBody,
-)
+from nonebot import get_plugin_config
+from nonebot.adapters import Adapter as BaseAdapter
 
 from . import event
 from .bot import Bot
@@ -41,9 +32,16 @@ from .config import Config
 from .collator import Collator
 from .utils import log, get_msg, get_actionbar_msg
 from .exception import (
+    RCONConnectionError,
     IncorrectPasswordError,
     ClientNotConnectedError,
-    RCONConnectionError,
+)
+from .model import (
+    MessageList,
+    ProtocolData,
+    SendTitleData,
+    SendTitleItem,
+    SendActionBarData,
 )
 
 RECONNECT_INTERVAL = 3.0
@@ -131,7 +129,10 @@ class Adapter(BaseAdapter):
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
     async def _forward_ws(self, server_name: str, url: URL) -> None:
-        headers = {"x-self-name": "".join(f"\\u{ord(c):04x}" for c in server_name)}
+        headers = {
+            "x-self-name": "".join(f"\\u{ord(c):04x}" for c in server_name),
+            "x-client-origin": "nonebot",
+        }
         if self.minecraft_config.minecraft_access_token:
             headers["Authorization"] = (
                 f"Bearer {self.minecraft_config.minecraft_access_token}"
@@ -205,12 +206,12 @@ class Adapter(BaseAdapter):
         websocket = self.connections.get(bot.self_id, None)
         log("DEBUG", f"Calling API <y>{api}</y>")
         if websocket:
-            websocket_send_body = WebSocketSendBody()
+            protocol_data = ProtocolData()
             if api == "send_msg":
-                websocket_send_body.api = "broadcast"
-                websocket_send_body.data = MessageList(message_list=get_msg(**data))
+                protocol_data.api = "broadcast"
+                protocol_data.data = MessageList(message_list=get_msg(**data))
             elif api == "send_title":
-                websocket_send_body.api = "send_title"
+                protocol_data.api = "send_title"
                 send_title_item = SendTitleItem(
                     title=data.get("title"),
                     subtitle=data.get("subtitle"),
@@ -218,10 +219,10 @@ class Adapter(BaseAdapter):
                     stay=data.get("stay") if data.get("stay") else 70,
                     fadeout=data.get("fadeout") if data.get("fadeout") else 20,
                 )
-                websocket_send_body.data = SendTitleBody(send_title=send_title_item)
+                protocol_data.data = SendTitleData(send_title=send_title_item)
             elif api == "send_actionbar":
-                websocket_send_body.api = "actionbar"
-                websocket_send_body.data = SendActionBarBody(
+                protocol_data.api = "actionbar"
+                protocol_data.data = SendActionBarData(
                     message_list=get_actionbar_msg(**data)
                 )
             elif api == "send_rcon_cmd":
@@ -230,7 +231,12 @@ class Adapter(BaseAdapter):
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
 
-            await websocket.send(websocket_send_body.model_dump_json())
+            if PYDANTIC_V2:
+                json_data = protocol_data.model_dump_json()
+            else:
+                json_data = protocol_data.json()
+
+            await websocket.send(json_data)
         return
 
     async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
@@ -281,6 +287,12 @@ class Adapter(BaseAdapter):
             return
 
         self_id = ori_self_id.encode("utf-8").decode("unicode_escape")
+
+        if client_origin := websocket.request.headers.get("x-client-origin"):
+            if client_origin == "nonebot":
+                log("WARNING", "X-Client-Origin Header cannot be nonebot")
+                await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
+                return
 
         if self.minecraft_config.minecraft_access_token:
             access_token = websocket.request.headers.get("Authorization")

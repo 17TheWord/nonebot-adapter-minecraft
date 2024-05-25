@@ -1,10 +1,10 @@
 from enum import Enum
-from typing import List, Optional, Any, Union
+from typing import Any, List, Union, Optional
 
 from pydantic import BaseModel
 
 """
-WebSocket
+Protocol
 """
 
 
@@ -149,7 +149,7 @@ class ChatImageModComponent(BaseModel):
 
 class MessageList(BaseModel):
     """
-    websocket 发送的消息列表
+    消息列表
     """
 
     message_list: Optional[List[TextComponent]] = []
@@ -167,7 +167,7 @@ class SendTitleItem(BaseModel):
     fadeout: Optional[int] = 20
 
 
-class SendTitleBody(BaseModel):
+class SendTitleData(BaseModel):
     """
     SendTitle
     """
@@ -181,7 +181,7 @@ class ActionBarComponent(BaseComponent):
     """
 
 
-class SendActionBarBody(BaseModel):
+class SendActionBarData(BaseModel):
     """
     ActionBar 消息体
     """
@@ -189,9 +189,9 @@ class SendActionBarBody(BaseModel):
     message_list: Optional[List[ActionBarComponent]] = None
 
 
-class WebSocketSendBody(BaseModel):
+class ProtocolData(BaseModel):
     """
-    websocket 发送消息的body
+    发送的消息体
     """
 
     api: Optional[str] = None
@@ -279,15 +279,15 @@ __all__ = [
     "HoverEntity",
     "MessageList",
     "HoverAction",
+    "ProtocolData",
     "RconFontEnum",
     "TextComponent",
     "BaseComponent",
     "SendTitleItem",
-    "SendTitleBody",
+    "SendTitleData",
     "RconClickEvent",
     "RconHoverEvent",
-    "SendActionBarBody",
-    "WebSocketSendBody",
+    "SendActionBarData",
     "RconBaseComponent",
     "RconTextComponent",
     "ActionBarComponent",

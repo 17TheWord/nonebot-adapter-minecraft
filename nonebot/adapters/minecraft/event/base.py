@@ -1,10 +1,11 @@
 from typing import Literal, Optional
 
-from nonebot.compat import model_dump, PYDANTIC_V2, ConfigDict
-from nonebot.utils import escape_tag
-from nonebot.adapters import Event as BaseEvent
-from nonebot.typing import overrides
 from pydantic import BaseModel
+from nonebot.typing import overrides
+from nonebot.utils import escape_tag
+from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump
+
+from nonebot.adapters import Event as BaseEvent
 
 from ..message import Message
 
