@@ -1,4 +1,4 @@
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 
 from pydantic import BaseModel, Field
 
@@ -13,6 +13,4 @@ class Server(BaseModel):
 class Config(BaseModel):
     minecraft_server_rcon: Dict[str, Server] = Field(default_factory=dict)
     minecraft_ws_urls: Dict[str, List[str]] = Field(default_factory=dict)
-    minecraft_access_token: Optional[str] = Field(
-        default=None, alias="minecraft_access_token"
-    )
+    minecraft_access_token: Optional[Union[str, int]] = None
