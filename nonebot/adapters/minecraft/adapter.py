@@ -28,10 +28,10 @@ from nonebot.utils import escape_tag
 
 from .model import (
     MessageList,
+    ProtocolData,
     SendTitleItem,
-    SendTitleBody,
-    SendActionBarBody,
-    WebSocketSendBody,
+    SendTitleData,
+    SendActionBarData,
 )
 
 from . import event
@@ -205,12 +205,12 @@ class Adapter(BaseAdapter):
         websocket = self.connections.get(bot.self_id, None)
         log("DEBUG", f"Calling API <y>{api}</y>")
         if websocket:
-            websocket_send_body = WebSocketSendBody()
+            protocol_data = ProtocolData()
             if api == "send_msg":
-                websocket_send_body.api = "broadcast"
-                websocket_send_body.data = MessageList(message_list=get_msg(**data))
+                protocol_data.api = "broadcast"
+                protocol_data.data = MessageList(message_list=get_msg(**data))
             elif api == "send_title":
-                websocket_send_body.api = "send_title"
+                protocol_data.api = "send_title"
                 send_title_item = SendTitleItem(
                     title=data.get("title"),
                     subtitle=data.get("subtitle"),
@@ -218,10 +218,10 @@ class Adapter(BaseAdapter):
                     stay=data.get("stay") if data.get("stay") else 70,
                     fadeout=data.get("fadeout") if data.get("fadeout") else 20,
                 )
-                websocket_send_body.data = SendTitleBody(send_title=send_title_item)
+                protocol_data.data = SendTitleData(send_title=send_title_item)
             elif api == "send_actionbar":
-                websocket_send_body.api = "actionbar"
-                websocket_send_body.data = SendActionBarBody(
+                protocol_data.api = "actionbar"
+                protocol_data.data = SendActionBarData(
                     message_list=get_actionbar_msg(**data)
                 )
             elif api == "send_rcon_cmd":
