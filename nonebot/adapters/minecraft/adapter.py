@@ -1,4 +1,5 @@
 import json
+import urllib
 import asyncio
 import inspect
 import contextlib
@@ -130,7 +131,7 @@ class Adapter(BaseAdapter):
 
     async def _forward_ws(self, server_name: str, url: URL) -> None:
         headers = {
-            "x-self-name": "".join(f"\\u{ord(c):04x}" for c in server_name),
+            "x-self-name": urllib.parse.quote_plus(server_name),
             "x-client-origin": "nonebot",
         }
         if self.minecraft_config.minecraft_access_token:
@@ -286,7 +287,7 @@ class Adapter(BaseAdapter):
             await websocket.close(1008, "Missing X-Self-Name Header")
             return
 
-        self_id = ori_self_id.encode("utf-8").decode("unicode_escape")
+        self_id = urllib.parse.unquote_plus(ori_self_id)
 
         if client_origin := websocket.request.headers.get("x-client-origin"):
             if client_origin == "nonebot":
