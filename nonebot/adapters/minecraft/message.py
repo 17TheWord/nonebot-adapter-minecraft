@@ -12,7 +12,6 @@ from .model import (
     BaseComponent,
     SendTitleItem,
     TextComponent,
-    ActionBarComponent,
     ChatImageModComponent,
 )
 
@@ -49,7 +48,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
     @staticmethod
     def text(
             text: Optional[str] = None,
-            color: Optional[TextColor] = TextColor.WHITE,
+            color: Optional[TextColor] = None,
             font: Optional[str] = None,
             bold: Optional[bool] = False,
             italic: Optional[bool] = False,
@@ -62,7 +61,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
     ):
         text_component = TextComponent(
             text=text,
-            color=color.value,  # todo fix
+            color=color,  # todo fix
             font=font,
             bold=bold,
             italic=italic,
@@ -74,12 +73,12 @@ class MessageSegment(BaseMessageSegment["Message"]):
             hover_event=hover_event,
         )
 
-        return MessageSegment("text", text_component.dict())
+        return MessageSegment("text", text_component.get_dict())
 
     @staticmethod
     def title(
-            title: str,
-            subtitle: Optional[str] = None,
+            title: BaseComponent,
+            subtitle: Optional[BaseComponent] = None,
             fadein: Optional[int] = 10,
             stay: Optional[int] = 70,
             fadeout: Optional[int] = 20,
@@ -87,13 +86,12 @@ class MessageSegment(BaseMessageSegment["Message"]):
         title_component = SendTitleItem(
             title=title, subtitle=subtitle, fadein=fadein, stay=stay, fadeout=fadeout
         )
-
-        return MessageSegment("title", title_component.dict())
+        return MessageSegment("title", title_component.get_dict())
 
     @staticmethod
     def actionbar(
             text: Optional[str] = None,
-            color: Optional[TextColor] = TextColor.WHITE,
+            color: Optional[TextColor] = None,
             font: Optional[str] = None,
             bold: Optional[bool] = False,
             italic: Optional[bool] = False,
@@ -102,9 +100,9 @@ class MessageSegment(BaseMessageSegment["Message"]):
             obfuscated: Optional[bool] = False,
             insertion: Optional[str] = None,
     ):
-        actionbar_component = ActionBarComponent(
+        actionbar_component = BaseComponent(
             text=text,
-            color=color.value,
+            color=color,
             font=font,
             bold=bold,
             italic=italic,
@@ -113,13 +111,13 @@ class MessageSegment(BaseMessageSegment["Message"]):
             obfuscated=obfuscated,
             insertion=insertion,
         )
-        return MessageSegment("actionbar", actionbar_component.dict())
+        return MessageSegment("actionbar", actionbar_component.get_dict())
 
     @staticmethod
     def chat_image_mod(
             url: str,
             name: Optional[str] = "图片",
-            color: Optional[TextColor] = TextColor.WHITE,
+            color: Optional[TextColor] = None,
             font: Optional[str] = None,
             bold: Optional[bool] = False,
             italic: Optional[bool] = False,
@@ -141,7 +139,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
             obfuscated=obfuscated,
             insertion=insertion,
         )
-        return MessageSegment("chat_image_mod", base_component.dict())
+        return MessageSegment("chat_image_mod", base_component.get_dict())
 
 
 class Message(BaseMessage[MessageSegment]):
