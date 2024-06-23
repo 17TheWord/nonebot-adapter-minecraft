@@ -31,7 +31,7 @@ from .bot import Bot
 from .event import Event
 from .config import Config
 from .collator import Collator
-from .utils import log, get_msg, get_actionbar_msg
+from .utils import log, get_msg
 from .exception import (
     RCONConnectionError,
     IncorrectPasswordError,
@@ -214,8 +214,8 @@ class Adapter(BaseAdapter):
             elif api == "send_title":
                 protocol_data.api = "send_title"
                 send_title_item = SendTitleItem(
-                    title=data.get("title"),
-                    subtitle=data.get("subtitle"),
+                    title=get_msg(data.get("title")),
+                    subtitle=get_msg(data.get("subtitle")) if get_msg(data.get("subtitle")) else [],
                     fadein=data.get("fadein") if data.get("fadein") else 10,
                     stay=data.get("stay") if data.get("stay") else 70,
                     fadeout=data.get("fadeout") if data.get("fadeout") else 20,
@@ -224,7 +224,7 @@ class Adapter(BaseAdapter):
             elif api == "send_actionbar":
                 protocol_data.api = "actionbar"
                 protocol_data.data = SendActionBarData(
-                    message_list=get_actionbar_msg(**data)
+                    message_list=get_msg(**data)
                 )
             elif api == "send_rcon_cmd":
                 try:
