@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, List, Union, Optional
-
 from pydantic import BaseModel
+from nonebot.compat import PYDANTIC_V2
 
 """
 Protocol
@@ -40,7 +40,7 @@ class BaseComponent(BaseModel):
     """
 
     text: Optional[str] = None
-    color: Optional[TextColor] = TextColor.WHITE
+    color: Optional[TextColor] = None
     font: Optional[str] = None
     bold: Optional[bool] = False
     italic: Optional[bool] = False
@@ -55,6 +55,12 @@ class BaseComponent(BaseModel):
         :return: 文本消息
         """
         return self.text
+
+    def get_dict(self):
+        if PYDANTIC_V2:
+            return self.model_dump()
+        else:
+            return self.dict()
 
 
 class ClickAction(Enum):
@@ -160,8 +166,8 @@ class SendTitleItem(BaseModel):
     SendTitle 消息体
     """
 
-    title: Optional[str] = ""
-    subtitle: Optional[str] = ""
+    title: Optional[List[BaseComponent]] = None
+    subtitle: Optional[List[BaseComponent]] = None
     fadein: Optional[int] = 10
     stay: Optional[int] = 70
     fadeout: Optional[int] = 20
@@ -175,18 +181,12 @@ class SendTitleData(BaseModel):
     send_title: Optional[SendTitleItem] = None
 
 
-class ActionBarComponent(BaseComponent):
-    """
-    ActionBarComponent
-    """
-
-
 class SendActionBarData(BaseModel):
     """
     ActionBar 消息体
     """
 
-    message_list: Optional[List[ActionBarComponent]] = None
+    message_list: Optional[List[BaseComponent]] = None
 
 
 class ProtocolData(BaseModel):
@@ -290,6 +290,5 @@ __all__ = [
     "SendActionBarData",
     "RconBaseComponent",
     "RconTextComponent",
-    "ActionBarComponent",
     "ChatImageModComponent",
 ]

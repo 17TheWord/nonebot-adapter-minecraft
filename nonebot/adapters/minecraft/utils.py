@@ -19,16 +19,3 @@ def get_msg(message: Union[str, Message, MessageSegment]):
     else:
         return None
     return message_list
-
-
-def get_actionbar_msg(message: Union[str, Message, MessageSegment]):
-    message_list = []
-    if isinstance(message, str):
-        message_list.append(MessageSegment.actionbar(message).data)
-    elif isinstance(message, MessageSegment) and message.type == "actionbar":
-        message_list.append(message.data)
-    elif isinstance(message, Message):
-        return message
-    else:
-        return None
-    return message_list
