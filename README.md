@@ -16,10 +16,12 @@ _✨ Minecraft 协议适配 ✨_
 
 ## 服务端支持
 
-- 原版：[日志读取程序](https://github.com/17TheWord/nonebot-plugin-mcqq)
-- Spigot：[插件](https://github.com/17TheWord/MC_QQ_Spigot) (主要更新)
-- Forge：[日志读取程序](https://github.com/17TheWord/nonebot-plugin-mcqq)、[Forge Mod](https://github.com/17TheWord/MC_QQ_Forge)
-- Fabric：[日志读取程序](https://github.com/17TheWord/nonebot-plugin-mcqq)、[Fabric Mod](https://github.com/17TheWord/MC_QQ_Fabric)
+> 服务器端插件/Mod下载：[`鹊桥`](https://github.com/17TheWord/QueQiao)
+
+- [`Spigot`](https://www.spigotmc.org/)
+- [`Fabric`](https://fabricmc.net/)
+- [`Forge`](https://files.minecraftforge.net/)
+- [`Velocity`](https://papermc.io/software/velocity)（Demo）
 
 ## Rcon支持
 

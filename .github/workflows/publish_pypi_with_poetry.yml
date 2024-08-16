@@ -10,6 +10,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,12 +25,25 @@ jobs:
 
       - name: Install Poetry
         run: |
-          curl -sSL https://install.python-poetry.org | python -
-          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+          python -m pip install --upgrade pip
+          pip install poetry
+
+
+      - name: Get version from pyproject.toml
+        id: get_version
+        run: |
+            VERSION=$(poetry version -s)
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: poetry install --no-root --no-dev
 
-      - name: Build and publish
+      # - name: Build and publish
+      #   if: github.event_name == 'push'
+      #   run: |
+      #     poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+      #     poetry publish --build
+      
+      - name: Create Release with generate note
         if: github.event_name == 'push'
-        run: poetry publish --build
+        run: gh release create v${{ env.VERSION }} --generate-notes

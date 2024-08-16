@@ -13,7 +13,6 @@ from .base import (
 class Player(BasePlayer):
     """Forge Player"""
 
-    uuid: Optional[str] = None
     display_name: Optional[str] = None
     ipAddress: Optional[str] = None
 

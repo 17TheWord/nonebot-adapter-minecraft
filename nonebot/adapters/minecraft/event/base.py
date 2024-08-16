@@ -1,3 +1,4 @@
+from uuid import UUID
 from typing import Literal, Optional
 
 from pydantic import BaseModel
@@ -58,6 +59,7 @@ class Event(BaseEvent):
 class BasePlayer(BaseModel):
     """玩家基类"""
     nickname: str
+    uuid: Optional[UUID] = None
     is_op: Optional[bool] = None
 
     if PYDANTIC_V2:
