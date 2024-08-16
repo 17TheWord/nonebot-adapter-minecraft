@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Any, List, Union, Optional
+
 from pydantic import BaseModel
 from nonebot.compat import PYDANTIC_V2
 
