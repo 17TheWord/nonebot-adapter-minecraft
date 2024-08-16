@@ -39,6 +39,10 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-root --no-dev
 
+      - name: Build and publish
+        if: github.event_name == 'push'
+        run: poetry publish --build
+
       - name: Check if Release exists
         id: check-release
         run: |
@@ -62,10 +66,6 @@ jobs:
           else
             echo "Failed to delete release v${{ env.VERSION }}. It might not exist or there might be another issue."
           fi
-
-      - name: Build and publish
-        if: github.event_name == 'push'
-        run: poetry publish --build
 
       - name: Create Release with generate note
         if: github.event_name == 'push'
