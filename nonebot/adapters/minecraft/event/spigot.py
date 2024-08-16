@@ -13,7 +13,6 @@ from .base import (
 class Player(BasePlayer):
     """Spigot Player"""
 
-    uuid: Optional[str] = None
     display_name: Optional[str] = None
     player_list_name: Optional[str] = None
     is_health_scaled: Optional[bool] = None

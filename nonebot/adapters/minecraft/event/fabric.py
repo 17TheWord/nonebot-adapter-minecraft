@@ -13,7 +13,6 @@ from .base import (
 class Player(BasePlayer):
     """Fabric Player"""
 
-    uuid: Optional[str] = None
     ip: Optional[str] = None
     display_name: Optional[str] = None
     movement_speed: Optional[float] = None
