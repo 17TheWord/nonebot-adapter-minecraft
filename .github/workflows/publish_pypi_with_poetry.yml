@@ -7,13 +7,15 @@ on:
   pull_request:
     types: [opened, synchronize]
 
+permissions:
+  contents: write
+env:
+  GH_TOKEN: ${{ github.token }}
+  PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,31 +27,17 @@ jobs:
 
       - name: Install Poetry
         run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-
+          curl -sSL https://install.python-poetry.org | python -
+          poetry config pypi-token.pypi ${{ env.PYPI_API_TOKEN }}
 
       - name: Get version from pyproject.toml
         id: get_version
         run: |
-            VERSION=$(poetry version -s)
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          VERSION=$(poetry version -s)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: poetry install --no-root --no-dev
-
-      - name: Build and publish
-        if: github.event_name == 'push'
-        run: |
-          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
-          poetry publish --build
-      
-      - name: Create Release with generate note
-        if: github.event_name == 'push'
-
-        run: |
-          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
-          poetry publish --build
 
       - name: Check if Release exists
         id: check-release
@@ -75,7 +63,10 @@ jobs:
             echo "Failed to delete release v${{ env.VERSION }}. It might not exist or there might be another issue."
           fi
 
+      - name: Build and publish
+        if: github.event_name == 'push'
+        run: poetry publish --build
+
       - name: Create Release with generate note
         if: github.event_name == 'push'
-
         run: gh release create v${{ env.VERSION }} --generate-notes
