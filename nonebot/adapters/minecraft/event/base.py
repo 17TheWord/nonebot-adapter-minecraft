@@ -1,5 +1,5 @@
-from typing import Literal, Optional
 from uuid import UUID
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 from nonebot.typing import overrides
