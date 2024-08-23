@@ -246,6 +246,8 @@ class Adapter(BaseAdapter):
                     return await bot.rcon.send_cmd(data.get("command"))
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
+                except Exception as e:
+                    raise ActionFailed(Response(status_code=500, content=str(e)))
 
             if PYDANTIC_V2:
                 json_data = protocol_data.model_dump_json()
