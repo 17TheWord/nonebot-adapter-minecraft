@@ -5,6 +5,7 @@ import inspect
 import contextlib
 from typing import Any, Dict, List, Type, Optional, Generator
 
+from nonebot.internal.driver import Response
 from nonebot.typing import overrides
 from nonebot.utils import escape_tag
 from aiomcrcon import Client as RCONClient
@@ -35,14 +36,14 @@ from .utils import log, get_msg
 from .exception import (
     RCONConnectionError,
     IncorrectPasswordError,
-    ClientNotConnectedError,
+    ClientNotConnectedError, ActionFailed,
 )
 from .model import (
     MessageList,
     ProtocolData,
     SendTitleData,
     SendTitleItem,
-    SendActionBarData,
+    SendActionBarData, PrivateMessageData,
 )
 
 RECONNECT_INTERVAL = 3.0
@@ -211,6 +212,20 @@ class Adapter(BaseAdapter):
             if api == "send_msg":
                 protocol_data.api = "broadcast"
                 protocol_data.data = MessageList(message_list=get_msg(**data))
+            elif api == "send_private_msg":
+                target_uuid = data.get("uuid")
+                target_nickname = data.get("nickname")
+                if not target_uuid or not target_nickname:
+                    raise ActionFailed(Response(
+                        status_code=400,
+                        content="Target player's uuid or nickname is required at least one")
+                    )
+                protocol_data.api = "send_private_message"
+                protocol_data.data = PrivateMessageData(
+                    target_uuid=target_uuid,
+                    target_nickname=target_nickname,
+                    message_list=get_msg(**data)
+                )
             elif api == "send_title":
                 protocol_data.api = "send_title"
                 send_title_item = SendTitleItem(
