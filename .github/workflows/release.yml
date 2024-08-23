@@ -43,6 +43,13 @@ jobs:
         run: |
           poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
           poetry publish --build
+      
+      - name: Create Release with generate note
+        if: github.event_name == 'push'
+
+        run: |
+          poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
+          poetry publish --build
 
       - name: Check if Release exists
         id: check-release
@@ -70,4 +77,5 @@ jobs:
 
       - name: Create Release with generate note
         if: github.event_name == 'push'
+
         run: gh release create v${{ env.VERSION }} --generate-notes
