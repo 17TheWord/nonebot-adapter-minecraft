@@ -1,4 +1,5 @@
 from typing import Any, Tuple, Union, Optional
+from uuid import UUID
 
 from nonebot.adapters import Bot as BaseBot
 
@@ -16,7 +17,15 @@ class Bot(BaseBot):
     async def send(
         self, event: Event, message: Union[str, Message, MessageSegment], **kwargs
     ) -> Any: ...
+    async def send_private_msg(
+        self,
+        uuid: Optional[UUID] = None,
+        nickname: Optional[str] = None,
+        message: Union[str, Message, MessageSegment] = None,
+        **kwargs,
+    ) -> Any: ...
     async def send_msg(self, message: Union[str, Message, MessageSegment]) -> Any: ...
+    async def broadcast(self, message: Union[str, Message, MessageSegment]) -> Any: ...
     async def send_actionbar(
         self, message: Union[str, Message, MessageSegment], **kwargs
     ) -> Any: ...

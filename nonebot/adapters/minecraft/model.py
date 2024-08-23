@@ -1,3 +1,4 @@
+from uuid import UUID
 from enum import Enum
 from typing import Any, List, Union, Optional
 
@@ -160,6 +161,15 @@ class MessageList(BaseModel):
     """
 
     message_list: Optional[List[TextComponent]] = []
+
+
+class PrivateMessageData(MessageList):
+    """
+    消息列表
+    """
+
+    target_uuid: Optional[UUID] = None
+    target_nickname: Optional[str] = None
 
 
 class SendTitleItem(BaseModel):
