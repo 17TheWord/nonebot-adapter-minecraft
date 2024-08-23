@@ -247,7 +247,7 @@ class Adapter(BaseAdapter):
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
                 except Exception as e:
-                    raise ActionFailed(Response(status_code=500, content=str(e)))
+                    raise RCONConnectionError(msg=str(e), error=e)
 
             if PYDANTIC_V2:
                 json_data = protocol_data.model_dump_json()
