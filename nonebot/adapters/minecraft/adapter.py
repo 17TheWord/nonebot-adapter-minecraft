@@ -5,7 +5,6 @@ import inspect
 import contextlib
 from typing import Any, Dict, List, Type, Optional, Generator
 
-from httpx import Client
 from nonebot.internal.driver import Response
 from nonebot.typing import overrides
 from nonebot.utils import escape_tag
