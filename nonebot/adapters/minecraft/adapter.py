@@ -5,6 +5,7 @@ import inspect
 import contextlib
 from typing import Any, Dict, List, Type, Optional, Generator
 
+from httpx import Client
 from nonebot.internal.driver import Response
 from nonebot.typing import overrides
 from nonebot.utils import escape_tag
@@ -243,6 +244,8 @@ class Adapter(BaseAdapter):
                 )
             elif api == "send_rcon_cmd":
                 try:
+                    if bot.rcon is None:
+                        raise RCONConnectionError(msg="RCON client is None")
                     return await bot.rcon.send_cmd(data.get("command"))
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
