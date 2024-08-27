@@ -6,7 +6,7 @@ import contextlib
 from typing import Any, Dict, List, Type, Optional, Generator
 
 from nonebot.typing import overrides
-from nonebot.utils import escape_tag
+from nonebot.utils import escape_tag, DataclassEncoder
 from aiomcrcon import Client as RCONClient
 from nonebot.exception import WebSocketClosed
 from nonebot.compat import type_validate_python
