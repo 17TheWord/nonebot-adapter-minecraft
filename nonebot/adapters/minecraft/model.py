@@ -1,9 +1,11 @@
-from uuid import UUID
+import json
 from enum import Enum
-from typing import Any, List, Union, Optional
+from typing import List, Union, Optional, Dict, Any
 
-from pydantic import BaseModel
 from nonebot.compat import PYDANTIC_V2
+from pydantic import BaseModel, Field
+
+from .utils import exclude_all_none
 
 """
 Protocol
@@ -36,6 +38,19 @@ class TextColor(Enum):
         return self.value
 
 
+class FontEnum(Enum):
+    """
+    字体枚举
+    """
+
+    DEFAULT = "minecraft:default"
+
+    # TODO Add more fonts
+
+    def __str__(self):
+        return self.value
+
+
 class BaseComponent(BaseModel):
     """
     BaseComponent
@@ -43,12 +58,12 @@ class BaseComponent(BaseModel):
 
     text: Optional[str] = None
     color: Optional[TextColor] = None
-    font: Optional[str] = None
-    bold: Optional[bool] = False
-    italic: Optional[bool] = False
-    underlined: Optional[bool] = False
-    strikethrough: Optional[bool] = False
-    obfuscated: Optional[bool] = False
+    font: Optional[Union[FontEnum, str]] = None
+    bold: Optional[bool] = None
+    italic: Optional[bool] = None
+    underlined: Optional[bool] = None
+    strikethrough: Optional[bool] = None
+    obfuscated: Optional[bool] = None
     insertion: Optional[str] = None
 
     def __str__(self):
@@ -125,11 +140,11 @@ class HoverEntity(BaseModel):
 
 class HoverEvent(BaseModel):
     """
-    悬停事件
+    悬停事件，传参请传action 和 text/item/entity
     """
 
     action: Optional[HoverAction] = None
-    base_component_list: Optional[List[BaseComponent]] = None
+    text: Optional[List[BaseComponent]] = None
     item: Optional[HoverItem] = None
     entity: Optional[HoverEntity] = None
 
@@ -155,24 +170,7 @@ class ChatImageModComponent(BaseModel):
         return f"[[CICode,url={self.url},name={self.name}]]"
 
 
-class MessageList(BaseModel):
-    """
-    消息列表
-    """
-
-    message_list: Optional[List[TextComponent]] = []
-
-
-class PrivateMessageData(MessageList):
-    """
-    消息列表
-    """
-
-    target_uuid: Optional[UUID] = None
-    target_nickname: Optional[str] = None
-
-
-class SendTitleItem(BaseModel):
+class TitleItem(BaseModel):
     """
     SendTitle 消息体
     """
@@ -184,31 +182,6 @@ class SendTitleItem(BaseModel):
     fadeout: Optional[int] = 20
 
 
-class SendTitleData(BaseModel):
-    """
-    SendTitle
-    """
-
-    send_title: Optional[SendTitleItem] = None
-
-
-class SendActionBarData(BaseModel):
-    """
-    ActionBar 消息体
-    """
-
-    message_list: Optional[List[BaseComponent]] = None
-
-
-class ProtocolData(BaseModel):
-    """
-    发送的消息体
-    """
-
-    api: Optional[str] = None
-    data: Optional[Any] = None
-
-
 """
 Rcon
 """
@@ -216,7 +189,7 @@ Rcon
 
 class RconFontEnum(Enum):
     """
-    字体枚举
+    Rcon FontEnum
     """
 
     DEFAULT = "minecraft:default"
@@ -227,40 +200,8 @@ class RconFontEnum(Enum):
 
 class RconClickEvent(ClickEvent):
     """
-    点击事件
+    Rcon ClickEvent
     """
-
-    action: Optional[ClickAction] = None
-    value: Optional[str] = None
-
-
-class RconBaseComponent(BaseComponent):
-    """
-    RconBaseComponent
-    """
-
-    score: Optional[dict] = None
-    selector: Optional[str] = None
-    block: Optional[str] = None
-    translate: Optional[str] = None
-
-    def __str__(self):
-        """
-        获取纯文本格式的消息
-        :return: 文本消息
-        """
-        return self.text
-
-    def get_component(self) -> dict:
-        """
-        获取组件格式的消息，同时对空值进行过滤
-        :return: component
-        """
-        temp_dict = {}
-        for i in self.__dict__:
-            if self.__dict__[i]:
-                temp_dict[i] = str(self.__dict__[i])
-        return temp_dict
 
 
 class RconHoverEvent(BaseModel):
@@ -269,37 +210,171 @@ class RconHoverEvent(BaseModel):
     """
 
     action: Optional[HoverAction] = None
-    contents: Optional[List[RconBaseComponent]] = None
+    contents: Optional[Union[List[BaseComponent], str, Dict[str, Any]]] = None
 
 
-class RconTextComponent(RconBaseComponent):
+class RconStyleComponent(BaseModel):
     """
-    文本组件
+    Rcon BaseComponent
+    """
+
+    color: Optional[TextColor] = None
+    font: Optional[Union[FontEnum, str]] = None
+    bold: Optional[bool] = None
+    italic: Optional[bool] = None
+    underlined: Optional[bool] = None
+    strikethrough: Optional[bool] = None
+    obfuscated: Optional[bool] = None
+    insertion: Optional[str] = None
+
+
+class RconRichComponent(BaseModel):
+    """
+    Rcon Text Component
     """
 
     click_event: Optional[RconClickEvent] = None
     hover_event: Optional[RconHoverEvent] = None
 
 
-__all__ = [
-    "TextColor",
-    "HoverItem",
-    "ClickEvent",
-    "HoverEvent",
-    "ClickAction",
-    "HoverEntity",
-    "MessageList",
-    "HoverAction",
-    "ProtocolData",
-    "RconFontEnum",
-    "TextComponent",
-    "BaseComponent",
-    "SendTitleItem",
-    "SendTitleData",
-    "RconClickEvent",
-    "RconHoverEvent",
-    "SendActionBarData",
-    "RconBaseComponent",
-    "RconTextComponent",
-    "ChatImageModComponent",
-]
+class RconTextComponent(RconStyleComponent):
+    """
+    Rcon Text Component
+    """
+
+    text: Optional[str] = None
+
+
+class RconRichTextComponent(RconTextComponent, RconRichComponent):
+    """
+    Rcon Rich Text Component
+    """
+
+
+class RconSelectorComponent(RconStyleComponent):
+    """
+    Rcon Selector Component
+    """
+
+    selector: Optional[str] = None
+
+
+class RconRichSelectorComponent(RconSelectorComponent, RconRichComponent):
+    """
+    Rcon Rich Selector Component
+    """
+
+
+class RconScoreboardObjective(BaseModel):
+    """
+    Rcon Scoreboard Objective
+    """
+
+    name: Optional[str] = None
+    objective: Optional[str] = None
+
+
+class RconScoreboardComponent(RconStyleComponent):
+    """
+    Rcon Scoreboard Component
+    """
+
+    score: Optional[RconScoreboardObjective] = None
+
+
+class RconRichScoreboardComponent(RconScoreboardComponent, RconRichComponent):
+    """
+    Rcon Rich Scoreboard Component
+    """
+
+
+class RconNBTComponent(RconStyleComponent):
+    """
+    Rcon NBT Component
+    """
+
+    nbt: Optional[str] = None
+    interpret: Optional[bool] = None
+
+
+class RconNBTStorageComponent(RconNBTComponent):
+    """
+    Rcon NBT Component
+    """
+
+    storage: Optional[str] = None
+
+
+class RconNBTEntityComponent(RconNBTComponent):
+    """
+    Rcon NBT Component
+    """
+
+    entity: Optional[str] = None
+
+
+class RconNBTBlockComponent(RconNBTComponent):
+    """
+    Rcon NBT Component
+    """
+
+    block: Optional[str] = None
+
+
+class RconRichNBTStorageComponent(RconNBTStorageComponent, RconRichComponent):
+    """
+    Rcon Rich NBT Component
+    """
+
+
+class RconRichNBTEntityComponent(RconNBTEntityComponent, RconRichComponent):
+    """
+    Rcon Rich NBT Component
+    """
+
+
+class RconRichNBTBlockComponent(RconNBTBlockComponent, RconRichComponent):
+    """
+    Rcon Rich NBT Component
+    """
+
+
+class RconKeybindComponent(RconStyleComponent):
+    """
+    Rcon Keybind Component
+    """
+
+    keybind: Optional[str] = None
+
+
+class RconRichKeybindComponent(RconKeybindComponent, RconRichComponent):
+    """
+    Rcon Rich Keybind Component
+    """
+
+
+class RconLineBreakComponent(BaseModel):
+    """
+    Rcon Line Break Component
+    """
+
+    text = "\n"
+
+
+class RconTranslateComponent(RconStyleComponent):
+    """
+    Rcon Translate Component
+    """
+
+    translate: Optional[str] = None
+    with_: Optional[List[Union[
+        RconRichTextComponent, RconRichSelectorComponent, RconRichScoreboardComponent,
+        RconRichNBTStorageComponent, RconRichNBTEntityComponent, RconRichNBTBlockComponent,
+        RconRichKeybindComponent, RconLineBreakComponent
+    ]]] = Field(alias="with")
+
+
+class RconRichTranslateComponent(RconTranslateComponent, RconRichComponent):
+    """
+    Rcon Rich Translate Component
+    """
