@@ -208,40 +208,7 @@ class Adapter(BaseAdapter):
         websocket = self.connections.get(bot.self_id, None)
         log("DEBUG", f"Calling API <y>{api}</y>")
         if websocket:
-            protocol_data = ProtocolData()
-            if api == "send_msg":
-                protocol_data.api = "broadcast"
-                protocol_data.data = MessageList(message_list=get_msg(**data))
-            elif api == "send_private_msg":
-                target_uuid = data.get("uuid")
-                target_nickname = data.get("nickname")
-                if not target_uuid or not target_nickname:
-                    raise ActionFailed(Response(
-                        status_code=400,
-                        content="Target player's uuid or nickname is required at least one")
-                    )
-                protocol_data.api = "send_private_msg"
-                protocol_data.data = PrivateMessageData(
-                    target_player_uuid=target_uuid,
-                    target_player_nickname=target_nickname,
-                    message_list=get_msg(data.get("message"))
-                )
-            elif api == "send_title":
-                protocol_data.api = "send_title"
-                send_title_item = SendTitleItem(
-                    title=get_msg(data.get("title")),
-                    subtitle=get_msg(data.get("subtitle")) if get_msg(data.get("subtitle")) else [],
-                    fadein=data.get("fadein") if data.get("fadein") else 10,
-                    stay=data.get("stay") if data.get("stay") else 70,
-                    fadeout=data.get("fadeout") if data.get("fadeout") else 20,
-                )
-                protocol_data.data = SendTitleData(send_title=send_title_item)
-            elif api == "send_actionbar":
-                protocol_data.api = "actionbar"
-                protocol_data.data = SendActionBarData(
-                    message_list=get_msg(**data)
-                )
-            elif api == "send_rcon_cmd":
+            if api == "send_rcon_cmd":
                 try:
                     if bot.rcon is None:
                         raise RCONConnectionError(msg="RCON client is None")
@@ -250,14 +217,8 @@ class Adapter(BaseAdapter):
                     raise ClientNotConnectedError()
                 except Exception as e:
                     raise RCONConnectionError(msg=str(e), error=e)
-
-            if PYDANTIC_V2:
-                json_data = protocol_data.model_dump_json()
-            else:
-                json_data = protocol_data.json()
-
+            json_data = json.dumps({"api": api, "data": data}, cls=DataclassEncoder)
             await websocket.send(json_data)
-        return
 
     async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
         if server := self.minecraft_config.minecraft_server_rcon.get(server_name):
