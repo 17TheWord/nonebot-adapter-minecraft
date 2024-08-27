@@ -220,11 +220,11 @@ class Adapter(BaseAdapter):
                         status_code=400,
                         content="Target player's uuid or nickname is required at least one")
                     )
-                protocol_data.api = "send_private_message"
+                protocol_data.api = "send_private_msg"
                 protocol_data.data = PrivateMessageData(
-                    target_uuid=target_uuid,
-                    target_nickname=target_nickname,
-                    message_list=get_msg(**data)
+                    target_player_uuid=target_uuid,
+                    target_player_nickname=target_nickname,
+                    message_list=get_msg(data.get("message"))
                 )
             elif api == "send_title":
                 protocol_data.api = "send_title"
