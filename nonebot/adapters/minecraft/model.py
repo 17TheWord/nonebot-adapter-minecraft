@@ -1,9 +1,9 @@
 import json
 from enum import Enum
-from typing import List, Union, Optional, Dict, Any
+from typing import Any, Dict, List, Union, Optional
 
+from pydantic import Field, BaseModel
 from nonebot.compat import PYDANTIC_V2
-from pydantic import BaseModel, Field
 
 from .utils import exclude_all_none
 
