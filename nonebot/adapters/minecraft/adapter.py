@@ -5,12 +5,11 @@ import inspect
 import contextlib
 from typing import Any, Dict, List, Type, Optional, Generator
 
-from nonebot.internal.driver import Response
 from nonebot.typing import overrides
 from nonebot.utils import escape_tag
 from aiomcrcon import Client as RCONClient
 from nonebot.exception import WebSocketClosed
-from nonebot.compat import PYDANTIC_V2, type_validate_python
+from nonebot.compat import type_validate_python
 from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
 from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
 from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
@@ -32,18 +31,11 @@ from .bot import Bot
 from .event import Event
 from .config import Config
 from .collator import Collator
-from .utils import log, get_msg
+from .utils import log
 from .exception import (
     RCONConnectionError,
     IncorrectPasswordError,
     ClientNotConnectedError, ActionFailed,
-)
-from .model import (
-    MessageList,
-    ProtocolData,
-    SendTitleData,
-    SendTitleItem,
-    SendActionBarData, PrivateMessageData,
 )
 
 RECONNECT_INTERVAL = 3.0
