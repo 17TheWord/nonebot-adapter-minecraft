@@ -1,11 +1,8 @@
-import json
 from enum import Enum
 from typing import Any, Dict, List, Union, Optional
 
-from pydantic import Field, BaseModel
 from nonebot.compat import PYDANTIC_V2
-
-from .utils import exclude_all_none
+from pydantic import Field, BaseModel
 
 """
 Protocol
@@ -57,14 +54,14 @@ class BaseComponent(BaseModel):
     """
 
     text: Optional[str] = None
-    color: Optional[TextColor] = None
+    color: Optional[Union[TextColor, str]] = None
     font: Optional[Union[FontEnum, str]] = None
     bold: Optional[bool] = None
     italic: Optional[bool] = None
     underlined: Optional[bool] = None
     strikethrough: Optional[bool] = None
     obfuscated: Optional[bool] = None
-    insertion: Optional[str] = None
+    insertion: Optional[Union[str, Dict[str, Any]]] = None
 
     def __str__(self):
         """
@@ -101,7 +98,7 @@ class ClickEvent(BaseModel):
     点击事件
     """
 
-    action: Optional[ClickAction] = None
+    action: Optional[Union[ClickAction, str]] = None
     value: Optional[str] = None
 
 
@@ -123,9 +120,14 @@ class HoverItem(BaseModel):
     悬停事件中的物品
     """
 
-    id: Optional[Union[str, int]] = None
+    id: Optional[str] = None
+    """Spigot, Forge, Fabric"""
     count: Optional[int] = None
+    """Spigot, Forge, Fabric"""
     tag: Optional[str] = None
+    """Spigot"""
+    key: Optional[str] = None
+    """Velocity"""
 
 
 class HoverEntity(BaseModel):
@@ -134,16 +136,21 @@ class HoverEntity(BaseModel):
     """
 
     type: Optional[str] = None
+    """Spigot, Forge, Fabric"""
     id: Optional[str] = None
-    name: Optional[str] = None
+    """Spigot"""
+    name: Optional[List[BaseComponent]] = None
+    """Spigot, Forge, Fabric"""
+    key: Optional[str] = None
+    """Velocity"""
 
 
 class HoverEvent(BaseModel):
     """
-    悬停事件，传参请传action 和 text/item/entity
+    悬停事件，传参请传action 和 text/item/entity (三选一)
     """
 
-    action: Optional[HoverAction] = None
+    action: Optional[Union[HoverAction, str]] = None
     text: Optional[List[BaseComponent]] = None
     item: Optional[HoverItem] = None
     entity: Optional[HoverEntity] = None
@@ -177,9 +184,9 @@ class TitleItem(BaseModel):
 
     title: Optional[List[BaseComponent]] = None
     subtitle: Optional[List[BaseComponent]] = None
-    fadein: Optional[int] = 10
-    stay: Optional[int] = 70
-    fadeout: Optional[int] = 20
+    fadein: Optional[int] = None
+    stay: Optional[int] = None
+    fadeout: Optional[int] = None
 
 
 """
@@ -218,7 +225,7 @@ class RconStyleComponent(BaseModel):
     Rcon BaseComponent
     """
 
-    color: Optional[TextColor] = None
+    color: Optional[Union[TextColor, str]] = None
     font: Optional[Union[FontEnum, str]] = None
     bold: Optional[bool] = None
     italic: Optional[bool] = None
@@ -353,14 +360,6 @@ class RconRichKeybindComponent(RconKeybindComponent, RconRichComponent):
     """
 
 
-class RconLineBreakComponent(BaseModel):
-    """
-    Rcon Line Break Component
-    """
-
-    text = "\n"
-
-
 class RconTranslateComponent(RconStyleComponent):
     """
     Rcon Translate Component
@@ -370,7 +369,7 @@ class RconTranslateComponent(RconStyleComponent):
     with_: Optional[List[Union[
         RconRichTextComponent, RconRichSelectorComponent, RconRichScoreboardComponent,
         RconRichNBTStorageComponent, RconRichNBTEntityComponent, RconRichNBTBlockComponent,
-        RconRichKeybindComponent, RconLineBreakComponent
+        RconRichKeybindComponent
     ]]] = Field(alias="with")
 
 
