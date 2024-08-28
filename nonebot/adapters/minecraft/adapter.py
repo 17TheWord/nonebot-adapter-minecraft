@@ -9,7 +9,7 @@ from nonebot.typing import overrides
 from aiomcrcon import Client as RCONClient
 from nonebot.exception import WebSocketClosed
 from nonebot.compat import type_validate_python
-from nonebot.utils import DataclassEncoder, escape_tag
+from nonebot.utils import escape_tag
 from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
 from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
 from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
@@ -28,15 +28,19 @@ from nonebot.adapters import Adapter as BaseAdapter
 
 from . import event
 from .bot import Bot
-from .utils import log
+from .store import ResultStore
+from .utils import (
+    log,
+    handle_api_result,
+    DataclassEncoder
+)
 from .event import Event
 from .config import Config
 from .collator import Collator
 from .exception import (
-    ActionFailed,
     RCONConnectionError,
     IncorrectPasswordError,
-    ClientNotConnectedError,
+    ClientNotConnectedError, NetworkError,
 )
 
 RECONNECT_INTERVAL = 3.0
@@ -58,6 +62,8 @@ class Adapter(BaseAdapter):
             # "sub_type",
         ),
     )
+
+    _result_store = ResultStore()
 
     @overrides(BaseAdapter)
     def __init__(self, driver: Driver, **kwargs: Any):
@@ -199,19 +205,31 @@ class Adapter(BaseAdapter):
     @overrides(BaseAdapter)
     async def _call_api(self, bot: Bot, api: str, **data: Any) -> Any:
         websocket = self.connections.get(bot.self_id, None)
+        timeout: float = data.get("_timeout", self.config.api_timeout)
         log("DEBUG", f"Calling API <y>{api}</y>")
         if websocket:
             if api == "send_rcon_cmd":
                 try:
                     if bot.rcon is None:
                         raise RCONConnectionError(msg="RCON client is None")
-                    return await bot.rcon.send_cmd(data.get("command"))
+                    return await bot.rcon.send_cmd(
+                        cmd=data.get("command"),
+                        timeout=timeout
+                    )
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
                 except Exception as e:
                     raise RCONConnectionError(msg=str(e), error=e)
-            json_data = json.dumps({"api": api, "data": data}, cls=DataclassEncoder)
+            seq = self._result_store.get_seq()
+            json_data = json.dumps(
+                {"api": api, "data": data, "echo": str(seq)},
+                cls=DataclassEncoder
+            )
             await websocket.send(json_data)
+            try:
+                return handle_api_result(await self._result_store.fetch(seq, timeout))
+            except asyncio.TimeoutError:
+                raise NetworkError(f"WebSocket call api {api} timeout") from None
 
     async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
         if server := self.minecraft_config.minecraft_server_rcon.get(server_name):
@@ -358,6 +376,10 @@ class Adapter(BaseAdapter):
         """
         if not isinstance(json_data, dict):
             return None
+
+        if json_data.get("post_type") == "response":
+            cls._result_store.add_result(json_data)
+            return
 
         try:
             for model in cls.get_event_model(json_data):
