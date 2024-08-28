@@ -1,5 +1,5 @@
-from typing import Any, Tuple, Union, Optional
 from uuid import UUID
+from typing import Any, Tuple, Union, Optional
 
 from nonebot.adapters import Bot as BaseBot
 

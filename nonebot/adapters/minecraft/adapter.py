@@ -5,12 +5,11 @@ import inspect
 import contextlib
 from typing import Any, Dict, List, Type, Optional, Generator
 
-from nonebot.internal.driver import Response
 from nonebot.typing import overrides
-from nonebot.utils import escape_tag
 from aiomcrcon import Client as RCONClient
 from nonebot.exception import WebSocketClosed
-from nonebot.compat import PYDANTIC_V2, type_validate_python
+from nonebot.compat import type_validate_python
+from nonebot.utils import escape_tag
 from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
 from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
 from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
@@ -29,21 +28,19 @@ from nonebot.adapters import Adapter as BaseAdapter
 
 from . import event
 from .bot import Bot
+from .store import ResultStore
+from .utils import (
+    log,
+    handle_api_result,
+    DataclassEncoder
+)
 from .event import Event
 from .config import Config
 from .collator import Collator
-from .utils import log, get_msg
 from .exception import (
     RCONConnectionError,
     IncorrectPasswordError,
-    ClientNotConnectedError, ActionFailed,
-)
-from .model import (
-    MessageList,
-    ProtocolData,
-    SendTitleData,
-    SendTitleItem,
-    SendActionBarData, PrivateMessageData,
+    ClientNotConnectedError, NetworkError,
 )
 
 RECONNECT_INTERVAL = 3.0
@@ -65,6 +62,8 @@ class Adapter(BaseAdapter):
             # "sub_type",
         ),
     )
+
+    _result_store = ResultStore()
 
     @overrides(BaseAdapter)
     def __init__(self, driver: Driver, **kwargs: Any):
@@ -206,58 +205,31 @@ class Adapter(BaseAdapter):
     @overrides(BaseAdapter)
     async def _call_api(self, bot: Bot, api: str, **data: Any) -> Any:
         websocket = self.connections.get(bot.self_id, None)
+        timeout: float = data.get("_timeout", self.config.api_timeout)
         log("DEBUG", f"Calling API <y>{api}</y>")
         if websocket:
-            protocol_data = ProtocolData()
-            if api == "send_msg":
-                protocol_data.api = "broadcast"
-                protocol_data.data = MessageList(message_list=get_msg(**data))
-            elif api == "send_private_msg":
-                target_uuid = data.get("uuid")
-                target_nickname = data.get("nickname")
-                if not target_uuid or not target_nickname:
-                    raise ActionFailed(Response(
-                        status_code=400,
-                        content="Target player's uuid or nickname is required at least one")
-                    )
-                protocol_data.api = "send_private_message"
-                protocol_data.data = PrivateMessageData(
-                    target_uuid=target_uuid,
-                    target_nickname=target_nickname,
-                    message_list=get_msg(**data)
-                )
-            elif api == "send_title":
-                protocol_data.api = "send_title"
-                send_title_item = SendTitleItem(
-                    title=get_msg(data.get("title")),
-                    subtitle=get_msg(data.get("subtitle")) if get_msg(data.get("subtitle")) else [],
-                    fadein=data.get("fadein") if data.get("fadein") else 10,
-                    stay=data.get("stay") if data.get("stay") else 70,
-                    fadeout=data.get("fadeout") if data.get("fadeout") else 20,
-                )
-                protocol_data.data = SendTitleData(send_title=send_title_item)
-            elif api == "send_actionbar":
-                protocol_data.api = "actionbar"
-                protocol_data.data = SendActionBarData(
-                    message_list=get_msg(**data)
-                )
-            elif api == "send_rcon_cmd":
+            if api == "send_rcon_cmd":
                 try:
                     if bot.rcon is None:
                         raise RCONConnectionError(msg="RCON client is None")
-                    return await bot.rcon.send_cmd(data.get("command"))
+                    return await bot.rcon.send_cmd(
+                        cmd=data.get("command"),
+                        timeout=timeout
+                    )
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
                 except Exception as e:
                     raise RCONConnectionError(msg=str(e), error=e)
-
-            if PYDANTIC_V2:
-                json_data = protocol_data.model_dump_json()
-            else:
-                json_data = protocol_data.json()
-
+            seq = self._result_store.get_seq()
+            json_data = json.dumps(
+                {"api": api, "data": data, "echo": str(seq)},
+                cls=DataclassEncoder
+            )
             await websocket.send(json_data)
-        return
+            try:
+                return handle_api_result(await self._result_store.fetch(seq, timeout))
+            except asyncio.TimeoutError:
+                raise NetworkError(f"WebSocket call api {api} timeout") from None
 
     async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
         if server := self.minecraft_config.minecraft_server_rcon.get(server_name):
@@ -404,6 +376,10 @@ class Adapter(BaseAdapter):
         """
         if not isinstance(json_data, dict):
             return None
+
+        if json_data.get("post_type") == "response":
+            cls._result_store.add_result(json_data)
+            return
 
         try:
             for model in cls.get_event_model(json_data):
