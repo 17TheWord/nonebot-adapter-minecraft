@@ -10,7 +10,6 @@ from .model import (
     ClickEvent,
     HoverEvent,
     BaseComponent,
-    SendTitleItem,
     TextComponent,
     ChatImageModComponent,
 )
@@ -61,7 +60,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
     ):
         text_component = TextComponent(
             text=text,
-            color=color,  # todo fix
+            color=color,
             font=font,
             bold=bold,
             italic=italic,
@@ -74,72 +73,6 @@ class MessageSegment(BaseMessageSegment["Message"]):
         )
 
         return MessageSegment("text", text_component.get_dict())
-
-    @staticmethod
-    def title(
-            title: BaseComponent,
-            subtitle: Optional[BaseComponent] = None,
-            fadein: Optional[int] = 10,
-            stay: Optional[int] = 70,
-            fadeout: Optional[int] = 20,
-    ):
-        title_component = SendTitleItem(
-            title=title, subtitle=subtitle, fadein=fadein, stay=stay, fadeout=fadeout
-        )
-        return MessageSegment("title", title_component.get_dict())
-
-    @staticmethod
-    def actionbar(
-            text: Optional[str] = None,
-            color: Optional[TextColor] = None,
-            font: Optional[str] = None,
-            bold: Optional[bool] = False,
-            italic: Optional[bool] = False,
-            underlined: Optional[bool] = False,
-            strikethrough: Optional[bool] = False,
-            obfuscated: Optional[bool] = False,
-            insertion: Optional[str] = None,
-    ):
-        actionbar_component = BaseComponent(
-            text=text,
-            color=color,
-            font=font,
-            bold=bold,
-            italic=italic,
-            underlined=underlined,
-            strikethrough=strikethrough,
-            obfuscated=obfuscated,
-            insertion=insertion,
-        )
-        return MessageSegment("actionbar", actionbar_component.get_dict())
-
-    @staticmethod
-    def chat_image_mod(
-            url: str,
-            name: Optional[str] = "图片",
-            color: Optional[TextColor] = None,
-            font: Optional[str] = None,
-            bold: Optional[bool] = False,
-            italic: Optional[bool] = False,
-            underlined: Optional[bool] = False,
-            strikethrough: Optional[bool] = False,
-            obfuscated: Optional[bool] = False,
-            insertion: Optional[str] = None,
-    ):
-        chat_image_model = ChatImageModComponent(url=url, name=name)
-
-        base_component = BaseComponent(
-            text=str(chat_image_model),
-            color=color,
-            font=font,
-            bold=bold,
-            italic=italic,
-            underlined=underlined,
-            strikethrough=strikethrough,
-            obfuscated=obfuscated,
-            insertion=insertion,
-        )
-        return MessageSegment("chat_image_mod", base_component.get_dict())
 
 
 class Message(BaseMessage[MessageSegment]):
