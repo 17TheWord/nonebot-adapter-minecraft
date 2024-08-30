@@ -31,6 +31,7 @@ from .bot import Bot
 from .store import ResultStore
 from .utils import (
     log,
+    zip_dict,
     handle_api_result,
     DataclassEncoder
 )
@@ -222,7 +223,7 @@ class Adapter(BaseAdapter):
                     raise RCONConnectionError(msg=str(e), error=e)
             seq = self._result_store.get_seq()
             json_data = json.dumps(
-                {"api": api, "data": data, "echo": str(seq)},
+                {"api": api, "data": zip_dict(data), "echo": str(seq)},
                 cls=DataclassEncoder
             )
             await websocket.send(json_data)
