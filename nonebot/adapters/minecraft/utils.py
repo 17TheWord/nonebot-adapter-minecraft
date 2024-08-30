@@ -1,7 +1,10 @@
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 from uuid import UUID
+
+from nonebot.compat import PYDANTIC_V2
 from nonebot.utils import logger_wrapper, DataclassEncoder as BaseDataclassEncoder
+from pydantic import BaseModel
 
 from .exception import ActionFailed
 
@@ -17,6 +20,28 @@ class DataclassEncoder(BaseDataclassEncoder):
         elif isinstance(o, Enum):
             return o.value
         return super().default(o)
+
+
+def zip_dict(data: Union[BaseModel, Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    将字典中的空值去除
+    :param data: 字典数据
+    :return: 处理后的字典数据
+    """
+    temp_dict = {}
+    if isinstance(data, BaseModel):
+        data = data.model_dump() if PYDANTIC_V2 else data.dict()
+    else:
+        data = data.copy()
+    for k, v in data.items():
+        if v:
+            if isinstance(v, dict):
+                temp_dict[k] = zip_dict(v)
+            elif isinstance(v, list):
+                temp_dict[k] = [zip_dict(i) for i in v]
+            else:
+                temp_dict[k] = v
+    return temp_dict
 
 
 def handle_api_result(result: Optional[Dict[str, Any]]) -> Any:
