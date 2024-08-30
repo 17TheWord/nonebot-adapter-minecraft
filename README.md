@@ -21,7 +21,7 @@ _✨ Minecraft 协议适配 ✨_
 - [`Spigot`](https://www.spigotmc.org/)
 - [`Fabric`](https://fabricmc.net/)
 - [`Forge`](https://files.minecraftforge.net/)
-- [`Velocity`](https://papermc.io/software/velocity)（Demo）
+- [`Velocity`](https://papermc.io/software/velocity)
 
 ## Rcon支持
 
