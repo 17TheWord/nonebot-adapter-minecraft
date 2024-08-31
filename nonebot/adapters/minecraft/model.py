@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Any, Dict, List, Union, Optional
 
-from nonebot.compat import PYDANTIC_V2
 from pydantic import Field, BaseModel
+from nonebot.compat import PYDANTIC_V2
 
 """
 Protocol

@@ -6,10 +6,10 @@ import contextlib
 from typing import Any, Dict, List, Type, Optional, Generator
 
 from nonebot.typing import overrides
+from nonebot.utils import escape_tag
 from aiomcrcon import Client as RCONClient
 from nonebot.exception import WebSocketClosed
 from nonebot.compat import type_validate_python
-from nonebot.utils import escape_tag
 from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
 from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
 from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
@@ -28,20 +28,16 @@ from nonebot.adapters import Adapter as BaseAdapter
 
 from . import event
 from .bot import Bot
-from .store import ResultStore
-from .utils import (
-    log,
-    zip_dict,
-    handle_api_result,
-    DataclassEncoder
-)
 from .event import Event
 from .config import Config
 from .collator import Collator
+from .store import ResultStore
+from .utils import DataclassEncoder, log, zip_dict, handle_api_result
 from .exception import (
+    NetworkError,
     RCONConnectionError,
     IncorrectPasswordError,
-    ClientNotConnectedError, NetworkError,
+    ClientNotConnectedError,
 )
 
 RECONNECT_INTERVAL = 3.0
