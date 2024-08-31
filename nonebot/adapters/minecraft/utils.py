@@ -17,8 +17,6 @@ class DataclassEncoder(BaseDataclassEncoder):
     def default(self, o):
         if isinstance(o, UUID):
             return str(o)
-        elif isinstance(o, Enum):
-            return o.value
         return super().default(o)
 
 
