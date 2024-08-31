@@ -1,15 +1,15 @@
 from enum import Enum
 from typing import Any, Dict, List, Union, Optional
 
-from nonebot.compat import PYDANTIC_V2
 from pydantic import Field, BaseModel
+from nonebot.compat import PYDANTIC_V2
 
 """
 Protocol
 """
 
 
-class TextColor(Enum):
+class TextColor(str, Enum):
     """
     颜色枚举
     """
@@ -31,11 +31,8 @@ class TextColor(Enum):
     YELLOW = "yellow"
     WHITE = "white"
 
-    def __str__(self):
-        return self.value
 
-
-class FontEnum(Enum):
+class FontEnum(str, Enum):
     """
     字体枚举
     """
@@ -43,9 +40,6 @@ class FontEnum(Enum):
     DEFAULT = "minecraft:default"
 
     # TODO Add more fonts
-
-    def __str__(self):
-        return self.value
 
 
 class BaseComponent(BaseModel):
@@ -77,7 +71,7 @@ class BaseComponent(BaseModel):
             return self.dict()
 
 
-class ClickAction(Enum):
+class ClickAction(str, Enum):
     """
     点击事件枚举
     """
@@ -89,9 +83,6 @@ class ClickAction(Enum):
     CHANGE_PAGE = "change_page"  # 仅用于书翻页
     COPY_TO_CLIPBOARD = "copy_to_clipboard"
 
-    def __str__(self):
-        return self.value
-
 
 class ClickEvent(BaseModel):
     """
@@ -102,7 +93,7 @@ class ClickEvent(BaseModel):
     value: Optional[str] = None
 
 
-class HoverAction(Enum):
+class HoverAction(str, Enum):
     """
     悬停事件枚举
     """
@@ -110,9 +101,6 @@ class HoverAction(Enum):
     SHOW_TEXT = "show_text"
     SHOW_ITEM = "show_item"
     SHOW_ENTITY = "show_entity"
-
-    def __str__(self):
-        return self.value
 
 
 class HoverItem(BaseModel):
@@ -194,15 +182,12 @@ Rcon
 """
 
 
-class RconFontEnum(Enum):
+class RconFontEnum(str, Enum):
     """
     Rcon FontEnum
     """
 
     DEFAULT = "minecraft:default"
-
-    def __str__(self):
-        return self.value
 
 
 class RconClickEvent(ClickEvent):

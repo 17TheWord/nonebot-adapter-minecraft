@@ -1,10 +1,10 @@
-from enum import Enum
-from typing import Any, Dict, Optional, Union
 from uuid import UUID
+from typing import Any, Dict, Union, Optional
 
-from nonebot.compat import PYDANTIC_V2
-from nonebot.utils import logger_wrapper, DataclassEncoder as BaseDataclassEncoder
 from pydantic import BaseModel
+from nonebot.compat import PYDANTIC_V2
+from nonebot.utils import logger_wrapper
+from nonebot.utils import DataclassEncoder as BaseDataclassEncoder
 
 from .exception import ActionFailed
 
@@ -17,8 +17,6 @@ class DataclassEncoder(BaseDataclassEncoder):
     def default(self, o):
         if isinstance(o, UUID):
             return str(o)
-        elif isinstance(o, Enum):
-            return o.value
         return super().default(o)
 
 

@@ -21,11 +21,11 @@ _✨ Minecraft 协议适配 ✨_
 - [`Spigot`](https://www.spigotmc.org/)
 - [`Fabric`](https://fabricmc.net/)
 - [`Forge`](https://files.minecraftforge.net/)
-- [`Velocity`](https://papermc.io/software/velocity)（Demo）
+- [`Velocity`](https://papermc.io/software/velocity)
 
 ## Rcon支持
 
-对于命令采用 `rcon` 发送，`rcon` 库为 `aio-mc-rcon`
+对于命令采用 `rcon` 发送，`rcon` 库为 [`aio-mc-rcon`](https://github.com/Iapetus-11/aio-mc-rcon)
 
 ## 其他
 

@@ -65,7 +65,6 @@ class BasePlayer(BaseModel):
     if PYDANTIC_V2:
         model_config = ConfigDict(extra="allow")
     else:
-
         class Config(ConfigDict):
             extra = "allow"
 
