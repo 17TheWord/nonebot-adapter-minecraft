@@ -18,6 +18,7 @@ _✨ Minecraft 协议适配 ✨_
 
 > 服务器端插件/Mod下载：[`鹊桥`](https://github.com/17TheWord/QueQiao)
 
+- [`原版端`](https://www.minecraft.net/zh-hans/download/server)
 - [`Spigot`](https://www.spigotmc.org/)
 - [`Fabric`](https://fabricmc.net/)
 - [`Forge`](https://files.minecraftforge.net/)
@@ -38,7 +39,7 @@ _✨ Minecraft 协议适配 ✨_
 
 ## 贡献与支持
 
-觉得好用可以给这个项目点个 `Star` 或者去 [爱发电](https://afdian.net/a/17TheWord) 投喂我。
+觉得好用可以给这个项目点个 `Star` 或者去 [爱发电](https://afdian.com/a/17TheWord) 投喂我。
 
 有意见或者建议也欢迎提交 [Issues](https://github.com/17TheWord/nonebot-adapter-minecraft/issues)
 和 [Pull requests](https://github.com/17TheWord/nonebot-adapter-minecraft/pulls) 。
