@@ -12,7 +12,7 @@ _✨ Minecraft 协议适配 ✨_
 
 ## 使用
 
-前往还未装修的 [Wiki](https://github.com/17TheWord/nonebot-adapter-spigot/wiki)
+前往 [Wiki](https://github.com/17TheWord/nonebot-adapter-spigot/wiki)
 
 ## 服务端支持
 
