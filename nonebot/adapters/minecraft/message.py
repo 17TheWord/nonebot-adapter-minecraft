@@ -11,7 +11,6 @@ from .model import (
     HoverEvent,
     BaseComponent,
     TextComponent,
-    ChatImageModComponent,
 )
 
 
