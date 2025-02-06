@@ -275,19 +275,13 @@ class Adapter(BaseAdapter):
             await websocket.close(1008, "Missing X-Self-Name Header")
             return
 
+        if client_origin := websocket.request.headers.get("x-client-origin"):
+            if client_origin == "nonebot":
+                log("WARNING", "X-Client-Origin Header cannot be nonebot")
+                await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
+                return
+
         self_id = urllib.parse.unquote_plus(ori_self_id)
-
-        if client_origin := websocket.request.headers.get("x-client-origin"):
-            if client_origin == "nonebot":
-                log("WARNING", "X-Client-Origin Header cannot be nonebot")
-                await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
-                return
-
-        if client_origin := websocket.request.headers.get("x-client-origin"):
-            if client_origin == "nonebot":
-                log("WARNING", "X-Client-Origin Header cannot be nonebot")
-                await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
-                return
 
         if self.minecraft_config.minecraft_access_token:
             access_token = websocket.request.headers.get("Authorization")
