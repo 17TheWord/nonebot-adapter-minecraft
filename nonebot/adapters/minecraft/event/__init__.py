@@ -37,4 +37,5 @@ from .base import (
     BaseJoinEvent,
     BaseQuitEvent,
     BaseDeathEvent,
+    BasePlayerCommandEvent,
 )
