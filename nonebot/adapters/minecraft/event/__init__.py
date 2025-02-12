@@ -28,6 +28,14 @@ from .fabric import (
 from .fabric import (
     ServerPlayConnectionDisconnectEvent as FabricServerPlayConnectionDisconnectEvent,
 )
+from .neoforge import (
+    ServerChatEvent as NeoForgeServerChatEvent,
+    PlayerCommandEvent as NeoForgePlayerCommandEvent,
+    PlayerDeathEvent as NeoForgePlayerDeathEvent,
+    PlayerLoggedInEvent as NeoForgePlayerLoggedInEvent,
+    PlayerLoggedOutEvent as NeoForgePlayerLoggedOutEvent,
+    Player as NeoForgePlayer,
+)
 from .base import (
     Event,
     BasePlayer,
