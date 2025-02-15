@@ -17,6 +17,8 @@ class Event(BaseEvent):
     post_type: str
     event_name: str
     server_name: str
+    server_version: str
+    server_type: str
     sub_type: str
 
     @overrides(BaseEvent)
