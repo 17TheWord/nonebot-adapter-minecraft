@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-adapter-minecraft"
-version = "1.3.3"
+version = "1.4.0"
 description = "NoneBot2与MineCraft Server互通的适配器。"
 authors = ["17TheWord <17theword@gmail.com>"]
 license = "MIT"
@@ -23,7 +23,7 @@ pytest-asyncio = "^0.23.0"
 nonebot2 = { version = "^2.2.0", extras = ["fastapi"] }
 
 [tool.pytest.ini_options]
-addopts = "--cov=nonebot/adapters/onebot --cov-report term-missing"
+addopts = "--cov=nonebot/adapters/minecraft --cov-report term-missing"
 
 [tool.isort]
 profile = "black"

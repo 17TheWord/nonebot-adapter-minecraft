@@ -12,17 +12,18 @@ _✨ Minecraft 协议适配 ✨_
 
 ## 使用
 
-前往 [Wiki](https://github.com/17TheWord/nonebot-adapter-spigot/wiki)
+前往 [Wiki](https://github.com/17TheWord/nonebot-adapter-minecraft/wiki)
 
 ## 服务端支持
-
-> 服务器端插件/Mod下载：[`鹊桥`](https://github.com/17TheWord/QueQiao)
 
 - [`原版端`](https://www.minecraft.net/zh-hans/download/server)
 - [`Spigot`](https://www.spigotmc.org/)
 - [`Fabric`](https://fabricmc.net/)
 - [`Forge`](https://files.minecraftforge.net/)
+- [`NeoForge`](https://neoforged.net/)
 - [`Velocity`](https://papermc.io/software/velocity)
+
+服务器端插件/Mod下载：[`鹊桥`](https://github.com/17TheWord/QueQiao)
 
 ## Rcon支持
 
@@ -43,6 +44,10 @@ _✨ Minecraft 协议适配 ✨_
 
 有意见或者建议也欢迎提交 [Issues](https://github.com/17TheWord/nonebot-adapter-minecraft/issues)
 和 [Pull requests](https://github.com/17TheWord/nonebot-adapter-minecraft/pulls) 。
+
+## 星星
+
+[![Stargazers over time](https://starchart.cc/17TheWord/nonebot-adapter-minecraft.svg?variant=adaptive)](https://starchart.cc/17TheWord/nonebot-adapter-minecraft)
 
 ## 开源许可
 
