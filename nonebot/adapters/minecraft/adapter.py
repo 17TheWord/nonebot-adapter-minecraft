@@ -127,8 +127,9 @@ class Adapter(BaseAdapter):
         await asyncio.gather(*self.tasks, return_exceptions=True)
 
     async def _forward_ws(self, server_name: str, url: URL) -> None:
+        assert url.host is not None
         headers = {
-            "x-self-name": urllib.parse.quote_plus(server_name),
+            "x-self-name": urllib.parse.quote_plus(server_name), # type: ignore
             "x-client-origin": "nonebot",
         }
         if self.minecraft_config.minecraft_access_token:
@@ -149,7 +150,7 @@ class Adapter(BaseAdapter):
                     # 连接 Rcon
                     rcon = await self._connect_rcon(server_name, url.host)
                     if not bot:
-                        bot = Bot(self, server_name, rcon)
+                        bot = Bot(self, server_name, rcon) # type: ignore
                         self.bot_connect(bot)
                         self.connections[server_name] = ws
                         log(
@@ -209,7 +210,7 @@ class Adapter(BaseAdapter):
                 try:
                     if bot.rcon is None:
                         raise RCONConnectionError(msg="RCON client is None")
-                    return await bot.rcon.send_cmd(
+                    return await bot.rcon.send_cmd( # type: ignore
                         cmd=data.get("command"),
                         timeout=timeout
                     )
@@ -230,6 +231,7 @@ class Adapter(BaseAdapter):
 
     async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
         if server := self.minecraft_config.minecraft_server_rcon.get(server_name):
+            server_host = server.rcon_host or server_host
             rcon = RCONClient(
                 server_host,
                 server.rcon_port,
@@ -281,7 +283,7 @@ class Adapter(BaseAdapter):
                 await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
                 return
 
-        self_id = urllib.parse.unquote_plus(ori_self_id)
+        self_id = urllib.parse.unquote_plus(ori_self_id) # type: ignore
 
         if self.minecraft_config.minecraft_access_token:
             access_token = websocket.request.headers.get("Authorization")
@@ -304,7 +306,7 @@ class Adapter(BaseAdapter):
 
         rcon = await self._connect_rcon(self_id, websocket.__dict__["websocket"].__dict__["scope"]["client"][0])
 
-        bot = Bot(self, self_id, rcon)
+        bot = Bot(self, self_id, rcon) # type: ignore
         self.connections[self_id] = websocket
         self.bot_connect(bot)
 

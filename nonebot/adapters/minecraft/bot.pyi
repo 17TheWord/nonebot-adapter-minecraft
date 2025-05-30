@@ -21,7 +21,7 @@ class Bot(BaseBot):
         self,
         uuid: Optional[UUID] = None,
         nickname: Optional[str] = None,
-        message: Union[str, Message, MessageSegment] = None,
+        message: Optional[Union[str, Message, MessageSegment]] = None,
         **kwargs,
     ) -> Any: ...
     async def send_msg(self, message: Union[str, Message, MessageSegment]) -> Any: ...
