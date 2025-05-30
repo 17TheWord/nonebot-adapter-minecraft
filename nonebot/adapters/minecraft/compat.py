@@ -21,4 +21,4 @@ else:
 
 
     def model_validator(*, mode: Literal["before", "after"]):
-        return root_validator(pre=mode == "before", allow_reuse=True)
+        return root_validator(pre=mode == "before", allow_reuse=True) # type: ignore

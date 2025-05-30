@@ -13,7 +13,7 @@ from .event import NoticeEvent, MessageEvent
 
 
 async def _is_op(event: Union[MessageEvent, NoticeEvent]) -> bool:
-    return event.player.is_op
+    return bool(event.player.is_op)
 
 
 OP: Permission = Permission(_is_op)

@@ -9,7 +9,6 @@ from .model import (
     TextColor,
     ClickEvent,
     HoverEvent,
-    BaseComponent,
     TextComponent,
 )
 
