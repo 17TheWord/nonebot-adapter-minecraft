@@ -124,7 +124,10 @@ class Adapter(BaseAdapter):
             if not task.done():
                 task.cancel()
 
-        await asyncio.gather(*self.tasks, return_exceptions=True)
+        await asyncio.gather(
+            *(asyncio.wait_for(task, timeout=10) for task in self.tasks),
+            return_exceptions=True,
+        )
 
     async def _forward_ws(self, server_name: str, url: URL) -> None:
         assert url.host is not None
