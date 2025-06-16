@@ -153,7 +153,7 @@ class Adapter(BaseAdapter):
                     # 连接 Rcon
                     rcon = await self._connect_rcon(server_name, url.host)
                     if not bot:
-                        bot = Bot(self, server_name, rcon) # type: ignore
+                        bot = Bot(self, server_name, rcon)
                         self.bot_connect(bot)
                         self.connections[server_name] = ws
                         log(
@@ -213,8 +213,11 @@ class Adapter(BaseAdapter):
                 try:
                     if bot.rcon is None:
                         raise RCONConnectionError(msg="RCON client is None")
-                    return await bot.rcon.send_cmd( # type: ignore
-                        cmd=data.get("command"),
+                    command = data.get("command")
+                    if not isinstance(command, str):
+                        raise RCONConnectionError(msg="Command must be a string")
+                    return await bot.rcon.send_cmd(
+                        cmd=command,
                         timeout=timeout
                     )
                 except BaseClientNotConnectedError:

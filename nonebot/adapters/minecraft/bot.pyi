@@ -1,10 +1,14 @@
 from uuid import UUID
-from typing import Any, Tuple, Union, Optional
+from typing import Any, Tuple, Union, Optional, Callable, TYPE_CHECKING
 
 from nonebot.adapters import Bot as BaseBot
+from aiomcrcon import Client
 
 from .event import Event, MessageEvent
 from .message import Message, MessageSegment
+
+if TYPE_CHECKING:
+    from nonebot.internal.adapter import Adapter
 
 def _check_nickname(bot: Bot, event: MessageEvent): ...
 async def send(
@@ -12,6 +16,8 @@ async def send(
 ) -> Any: ...
 
 class Bot(BaseBot):
+
+    def __init__(self, adapter: "Adapter", self_id: str, rcon: Optional[Client] = None) -> None: ...
     async def call_api(self, api: str, **data: Any) -> Any: ...
     async def handle_event(self, event: Event) -> None: ...
     async def send(
