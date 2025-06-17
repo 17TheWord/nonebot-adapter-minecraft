@@ -77,13 +77,11 @@ __all__ = [
     "BaseQuitEvent",
     "BaseDeathEvent",
     "BasePlayerCommandEvent",
-    
     # Minecraft
     "MinecraftPlayer",
     "MinecraftPlayerChatEvent",
     "MinecraftPlayerJoinEvent",
     "MinecraftPlayerQuitEvent",
-    
     # Forge
     "ForgePlayer",
     "ForgeServerChatEvent",
@@ -91,7 +89,6 @@ __all__ = [
     "ForgePlayerCommandEvent",
     "ForgePlayerLoggedInEvent",
     "ForgePlayerLoggedOutEvent",
-    
     # Fabric
     "FabricPlayer",
     "FabricServerMessageEvent",
@@ -99,7 +96,6 @@ __all__ = [
     "FabricServerPlayConnectionJoinEvent",
     "FabricServerPlayConnectionDisconnectEvent",
     "FabricServerLivingEntityAfterDeathEvent",
-    
     # Spigot
     "SpigotPlayer",
     "SpigotPlayerJoinEvent",
@@ -107,13 +103,11 @@ __all__ = [
     "SpigotPlayerDeathEvent",
     "SpigotAsyncPlayerChatEvent",
     "SpigotPlayerCommandPreprocessEvent",
-    
     # Velocity
     "VelocityLoginEvent",
     "VelocityDisconnectEvent",
     "VelocityPlayerChatEvent",
     "VelocityCommandExecuteEvent",
-    
     # NeoForge
     "NeoForgePlayer",
     "NeoForgeServerChatEvent",

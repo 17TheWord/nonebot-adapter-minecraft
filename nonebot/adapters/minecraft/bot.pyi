@@ -7,8 +7,7 @@ from aiomcrcon import Client
 from .event import Event, MessageEvent
 from .message import Message, MessageSegment
 
-if TYPE_CHECKING:
-    from nonebot.internal.adapter import Adapter
+from nonebot.internal.adapter import Adapter
 
 def _check_nickname(bot: Bot, event: MessageEvent): ...
 async def send(
