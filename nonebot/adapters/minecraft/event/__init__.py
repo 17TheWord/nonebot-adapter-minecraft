@@ -1,118 +1,170 @@
 from .base import (
-    Event,
-    BasePlayer,
-    NoticeEvent,
-    MessageEvent,
     BaseChatEvent,
-    BaseJoinEvent,
-    BaseQuitEvent,
     BaseDeathEvent,
+    BaseJoinEvent,
+    BasePlayer,
     BasePlayerCommandEvent,
-)
-
-# 原版事件
-from .minecraft import (
-    Player as MinecraftPlayer,
-    PlayerChatEvent as MinecraftPlayerChatEvent,
-    PlayerJoinEvent as MinecraftPlayerJoinEvent,
-    PlayerQuitEvent as MinecraftPlayerQuitEvent,
-)
-
-# Forge 事件
-from .forge import (
-    Player as ForgePlayer,
-    ServerChatEvent as ForgeServerChatEvent,
-    PlayerDeathEvent as ForgePlayerDeathEvent,
-    PlayerCommandEvent as ForgePlayerCommandEvent,
-    PlayerLoggedInEvent as ForgePlayerLoggedInEvent,
-    PlayerLoggedOutEvent as ForgePlayerLoggedOutEvent,
+    BaseQuitEvent,
+    Event,
+    MessageEvent,
+    NoticeEvent,
 )
 
 # Fabric 事件
 from .fabric import (
     Player as FabricPlayer,
-    ServerMessageEvent as FabricServerMessageEvent,
+)
+from .fabric import (
     ServerCommandMessageEvent as FabricServerCommandMessageEvent,
-    ServerPlayConnectionJoinEvent as FabricServerPlayConnectionJoinEvent,
-    ServerPlayConnectionDisconnectEvent as FabricServerPlayConnectionDisconnectEvent,
+)
+from .fabric import (
     ServerLivingEntityAfterDeathEvent as FabricServerLivingEntityAfterDeathEvent,
 )
-
-# Spigot 事件
-from .spigot import (
-    Player as SpigotPlayer,
-    PlayerJoinEvent as SpigotPlayerJoinEvent,
-    PlayerQuitEvent as SpigotPlayerQuitEvent,
-    PlayerDeathEvent as SpigotPlayerDeathEvent,
-    AsyncPlayerChatEvent as SpigotAsyncPlayerChatEvent,
-    PlayerCommandPreprocessEvent as SpigotPlayerCommandPreprocessEvent,
+from .fabric import (
+    ServerMessageEvent as FabricServerMessageEvent,
+)
+from .fabric import (
+    ServerPlayConnectionDisconnectEvent as FabricServerPlayConnectionDisconnectEvent,
+)
+from .fabric import (
+    ServerPlayConnectionJoinEvent as FabricServerPlayConnectionJoinEvent,
 )
 
-# Velocity 事件
-from .velocity import (
-    LoginEvent as VelocityLoginEvent,
-    DisconnectEvent as VelocityDisconnectEvent,
-    PlayerChatEvent as VelocityPlayerChatEvent,
-    CommandExecuteEvent as VelocityCommandExecuteEvent,
+# Forge 事件
+from .forge import (
+    Player as ForgePlayer,
+)
+from .forge import (
+    PlayerCommandEvent as ForgePlayerCommandEvent,
+)
+from .forge import (
+    PlayerDeathEvent as ForgePlayerDeathEvent,
+)
+from .forge import (
+    PlayerLoggedInEvent as ForgePlayerLoggedInEvent,
+)
+from .forge import (
+    PlayerLoggedOutEvent as ForgePlayerLoggedOutEvent,
+)
+from .forge import (
+    ServerChatEvent as ForgeServerChatEvent,
+)
+
+# 原版事件
+from .minecraft import (
+    Player as MinecraftPlayer,
+)
+from .minecraft import (
+    PlayerChatEvent as MinecraftPlayerChatEvent,
+)
+from .minecraft import (
+    PlayerJoinEvent as MinecraftPlayerJoinEvent,
+)
+from .minecraft import (
+    PlayerQuitEvent as MinecraftPlayerQuitEvent,
 )
 
 # NeoForge 事件
 from .neoforge import (
     Player as NeoForgePlayer,
-    ServerChatEvent as NeoForgeServerChatEvent,
+)
+from .neoforge import (
     PlayerCommandEvent as NeoForgePlayerCommandEvent,
+)
+from .neoforge import (
     PlayerDeathEvent as NeoForgePlayerDeathEvent,
+)
+from .neoforge import (
     PlayerLoggedInEvent as NeoForgePlayerLoggedInEvent,
+)
+from .neoforge import (
     PlayerLoggedOutEvent as NeoForgePlayerLoggedOutEvent,
+)
+from .neoforge import (
+    ServerChatEvent as NeoForgeServerChatEvent,
+)
+from .spigot import (
+    AsyncPlayerChatEvent as SpigotAsyncPlayerChatEvent,
+)
+
+# Spigot 事件
+from .spigot import (
+    Player as SpigotPlayer,
+)
+from .spigot import (
+    PlayerCommandPreprocessEvent as SpigotPlayerCommandPreprocessEvent,
+)
+from .spigot import (
+    PlayerDeathEvent as SpigotPlayerDeathEvent,
+)
+from .spigot import (
+    PlayerJoinEvent as SpigotPlayerJoinEvent,
+)
+from .spigot import (
+    PlayerQuitEvent as SpigotPlayerQuitEvent,
+)
+from .velocity import (
+    CommandExecuteEvent as VelocityCommandExecuteEvent,
+)
+from .velocity import (
+    DisconnectEvent as VelocityDisconnectEvent,
+)
+
+# Velocity 事件
+from .velocity import (
+    LoginEvent as VelocityLoginEvent,
+)
+from .velocity import (
+    PlayerChatEvent as VelocityPlayerChatEvent,
 )
 
 __all__ = [
+    "BaseChatEvent",
+    "BaseDeathEvent",
+    "BaseJoinEvent",
+    "BasePlayer",
+    "BasePlayerCommandEvent",
+    "BaseQuitEvent",
     # Base
     "Event",
-    "BasePlayer",
-    "NoticeEvent",
+    # Fabric
+    "FabricPlayer",
+    "FabricServerCommandMessageEvent",
+    "FabricServerLivingEntityAfterDeathEvent",
+    "FabricServerMessageEvent",
+    "FabricServerPlayConnectionDisconnectEvent",
+    "FabricServerPlayConnectionJoinEvent",
+    # Forge
+    "ForgePlayer",
+    "ForgePlayerCommandEvent",
+    "ForgePlayerDeathEvent",
+    "ForgePlayerLoggedInEvent",
+    "ForgePlayerLoggedOutEvent",
+    "ForgeServerChatEvent",
     "MessageEvent",
-    "BaseChatEvent",
-    "BaseJoinEvent",
-    "BaseQuitEvent",
-    "BaseDeathEvent",
-    "BasePlayerCommandEvent",
     # Minecraft
     "MinecraftPlayer",
     "MinecraftPlayerChatEvent",
     "MinecraftPlayerJoinEvent",
     "MinecraftPlayerQuitEvent",
-    # Forge
-    "ForgePlayer",
-    "ForgeServerChatEvent",
-    "ForgePlayerDeathEvent",
-    "ForgePlayerCommandEvent",
-    "ForgePlayerLoggedInEvent",
-    "ForgePlayerLoggedOutEvent",
-    # Fabric
-    "FabricPlayer",
-    "FabricServerMessageEvent",
-    "FabricServerCommandMessageEvent",
-    "FabricServerPlayConnectionJoinEvent",
-    "FabricServerPlayConnectionDisconnectEvent",
-    "FabricServerLivingEntityAfterDeathEvent",
-    # Spigot
-    "SpigotPlayer",
-    "SpigotPlayerJoinEvent",
-    "SpigotPlayerQuitEvent",
-    "SpigotPlayerDeathEvent",
-    "SpigotAsyncPlayerChatEvent",
-    "SpigotPlayerCommandPreprocessEvent",
-    # Velocity
-    "VelocityLoginEvent",
-    "VelocityDisconnectEvent",
-    "VelocityPlayerChatEvent",
-    "VelocityCommandExecuteEvent",
     # NeoForge
     "NeoForgePlayer",
-    "NeoForgeServerChatEvent",
     "NeoForgePlayerCommandEvent",
     "NeoForgePlayerDeathEvent",
     "NeoForgePlayerLoggedInEvent",
     "NeoForgePlayerLoggedOutEvent",
+    "NeoForgeServerChatEvent",
+    "NoticeEvent",
+    "SpigotAsyncPlayerChatEvent",
+    # Spigot
+    "SpigotPlayer",
+    "SpigotPlayerCommandPreprocessEvent",
+    "SpigotPlayerDeathEvent",
+    "SpigotPlayerJoinEvent",
+    "SpigotPlayerQuitEvent",
+    "VelocityCommandExecuteEvent",
+    "VelocityDisconnectEvent",
+    # Velocity
+    "VelocityLoginEvent",
+    "VelocityPlayerChatEvent",
 ]

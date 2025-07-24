@@ -1,47 +1,48 @@
-import json
-import urllib
 import asyncio
-import inspect
+from collections.abc import Generator
 import contextlib
-from typing import Any, Dict, List, Type, Optional, Generator
+import inspect
+import json
+from typing import Any, Optional
+import urllib
 
-from nonebot.typing import overrides
-from nonebot.utils import escape_tag
 from aiomcrcon import Client as RCONClient
-from nonebot.exception import WebSocketClosed
-from nonebot.compat import type_validate_python
-from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
-from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
 from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
+from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
+from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
+
+from nonebot import get_plugin_config
+from nonebot.adapters import Adapter as BaseAdapter
+from nonebot.compat import type_validate_python
 from nonebot.drivers import (
     URL,
+    ASGIMixin,
     Driver,
     Request,
-    ASGIMixin,
     WebSocket,
     WebSocketClientMixin,
     WebSocketServerSetup,
 )
-
-from nonebot import get_plugin_config
-from nonebot.adapters import Adapter as BaseAdapter
+from nonebot.exception import WebSocketClosed
+from nonebot.typing import overrides
+from nonebot.utils import escape_tag
 
 from . import event
 from .bot import Bot
-from .event import Event
-from .config import Config
 from .collator import Collator
-from .store import ResultStore
-from .utils import DataclassEncoder, log, zip_dict, handle_api_result
+from .config import Config
+from .event import Event
 from .exception import (
+    ClientNotConnectedError,
+    IncorrectPasswordError,
     NetworkError,
     RCONConnectionError,
-    IncorrectPasswordError,
-    ClientNotConnectedError,
 )
+from .store import ResultStore
+from .utils import DataclassEncoder, handle_api_result, log, zip_dict
 
 RECONNECT_INTERVAL = 3.0
-DEFAULT_MODELS: List[Type[Event]] = []
+DEFAULT_MODELS: list[type[Event]] = []
 for model_name in dir(event):
     model = getattr(event, model_name)
     if not inspect.isclass(model) or not issubclass(model, Event):
@@ -66,8 +67,8 @@ class Adapter(BaseAdapter):
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
         self.minecraft_config: Config = get_plugin_config(Config)
-        self.connections: Dict[str, WebSocket] = {}
-        self.tasks: List["asyncio.Task"] = []
+        self.connections: dict[str, WebSocket] = {}
+        self.tasks: list["asyncio.Task"] = []
         self._setup()
 
     @classmethod
@@ -77,27 +78,18 @@ class Adapter(BaseAdapter):
 
     def _setup(self) -> None:
         if isinstance(self.driver, ASGIMixin):
-            ws_setup = WebSocketServerSetup(
-                URL("/minecraft/"), f"{self.get_name()} WS", self._handle_ws
-            )
+            ws_setup = WebSocketServerSetup(URL("/minecraft/"), f"{self.get_name()} WS", self._handle_ws)
             self.setup_websocket_server(ws_setup)
-            ws_setup = WebSocketServerSetup(
-                URL("/minecraft/ws"), f"{self.get_name()} WS", self._handle_ws
-            )
+            ws_setup = WebSocketServerSetup(URL("/minecraft/ws"), f"{self.get_name()} WS", self._handle_ws)
             self.setup_websocket_server(ws_setup)
-            ws_setup = WebSocketServerSetup(
-                URL("/minecraft/ws/"), f"{self.get_name()} WS", self._handle_ws
-            )
+            ws_setup = WebSocketServerSetup(URL("/minecraft/ws/"), f"{self.get_name()} WS", self._handle_ws)
             self.setup_websocket_server(ws_setup)
 
         if self.minecraft_config.minecraft_ws_urls:
             if not isinstance(self.driver, WebSocketClientMixin):
                 log(
                     "WARNING",
-                    (
-                        f"Current driver {self.config.driver} does not support "
-                        "websocket client connections! Ignored"
-                    ),
+                    (f"Current driver {self.config.driver} does not support websocket client connections! Ignored"),
                 )
             else:
                 self.on_ready(self._start_forward)
@@ -108,9 +100,7 @@ class Adapter(BaseAdapter):
             for url in self.minecraft_config.minecraft_ws_urls[server_name]:
                 try:
                     ws_url = URL(url)
-                    self.tasks.append(
-                        asyncio.create_task(self._forward_ws(server_name, ws_url))
-                    )
+                    self.tasks.append(asyncio.create_task(self._forward_ws(server_name, ws_url)))
                 except Exception as e:
                     log(
                         "ERROR",
@@ -132,13 +122,11 @@ class Adapter(BaseAdapter):
     async def _forward_ws(self, server_name: str, url: URL) -> None:
         assert url.host is not None
         headers = {
-            "x-self-name": urllib.parse.quote_plus(server_name), # type: ignore
+            "x-self-name": urllib.parse.quote_plus(server_name),  # type: ignore
             "x-client-origin": "nonebot",
         }
         if self.minecraft_config.minecraft_access_token:
-            headers["Authorization"] = (
-                f"Bearer {self.minecraft_config.minecraft_access_token}"
-            )
+            headers["Authorization"] = f"Bearer {self.minecraft_config.minecraft_access_token}"
         request = Request("GET", url, headers=headers, timeout=30.0)
 
         bot: Optional[Bot] = None
@@ -216,19 +204,13 @@ class Adapter(BaseAdapter):
                     command = data.get("command")
                     if not isinstance(command, str):
                         raise RCONConnectionError(msg="Command must be a string")
-                    return await bot.rcon.send_cmd(
-                        cmd=command,
-                        timeout=timeout
-                    )
+                    return await bot.rcon.send_cmd(cmd=command, timeout=timeout)
                 except BaseClientNotConnectedError:
                     raise ClientNotConnectedError()
                 except Exception as e:
                     raise RCONConnectionError(msg=str(e), error=e)
             seq = self._result_store.get_seq()
-            json_data = json.dumps(
-                {"api": api, "data": zip_dict(data), "echo": str(seq)},
-                cls=DataclassEncoder
-            )
+            json_data = json.dumps({"api": api, "data": zip_dict(data), "echo": str(seq)}, cls=DataclassEncoder)
             await websocket.send(json_data)
             try:
                 return handle_api_result(await self._result_store.fetch(seq, timeout))
@@ -289,7 +271,7 @@ class Adapter(BaseAdapter):
                 await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
                 return
 
-        self_id = urllib.parse.unquote_plus(ori_self_id) # type: ignore
+        self_id = urllib.parse.unquote_plus(ori_self_id)  # type: ignore
 
         if self.minecraft_config.minecraft_access_token:
             access_token = websocket.request.headers.get("Authorization")
@@ -312,7 +294,7 @@ class Adapter(BaseAdapter):
 
         rcon = await self._connect_rcon(self_id, websocket.__dict__["websocket"].__dict__["scope"]["client"][0])
 
-        bot = Bot(self, self_id, rcon) # type: ignore
+        bot = Bot(self, self_id, rcon)  # type: ignore
         self.connections[self_id] = websocket
         self.bot_connect(bot)
 
@@ -343,7 +325,7 @@ class Adapter(BaseAdapter):
             self.bot_disconnect(bot)
 
     @classmethod
-    def add_custom_model(cls, *model: Type[Event]) -> None:
+    def add_custom_model(cls, *model: type[Event]) -> None:
         """插入或覆盖一个自定义的 Event 类型。
 
         参数:
@@ -352,16 +334,12 @@ class Adapter(BaseAdapter):
         cls.event_models.add_model(*model)
 
     @classmethod
-    def get_event_model(
-            cls, data: Dict[str, Any]
-    ) -> Generator[Type[Event], None, None]:
+    def get_event_model(cls, data: dict[str, Any]) -> Generator[type[Event], None, None]:
         """根据事件获取对应 `Event Model` 及 `FallBack Event Model` 列表。"""
         yield from cls.event_models.get_model(data)
 
     @classmethod
-    def json_to_event(
-            cls, json_data: Any, self_id: Optional[str] = None
-    ) -> Optional[Event]:
+    def json_to_event(cls, json_data: Any, self_id: Optional[str] = None) -> Optional[Event]:
         """将 json 数据转换为 Event 对象。
 
         如果为 API 调用返回数据且提供了 Event 对应 Bot，则将数据存入 ResultStore。
@@ -394,7 +372,6 @@ class Adapter(BaseAdapter):
         except Exception as e:
             log(
                 "ERROR",
-                "<r><bg #f8bbd0>Failed to parse event. "
-                f"Raw: {escape_tag(str(json_data))}</bg #f8bbd0></r>",
+                f"<r><bg #f8bbd0>Failed to parse event. Raw: {escape_tag(str(json_data))}</bg #f8bbd0></r>",
                 e,
             )

@@ -1,7 +1,8 @@
 from enum import Enum
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Optional, Union
 
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
+
 from nonebot.compat import PYDANTIC_V2
 
 """
@@ -55,7 +56,7 @@ class BaseComponent(BaseModel):
     underlined: Optional[bool] = None
     strikethrough: Optional[bool] = None
     obfuscated: Optional[bool] = None
-    insertion: Optional[Union[str, Dict[str, Any]]] = None
+    insertion: Optional[Union[str, dict[str, Any]]] = None
 
     def __str__(self):
         """
@@ -127,7 +128,7 @@ class HoverEntity(BaseModel):
     """Spigot, Forge, Fabric"""
     id: Optional[str] = None
     """Spigot"""
-    name: Optional[List[BaseComponent]] = None
+    name: Optional[list[BaseComponent]] = None
     """Spigot, Forge, Fabric"""
     key: Optional[str] = None
     """Velocity"""
@@ -139,7 +140,7 @@ class HoverEvent(BaseModel):
     """
 
     action: Optional[Union[HoverAction, str]] = None
-    text: Optional[List[BaseComponent]] = None
+    text: Optional[list[BaseComponent]] = None
     item: Optional[HoverItem] = None
     entity: Optional[HoverEntity] = None
 
@@ -170,8 +171,8 @@ class TitleItem(BaseModel):
     SendTitle 消息体
     """
 
-    title: Optional[List[BaseComponent]] = None
-    subtitle: Optional[List[BaseComponent]] = None
+    title: Optional[list[BaseComponent]] = None
+    subtitle: Optional[list[BaseComponent]] = None
     fadein: Optional[int] = None
     stay: Optional[int] = None
     fadeout: Optional[int] = None
@@ -202,7 +203,7 @@ class RconHoverEvent(BaseModel):
     """
 
     action: Optional[HoverAction] = None
-    contents: Optional[Union[List[BaseComponent], str, Dict[str, Any]]] = None
+    contents: Optional[Union[list[BaseComponent], str, dict[str, Any]]] = None
 
 
 class RconStyleComponent(BaseModel):
@@ -351,11 +352,19 @@ class RconTranslateComponent(RconStyleComponent):
     """
 
     translate: Optional[str] = None
-    with_: Optional[List[Union[
-        RconRichTextComponent, RconRichSelectorComponent, RconRichScoreboardComponent,
-        RconRichNBTStorageComponent, RconRichNBTEntityComponent, RconRichNBTBlockComponent,
-        RconRichKeybindComponent
-    ]]] = Field(alias="with")
+    with_: Optional[
+        list[
+            Union[
+                RconRichTextComponent,
+                RconRichSelectorComponent,
+                RconRichScoreboardComponent,
+                RconRichNBTStorageComponent,
+                RconRichNBTEntityComponent,
+                RconRichNBTBlockComponent,
+                RconRichKeybindComponent,
+            ]
+        ]
+    ] = Field(alias="with")
 
 
 class RconRichTranslateComponent(RconTranslateComponent, RconRichComponent):

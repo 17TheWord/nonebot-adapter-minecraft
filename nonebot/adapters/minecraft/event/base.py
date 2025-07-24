@@ -1,18 +1,19 @@
-from uuid import UUID
 from typing import Literal, Optional
+from uuid import UUID
 
 from pydantic import BaseModel
-from nonebot.typing import overrides
-from nonebot.utils import escape_tag
-from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump
 
 from nonebot.adapters import Event as BaseEvent
+from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump
+from nonebot.typing import overrides
+from nonebot.utils import escape_tag
 
 from ..message import Message
 
 
 class Event(BaseEvent):
     """事件基类"""
+
     timestamp: int
     post_type: str
     event_name: str
@@ -60,6 +61,7 @@ class Event(BaseEvent):
 # Models
 class BasePlayer(BaseModel):
     """玩家基类"""
+
     nickname: str
     uuid: Optional[UUID] = None
     is_op: Optional[bool] = None
@@ -67,6 +69,7 @@ class BasePlayer(BaseModel):
     if PYDANTIC_V2:
         model_config = ConfigDict(extra="allow")
     else:
+
         class Config(ConfigDict):
             extra = "allow"
 
@@ -102,7 +105,7 @@ class BaseChatEvent(MessageEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"Message from @{self.player.nickname} on [{self.server_name}]: {self.message}"  # noqa: E501
+        return f"Message from @{self.player.nickname} on [{self.server_name}]: {self.message}"
 
 
 class BasePlayerCommandEvent(MessageEvent):
@@ -112,7 +115,7 @@ class BasePlayerCommandEvent(MessageEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"Command from @{self.player.nickname} on [{self.server_name}]: {self.message}"  # noqa: E501
+        return f"Command from @{self.player.nickname} on [{self.server_name}]: {self.message}"
 
 
 class BaseDeathEvent(MessageEvent):

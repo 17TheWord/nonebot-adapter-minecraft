@@ -1,6 +1,6 @@
-from typing import Dict, List, Union, Optional
+from typing import Optional
 
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 
 
 class Server(BaseModel):
@@ -12,6 +12,6 @@ class Server(BaseModel):
 
 
 class Config(BaseModel):
-    minecraft_server_rcon: Dict[str, Server] = Field(default_factory=dict)
-    minecraft_ws_urls: Dict[str, List[str]] = Field(default_factory=dict)
+    minecraft_server_rcon: dict[str, Server] = Field(default_factory=dict)
+    minecraft_ws_urls: dict[str, list[str]] = Field(default_factory=dict)
     minecraft_access_token: Optional[str] = None

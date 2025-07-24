@@ -1,12 +1,12 @@
 from typing import Literal, Optional
 
 from .base import (
-    BasePlayer,
     BaseChatEvent,
-    BaseJoinEvent,
-    BaseQuitEvent,
     BaseDeathEvent,
+    BaseJoinEvent,
+    BasePlayer,
     BasePlayerCommandEvent,
+    BaseQuitEvent,
 )
 
 

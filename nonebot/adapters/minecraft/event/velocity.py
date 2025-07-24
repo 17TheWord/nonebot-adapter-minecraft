@@ -1,14 +1,14 @@
+from typing import Any, Literal, Optional
 from uuid import UUID
-from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel
 
 from .base import (
-    BasePlayer,
     BaseChatEvent,
     BaseJoinEvent,
-    BaseQuitEvent,
+    BasePlayer,
     BasePlayerCommandEvent,
+    BaseQuitEvent,
 )
 
 
@@ -18,7 +18,7 @@ class GameProfile(BaseModel):
     id: Optional[UUID] = None
     undashedId: Optional[UUID] = None
     name: Optional[str] = None
-    properties: Optional[List[Any]] = None
+    properties: Optional[list[Any]] = None
 
 
 class Settings(BaseModel):
@@ -55,7 +55,7 @@ class Player(BasePlayer):
     ping: Optional[int] = None
     online_mode: Optional[bool] = None
     game_profile: Optional[GameProfile] = None
-    remote_address: Optional[Dict[str, Any]] = None
+    remote_address: Optional[dict[str, Any]] = None
     player_settings: Optional[PlayerSettings] = None
 
 

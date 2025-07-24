@@ -1,16 +1,16 @@
-""" NeoForge 事件模型
+"""NeoForge 事件模型
 NeoForge 与 Forge事件名相同，此处协议中的事件名均在前添加 “Neo” 字符以区分
 """
 
 from typing import Literal, Optional
 
 from .base import (
-    BasePlayer,
     BaseChatEvent,
-    BaseJoinEvent,
-    BaseQuitEvent,
     BaseDeathEvent,
+    BaseJoinEvent,
+    BasePlayer,
     BasePlayerCommandEvent,
+    BaseQuitEvent,
 )
 
 

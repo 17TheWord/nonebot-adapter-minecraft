@@ -1,10 +1,11 @@
+from typing import Any, Optional, Union
 from uuid import UUID
-from typing import Any, Dict, Union, Optional
 
 from pydantic import BaseModel
+
 from nonebot.compat import PYDANTIC_V2
-from nonebot.utils import logger_wrapper
 from nonebot.utils import DataclassEncoder as BaseDataclassEncoder
+from nonebot.utils import logger_wrapper
 
 from .exception import ActionFailed
 
@@ -20,7 +21,7 @@ class DataclassEncoder(BaseDataclassEncoder):
         return super().default(o)
 
 
-def zip_dict(data: Union[BaseModel, Dict[str, Any]]) -> Dict[str, Any]:
+def zip_dict(data: Union[BaseModel, dict[str, Any]]) -> dict[str, Any]:
     """
     将字典中的空值去除
     :param data: 字典数据
@@ -42,7 +43,7 @@ def zip_dict(data: Union[BaseModel, Dict[str, Any]]) -> Dict[str, Any]:
     return temp_dict
 
 
-def handle_api_result(result: Optional[Dict[str, Any]]) -> Any:
+def handle_api_result(result: Optional[dict[str, Any]]) -> Any:
     """处理 API 请求返回值。
 
     参数:
