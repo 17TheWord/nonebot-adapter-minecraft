@@ -1,7 +1,7 @@
 from pathlib import Path
 
-import pytest
 from nonebug import NONEBOT_INIT_KWARGS
+import pytest
 
 import nonebot
 import nonebot.adapters
@@ -10,7 +10,7 @@ nonebot.adapters.__path__.append(  # type: ignore
     str((Path(__file__).parent.parent / "nonebot" / "adapters").resolve())
 )
 
-from nonebot.adapters.minecraft import Adapter  # noqa: E402
+from nonebot.adapters.minecraft import Adapter
 
 
 def pytest_configure(config: pytest.Config) -> None:

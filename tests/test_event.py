@@ -1,16 +1,16 @@
 from typing import Literal
 
 import pytest
-from nonebot.log import logger
-from nonebot.compat import model_dump
 
 from nonebot.adapters.minecraft import (
-    Event,
     Adapter,
-    SpigotPlayer,
+    Event,
     MessageSegment,
     SpigotAsyncPlayerChatEvent,
+    SpigotPlayer,
 )
+from nonebot.compat import model_dump
+from nonebot.log import logger
 
 
 @pytest.mark.asyncio
@@ -33,9 +33,7 @@ async def test_event():
 
 @pytest.mark.asyncio
 async def test_event_log():
-    msg = MessageSegment.text(text="[text]") + MessageSegment.actionbar(
-        text="[actionbar]"
-    )
+    msg = MessageSegment.text(text="[text]") + MessageSegment.actionbar(text="[actionbar]")
     event = SpigotAsyncPlayerChatEvent(
         timestamp=0,
         post_type="message",
@@ -48,6 +46,4 @@ async def test_event_log():
         player=SpigotPlayer(nickname="test"),
         message=msg,
     )
-    logger.opt(colors=True).success(
-        f"{event.get_event_name()}: {event.get_event_description()}"
-    )
+    logger.opt(colors=True).success(f"{event.get_event_name()}: {event.get_event_description()}")

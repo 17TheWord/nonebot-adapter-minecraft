@@ -1,16 +1,14 @@
 import asyncio
 
-import pytest
 from nonebug import App
+import pytest
 
 import nonebot
 from nonebot.adapters.minecraft import Adapter
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "endpoints", ["/minecraft/ws"]
-)
+@pytest.mark.parametrize("endpoints", ["/minecraft/ws"])
 async def test_ws(app: App, endpoints: str):
     adapter = nonebot.get_adapter(Adapter)
 
