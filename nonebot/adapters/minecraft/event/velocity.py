@@ -1,62 +1,62 @@
+from typing import Any, Literal
 from uuid import UUID
-from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel
 
 from .base import (
-    BasePlayer,
     BaseChatEvent,
     BaseJoinEvent,
-    BaseQuitEvent,
+    BasePlayer,
     BasePlayerCommandEvent,
+    BaseQuitEvent,
 )
 
 
 class GameProfile(BaseModel):
     """Velocity GameProfile"""
 
-    id: Optional[UUID] = None
-    undashedId: Optional[UUID] = None
-    name: Optional[str] = None
-    properties: Optional[List[Any]] = None
+    id: UUID | None = None
+    undashedId: UUID | None = None
+    name: str | None = None
+    properties: list[Any] | None = None
 
 
 class Settings(BaseModel):
     """Velocity Settings"""
 
-    locale: Optional[str] = None
-    viewDistance: Optional[int] = None
-    chatVisibility: Optional[int] = None
-    chatColors: Optional[bool] = None
-    difficulty: Optional[int] = None
-    skinParts: Optional[int] = None
-    mainHand: Optional[int] = None
-    chatFilteringEnabled: Optional[bool] = None
-    clientListingAllowed: Optional[bool] = None
+    locale: str | None = None
+    viewDistance: int | None = None
+    chatVisibility: int | None = None
+    chatColors: bool | None = None
+    difficulty: int | None = None
+    skinParts: int | None = None
+    mainHand: int | None = None
+    chatFilteringEnabled: bool | None = None
+    clientListingAllowed: bool | None = None
 
 
 class Parts(BaseModel):
     """Velocity Parts"""
 
-    bitmask: Optional[int] = None
+    bitmask: int | None = None
 
 
 class PlayerSettings(BaseModel):
     """Velocity Player Settings"""
 
-    settings: Optional[Settings] = None
-    parts: Optional[Parts] = None
-    locale: Optional[str] = None
+    settings: Settings | None = None
+    parts: Parts | None = None
+    locale: str | None = None
 
 
 class Player(BasePlayer):
     """Velocity Player"""
 
-    ping: Optional[int] = None
-    online_mode: Optional[bool] = None
-    game_profile: Optional[GameProfile] = None
-    remote_address: Optional[Dict[str, Any]] = None
-    player_settings: Optional[PlayerSettings] = None
+    ping: int | None = None
+    online_mode: bool | None = None
+    game_profile: GameProfile | None = None
+    remote_address: dict[str, Any] | None = None
+    player_settings: PlayerSettings | None = None
 
 
 class PlayerChatEvent(BaseChatEvent):

@@ -1,39 +1,39 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from .base import (
-    BasePlayer,
     BaseChatEvent,
-    BaseJoinEvent,
-    BaseQuitEvent,
     BaseDeathEvent,
+    BaseJoinEvent,
+    BasePlayer,
     BasePlayerCommandEvent,
+    BaseQuitEvent,
 )
 
 
 class Player(BasePlayer):
     """Spigot Player"""
 
-    display_name: Optional[str] = None
-    player_list_name: Optional[str] = None
-    is_health_scaled: Optional[bool] = None
-    address: Optional[str] = None
-    is_sprinting: Optional[bool] = None
-    walk_speed: Optional[float] = None
-    fly_speed: Optional[float] = None
-    is_sneaking: Optional[bool] = None
-    level: Optional[int] = None
-    is_flying: Optional[bool] = None
-    ping: Optional[int] = None
+    display_name: str | None = None
+    player_list_name: str | None = None
+    is_health_scaled: bool | None = None
+    address: str | None = None
+    is_sprinting: bool | None = None
+    walk_speed: float | None = None
+    fly_speed: float | None = None
+    is_sneaking: bool | None = None
+    level: int | None = None
+    is_flying: bool | None = None
+    ping: int | None = None
     """Spigot API 1.12.2 Player 无 ping 属性"""
-    allow_flight: Optional[bool] = None
-    locale: Optional[str] = None
-    health_scale: Optional[float] = None
-    player_time_offset: Optional[int] = None
-    exp: Optional[float] = None
-    total_exp: Optional[int] = None
-    player_time: Optional[int] = None
-    is_player_time_relative: Optional[bool] = None
-    is_op: Optional[bool] = None
+    allow_flight: bool | None = None
+    locale: str | None = None
+    health_scale: float | None = None
+    player_time_offset: int | None = None
+    exp: float | None = None
+    total_exp: int | None = None
+    player_time: int | None = None
+    is_player_time_relative: bool | None = None
+    is_op: bool | None = None
 
 
 class AsyncPlayerChatEvent(BaseChatEvent):

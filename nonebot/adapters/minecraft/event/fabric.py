@@ -1,32 +1,32 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from .base import (
-    BasePlayer,
     BaseChatEvent,
-    BaseJoinEvent,
-    BaseQuitEvent,
     BaseDeathEvent,
+    BaseJoinEvent,
+    BasePlayer,
     BasePlayerCommandEvent,
+    BaseQuitEvent,
 )
 
 
 class Player(BasePlayer):
     """Fabric Player"""
 
-    ip: Optional[str] = None
-    display_name: Optional[str] = None
-    movement_speed: Optional[float] = None
+    ip: str | None = None
+    display_name: str | None = None
+    movement_speed: float | None = None
 
-    block_x: Optional[int] = None
-    block_y: Optional[int] = None
-    block_z: Optional[int] = None
+    block_x: int | None = None
+    block_y: int | None = None
+    block_z: int | None = None
 
-    is_creative: Optional[bool] = None
-    is_spectator: Optional[bool] = None
-    is_sneaking: Optional[bool] = None
-    is_sleeping: Optional[bool] = None
-    is_climbing: Optional[bool] = None
-    is_swimming: Optional[bool] = None
+    is_creative: bool | None = None
+    is_spectator: bool | None = None
+    is_sneaking: bool | None = None
+    is_sleeping: bool | None = None
+    is_climbing: bool | None = None
+    is_swimming: bool | None = None
 
 
 class ServerMessageEvent(BaseChatEvent):

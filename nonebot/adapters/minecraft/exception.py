@@ -1,13 +1,12 @@
-from typing import Optional
+from aiomcrcon.errors import ClientNotConnectedError as BaseClientNotConnectedError
+from aiomcrcon.errors import IncorrectPasswordError as BaseIncorrectPasswordError
+from aiomcrcon.errors import RCONConnectionError as BaseRCONConnectionError
 
 from nonebot.drivers import Response
-from nonebot.exception import AdapterException
 from nonebot.exception import ActionFailed as BaseActionFailed
-from nonebot.exception import NetworkError as BaseNetworkError
+from nonebot.exception import AdapterException
 from nonebot.exception import ApiNotAvailable as BaseApiNotAvailable
-from aiomcrcon.errors import RCONConnectionError as BaseRCONConnectionError
-from aiomcrcon.errors import IncorrectPasswordError as BaseIncorrectPasswordError
-from aiomcrcon.errors import ClientNotConnectedError as BaseClientNotConnectedError
+from nonebot.exception import NetworkError as BaseNetworkError
 
 
 class MinecraftAdapterException(AdapterException):
@@ -16,9 +15,9 @@ class MinecraftAdapterException(AdapterException):
 
 
 class NetworkError(BaseNetworkError, MinecraftAdapterException):
-    def __init__(self, msg: Optional[str] = None):
+    def __init__(self, msg: str | None = None):
         super().__init__()
-        self.msg: Optional[str] = msg
+        self.msg: str | None = msg
         """错误原因"""
 
     def __repr__(self):
@@ -34,13 +33,13 @@ class ActionFailed(
 ):
     def __init__(self, response: Response):
         self.status_code: int = response.status_code
-        self.code: Optional[int] = None
-        self.message: Optional[str] = None
-        self.data: Optional[dict] = None
+        self.code: int | None = None
+        self.message: str | None = None
+        self.data: dict | None = None
 
 
 class RCONConnectionError(NetworkError, BaseRCONConnectionError):
-    def __init__(self, msg: Optional[str] = None, error: Optional[Exception] = None):
+    def __init__(self, msg: str | None = None, error: Exception | None = None):
         self.msg = msg
         self.message = msg
         self.error = error

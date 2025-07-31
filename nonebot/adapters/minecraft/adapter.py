@@ -1,47 +1,48 @@
-import json
-import urllib
 import asyncio
-import inspect
+from collections.abc import Generator
 import contextlib
-from typing import Any, Dict, List, Type, Optional, Generator
+import inspect
+import json
+from typing import Any
+from urllib.parse import quote_plus, unquote_plus
 
-from nonebot.typing import overrides
-from nonebot.utils import escape_tag
 from aiomcrcon import Client as RCONClient
-from nonebot.exception import WebSocketClosed
-from nonebot.compat import type_validate_python
-from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
-from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
 from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
+from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
+from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
+
+from nonebot import get_plugin_config
+from nonebot.adapters import Adapter as BaseAdapter
+from nonebot.compat import type_validate_python
 from nonebot.drivers import (
     URL,
+    ASGIMixin,
     Driver,
     Request,
-    ASGIMixin,
     WebSocket,
     WebSocketClientMixin,
     WebSocketServerSetup,
 )
-
-from nonebot import get_plugin_config
-from nonebot.adapters import Adapter as BaseAdapter
+from nonebot.exception import WebSocketClosed
+from nonebot.typing import overrides
+from nonebot.utils import escape_tag
 
 from . import event
 from .bot import Bot
-from .event import Event
-from .config import Config
 from .collator import Collator
-from .store import ResultStore
-from .utils import DataclassEncoder, log, zip_dict, handle_api_result
+from .config import Config
+from .event import Event
 from .exception import (
+    ClientNotConnectedError,
+    IncorrectPasswordError,
     NetworkError,
     RCONConnectionError,
-    IncorrectPasswordError,
-    ClientNotConnectedError,
 )
+from .store import ResultStore
+from .utils import DataclassEncoder, handle_api_result, log, zip_dict
 
 RECONNECT_INTERVAL = 3.0
-DEFAULT_MODELS: List[Type[Event]] = []
+DEFAULT_MODELS: list[type[Event]] = []
 for model_name in dir(event):
     model = getattr(event, model_name)
     if not inspect.isclass(model) or not issubclass(model, Event):
@@ -66,8 +67,8 @@ class Adapter(BaseAdapter):
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
         self.minecraft_config: Config = get_plugin_config(Config)
-        self.connections: Dict[str, WebSocket] = {}
-        self.tasks: List["asyncio.Task"] = []
+        self.connections: dict[str, WebSocket] = {}
+        self.tasks: list["asyncio.Task"] = []
         self._setup()
 
     @classmethod
@@ -77,27 +78,18 @@ class Adapter(BaseAdapter):
 
     def _setup(self) -> None:
         if isinstance(self.driver, ASGIMixin):
-            ws_setup = WebSocketServerSetup(
-                URL("/minecraft/"), f"{self.get_name()} WS", self._handle_ws
-            )
+            ws_setup = WebSocketServerSetup(URL("/minecraft/"), f"{self.get_name()} WS", self._handle_ws)
             self.setup_websocket_server(ws_setup)
-            ws_setup = WebSocketServerSetup(
-                URL("/minecraft/ws"), f"{self.get_name()} WS", self._handle_ws
-            )
+            ws_setup = WebSocketServerSetup(URL("/minecraft/ws"), f"{self.get_name()} WS", self._handle_ws)
             self.setup_websocket_server(ws_setup)
-            ws_setup = WebSocketServerSetup(
-                URL("/minecraft/ws/"), f"{self.get_name()} WS", self._handle_ws
-            )
+            ws_setup = WebSocketServerSetup(URL("/minecraft/ws/"), f"{self.get_name()} WS", self._handle_ws)
             self.setup_websocket_server(ws_setup)
 
         if self.minecraft_config.minecraft_ws_urls:
             if not isinstance(self.driver, WebSocketClientMixin):
                 log(
                     "WARNING",
-                    (
-                        f"Current driver {self.config.driver} does not support "
-                        "websocket client connections! Ignored"
-                    ),
+                    (f"Current driver {self.config.driver} does not support websocket client connections! Ignored"),
                 )
             else:
                 self.on_ready(self._start_forward)
@@ -108,9 +100,7 @@ class Adapter(BaseAdapter):
             for url in self.minecraft_config.minecraft_ws_urls[server_name]:
                 try:
                     ws_url = URL(url)
-                    self.tasks.append(
-                        asyncio.create_task(self._forward_ws(server_name, ws_url))
-                    )
+                    self.tasks.append(asyncio.create_task(self._forward_ws(server_name, ws_url)))
                 except Exception as e:
                     log(
                         "ERROR",
@@ -132,16 +122,14 @@ class Adapter(BaseAdapter):
     async def _forward_ws(self, server_name: str, url: URL) -> None:
         assert url.host is not None
         headers = {
-            "x-self-name": urllib.parse.quote_plus(server_name), # type: ignore
+            "x-self-name": quote_plus(server_name),
             "x-client-origin": "nonebot",
         }
         if self.minecraft_config.minecraft_access_token:
-            headers["Authorization"] = (
-                f"Bearer {self.minecraft_config.minecraft_access_token}"
-            )
+            headers["Authorization"] = f"Bearer {self.minecraft_config.minecraft_access_token}"
         request = Request("GET", url, headers=headers, timeout=30.0)
 
-        bot: Optional[Bot] = None
+        bot: Bot | None = None
 
         while True:
             try:
@@ -208,111 +196,95 @@ class Adapter(BaseAdapter):
         websocket = self.connections.get(bot.self_id, None)
         timeout: float = data.get("_timeout", self.config.api_timeout)
         log("DEBUG", f"Calling API <y>{api}</y>")
-        if websocket:
-            if api == "send_rcon_cmd":
-                try:
-                    if bot.rcon is None:
-                        raise RCONConnectionError(msg="RCON client is None")
-                    command = data.get("command")
-                    if not isinstance(command, str):
-                        raise RCONConnectionError(msg="Command must be a string")
-                    return await bot.rcon.send_cmd(
-                        cmd=command,
-                        timeout=timeout
-                    )
-                except BaseClientNotConnectedError:
-                    raise ClientNotConnectedError()
-                except Exception as e:
-                    raise RCONConnectionError(msg=str(e), error=e)
-            seq = self._result_store.get_seq()
-            json_data = json.dumps(
-                {"api": api, "data": zip_dict(data), "echo": str(seq)},
-                cls=DataclassEncoder
-            )
-            await websocket.send(json_data)
+        if not websocket:
+            raise NetworkError(f"Bot {bot.self_id} is not connected.")
+        if api == "send_rcon_cmd":
             try:
-                return handle_api_result(await self._result_store.fetch(seq, timeout))
-            except asyncio.TimeoutError:
-                raise NetworkError(f"WebSocket call api {api} timeout") from None
+                if bot.rcon is None:
+                    raise RCONConnectionError(msg="RCON client is None")
+                command = data.get("command")
+                if not isinstance(command, str):
+                    raise RCONConnectionError(msg="Command must be a string")
+                return await bot.rcon.send_cmd(cmd=command, timeout=timeout)
+            except BaseClientNotConnectedError:
+                raise ClientNotConnectedError()
+            except Exception as e:
+                raise RCONConnectionError(msg=str(e), error=e)
+        seq = self._result_store.get_seq()
+        json_data = json.dumps({"api": api, "data": zip_dict(data), "echo": str(seq)}, cls=DataclassEncoder)
+        await websocket.send(json_data)
+        try:
+            return handle_api_result(await self._result_store.fetch(seq, timeout))
+        except asyncio.TimeoutError:
+            raise NetworkError(f"WebSocket call api {api} timeout") from None
 
-    async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
-        if server := self.minecraft_config.minecraft_server_rcon.get(server_name):
-            server_host = server.rcon_host or server_host
-            rcon = RCONClient(
-                server_host,
-                server.rcon_port,
-                server.rcon_password,
-            )
-            if server.enable_rcon:
-                log(
-                    "INFO",
-                    f"<y>Connecting</y> RCON for <y>Bot {escape_tag(server_name)}</y>",
-                )
-                try:
-                    await rcon.connect(timeout=server.timeout)
-                except BaseIncorrectPasswordError:
-                    raise IncorrectPasswordError()
-                except BaseClientNotConnectedError:
-                    raise ClientNotConnectedError()
-                except BaseRCONConnectionError as e:
-                    raise RCONConnectionError(e.message, e.error)
-                else:
-                    log(
-                        "INFO",
-                        f"RCON for <y>Bot {escape_tag(server_name)}</y> <g>connected</g>",
-                    )
-                    return rcon
-            else:
-                log(
-                    "INFO",
-                    f"RCON for <y>Bot {escape_tag(server_name)}</y> is not enabled, will not connect",
-                )
-        else:
-            log(
-                "INFO",
-                f"RCON configuration for <y>Bot {escape_tag(server_name)}</y> not found, will not connect",
-            )
-        return None
+    async def _connect_rcon(self, server_name: str, server_host: str) -> RCONClient | None:
+        if not (server_config := self.minecraft_config.minecraft_server_rcon.get(server_name)):
+            log("INFO", f"RCON configuration for <y>Bot {escape_tag(server_name)}</y> not found, will not connect")
+            return None
+
+        if not server_config.enable_rcon:
+            log("INFO", f"RCON for <y>Bot {escape_tag(server_name)}</y> is not enabled, will not connect")
+            return None
+
+        host = server_config.rcon_host or server_host
+        rcon = RCONClient(host, server_config.rcon_port, server_config.rcon_password)
+
+        log("INFO", f"<y>Connecting</y> RCON for <y>Bot {escape_tag(server_name)}</y>")
+        try:
+            await rcon.connect(timeout=server_config.timeout)
+        except BaseIncorrectPasswordError:
+            raise IncorrectPasswordError()
+        except BaseClientNotConnectedError:
+            raise ClientNotConnectedError()
+        except BaseRCONConnectionError as e:
+            raise RCONConnectionError(e.message, e.error)
+
+        log("INFO", f"RCON for <y>Bot {escape_tag(server_name)}</y> <g>connected</g>")
+        return rcon
 
     async def _handle_ws(self, websocket: WebSocket) -> None:
-        ori_self_id = websocket.request.headers.get("x-self-name")
-
-        # check ori_self_id
-        if not ori_self_id:
+        if not (ori_self_id := websocket.request.headers.get("x-self-name")):
             log("WARNING", "Missing X-Self-Name Header")
             await websocket.close(1008, "Missing X-Self-Name Header")
             return
 
-        if client_origin := websocket.request.headers.get("x-client-origin"):
-            if client_origin == "nonebot":
-                log("WARNING", "X-Client-Origin Header cannot be nonebot")
-                await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
-                return
+        if websocket.request.headers.get("x-client-origin") == "nonebot":
+            log("WARNING", "X-Client-Origin Header cannot be nonebot")
+            await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
+            return
 
-        self_id = urllib.parse.unquote_plus(ori_self_id) # type: ignore
-
-        if self.minecraft_config.minecraft_access_token:
-            access_token = websocket.request.headers.get("Authorization")
-            if not access_token:
-                log("WARNING", "Missing Authorization Header")
-                await websocket.close(1008, "Missing Authorization Header")
-                return
-
-            if access_token != "Bearer " + self.minecraft_config.minecraft_access_token:
-                log("WARNING", "Invalid Authorization Header")
-                await websocket.close(1008, "Invalid Authorization Header")
-                return
+        self_id = unquote_plus(ori_self_id)
 
         if self_id in self.bots:
             log("WARNING", f"There's already a bot {self_id}, ignored")
             await websocket.close(1008, "Duplicate X-Self-Name")
             return
 
+        if token_config := self.minecraft_config.minecraft_access_token:
+            auth_header = websocket.request.headers.get("Authorization")
+            if not auth_header:
+                log("WARNING", "Missing Authorization Header")
+                await websocket.close(1008, "Missing Authorization Header")
+                return
+            if auth_header != f"Bearer {token_config}":
+                log("WARNING", "Invalid Authorization Header")
+                await websocket.close(1008, "Invalid Authorization Header")
+                return
+
         await websocket.accept()
 
-        rcon = await self._connect_rcon(self_id, websocket.__dict__["websocket"].__dict__["scope"]["client"][0])
+        try:
+            log("DEBUG", "Try getting host from websocket")
+            host_from_websocket = websocket.__dict__["websocket"].__dict__["scope"]["client"][0]
+            log("DEBUG", "Host from websocket: " + host_from_websocket)
+        except Exception:
+            log("WARNING", "Cannot get host from websocket, will try getting from configuration")
+            host_from_websocket = ""
 
-        bot = Bot(self, self_id, rcon) # type: ignore
+        rcon = await self._connect_rcon(self_id, host_from_websocket)
+
+        bot = Bot(self, self_id, rcon)  # type: ignore
         self.connections[self_id] = websocket
         self.bot_connect(bot)
 
@@ -343,7 +315,7 @@ class Adapter(BaseAdapter):
             self.bot_disconnect(bot)
 
     @classmethod
-    def add_custom_model(cls, *model: Type[Event]) -> None:
+    def add_custom_model(cls, *model: type[Event]) -> None:
         """插入或覆盖一个自定义的 Event 类型。
 
         参数:
@@ -352,16 +324,12 @@ class Adapter(BaseAdapter):
         cls.event_models.add_model(*model)
 
     @classmethod
-    def get_event_model(
-            cls, data: Dict[str, Any]
-    ) -> Generator[Type[Event], None, None]:
+    def get_event_model(cls, data: dict[str, Any]) -> Generator[type[Event], None, None]:
         """根据事件获取对应 `Event Model` 及 `FallBack Event Model` 列表。"""
         yield from cls.event_models.get_model(data)
 
     @classmethod
-    def json_to_event(
-            cls, json_data: Any, self_id: Optional[str] = None
-    ) -> Optional[Event]:
+    def json_to_event(cls, json_data: Any, self_id: str | None = None) -> Event | None:
         """将 json 数据转换为 Event 对象。
 
         如果为 API 调用返回数据且提供了 Event 对应 Bot，则将数据存入 ResultStore。
@@ -394,7 +362,6 @@ class Adapter(BaseAdapter):
         except Exception as e:
             log(
                 "ERROR",
-                "<r><bg #f8bbd0>Failed to parse event. "
-                f"Raw: {escape_tag(str(json_data))}</bg #f8bbd0></r>",
+                f"<r><bg #f8bbd0>Failed to parse event. Raw: {escape_tag(str(json_data))}</bg #f8bbd0></r>",
                 e,
             )

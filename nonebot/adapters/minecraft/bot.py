@@ -1,15 +1,16 @@
+from collections.abc import Callable
 import re
-from typing import TYPE_CHECKING, Any, Union, Callable, Optional
+from typing import TYPE_CHECKING, Any
 
 from aiomcrcon import Client
-from nonebot.typing import overrides
-from nonebot.message import handle_event
 
 from nonebot.adapters import Bot as BaseBot
+from nonebot.message import handle_event
+from nonebot.typing import overrides
 
-from .utils import log
 from .event import Event, MessageEvent
 from .message import Message, MessageSegment
+from .utils import log
 
 if TYPE_CHECKING:
     from nonebot.internal.adapter import Adapter
@@ -36,33 +37,26 @@ def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
     if m := re.search(rf"^({nickname_regex})([\s,，]*|$)", first_text, re.IGNORECASE):
         log("DEBUG", f"User is calling me {m[1]}")
         event.to_me = True
-        first_msg_seg.data["text"] = first_text[m.end():]
+        first_msg_seg.data["text"] = first_text[m.end() :]
 
 
 @overrides(BaseBot)
 async def send(
-        bot: "Bot",
-        event: Event,
-        message: Union[str, Message, MessageSegment],
-        **kwargs,
+    bot: "Bot",
+    event: Event,
+    message: str | Message | MessageSegment,
+    **kwargs,
 ) -> Any:
     return await bot.send_msg(message=message)
 
 
 class Bot(BaseBot):
     @overrides(BaseBot)
-    def __init__(
-            self, adapter: "Adapter", self_id: str, rcon: Optional[Client] = None
-    ):
-        self.adapter: "Adapter" = adapter
-        """协议适配器实例"""
-        self.self_id: str = self_id
-        """机器人 ID"""
-        self.rcon: Optional[Client] = rcon
+    def __init__(self, adapter: "Adapter", self_id: str, rcon: Client | None = None):
+        super().__init__(adapter, self_id)
+        self.rcon: Client | None = rcon
 
-    send_handler: Callable[
-        ["Bot", Event, Union[str, Message, MessageSegment]], Any
-    ] = send
+    send_handler: Callable[["Bot", Event, str | Message | MessageSegment], Any] = send
 
     async def handle_event(self, event: Event) -> None:
         """处理收到的事件。"""
@@ -73,9 +67,9 @@ class Bot(BaseBot):
 
     @overrides(BaseBot)
     async def send(
-            self,
-            event: Event,
-            message: Union[str, Message, MessageSegment],
-            **kwargs,
+        self,
+        event: Event,
+        message: str | Message | MessageSegment,
+        **kwargs,
     ) -> Any:
         return await self.__class__.send_handler(self, event, message, **kwargs)

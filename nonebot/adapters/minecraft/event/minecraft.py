@@ -1,6 +1,6 @@
 from typing import Literal
 
-from .base import BasePlayer, BaseChatEvent, BaseJoinEvent, BaseQuitEvent
+from .base import BaseChatEvent, BaseJoinEvent, BasePlayer, BaseQuitEvent
 
 
 class Player(BasePlayer):

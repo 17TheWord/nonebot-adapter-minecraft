@@ -1,14 +1,13 @@
-from typing import Type, Iterable, Optional
-
-from nonebot.typing import overrides
+from collections.abc import Iterable
 
 from nonebot.adapters import Message as BaseMessage
 from nonebot.adapters import MessageSegment as BaseMessageSegment
+from nonebot.typing import overrides
 
 from .model import (
-    TextColor,
     ClickEvent,
     HoverEvent,
+    TextColor,
     TextComponent,
 )
 
@@ -16,7 +15,7 @@ from .model import (
 class MessageSegment(BaseMessageSegment["Message"]):
     @classmethod
     @overrides(BaseMessageSegment)
-    def get_message_class(cls) -> Type["Message"]:
+    def get_message_class(cls) -> type["Message"]:
         return Message
 
     def __str__(self) -> str:
@@ -26,7 +25,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
         if type_ == "text":
             return data["text"]
 
-        params = ",".join([f"{k}={str(v)}" for k, v in data.items() if v is not None])
+        params = ",".join([f"{k}={v!s}" for k, v in data.items() if v is not None])
         return "{msg_type=" + f"{type_}{',' if params else ''}{params}" + "}"
 
     @overrides(BaseMessageSegment)
@@ -44,17 +43,17 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @staticmethod
     def text(
-            text: Optional[str] = None,
-            color: Optional[TextColor] = None,
-            font: Optional[str] = None,
-            bold: Optional[bool] = False,
-            italic: Optional[bool] = False,
-            underlined: Optional[bool] = False,
-            strikethrough: Optional[bool] = False,
-            obfuscated: Optional[bool] = False,
-            insertion: Optional[str] = None,
-            click_event: Optional[ClickEvent] = None,
-            hover_event: Optional[HoverEvent] = None,
+        text: str | None = None,
+        color: TextColor | None = None,
+        font: str | None = None,
+        bold: bool | None = False,
+        italic: bool | None = False,
+        underlined: bool | None = False,
+        strikethrough: bool | None = False,
+        obfuscated: bool | None = False,
+        insertion: str | None = None,
+        click_event: ClickEvent | None = None,
+        hover_event: HoverEvent | None = None,
     ):
         text_component = TextComponent(
             text=text,
@@ -76,10 +75,10 @@ class MessageSegment(BaseMessageSegment["Message"]):
 class Message(BaseMessage[MessageSegment]):
     @classmethod
     @overrides
-    def get_segment_class(cls) -> Type[MessageSegment]:
+    def get_segment_class(cls) -> type[MessageSegment]:
         return MessageSegment
 
     @staticmethod
     @overrides(BaseMessage)
-    def _construct(msg: Optional[str] = None) -> Iterable[MessageSegment]:
+    def _construct(msg: str | None = None) -> Iterable[MessageSegment]:
         yield MessageSegment.text(msg)

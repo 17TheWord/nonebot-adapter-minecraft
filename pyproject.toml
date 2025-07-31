@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-adapter-minecraft"
-version = "1.4.2"
+version = "1.5.0"
 description = "NoneBot2与MineCraft Server互通的适配器。"
 authors = ["17TheWord <17theword@gmail.com>"]
 license = "MIT"
@@ -8,16 +8,16 @@ readme = "README.md"
 packages = [{ include = "nonebot" }]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 aio-mc-rcon = "^3.4.1"
 pydantic = ">=1.10.0,<3.0.0,!=2.5.0,!=2.5.1"
 nonebot2 = { version = "^2.2.0", extras = ["fastapi"] }
 
 [tool.poetry.group.test.dependencies]
-ruff = "^0.11.8"
+ruff = "^0.12.4"
 nonebug = "^0.3.5"
 pytest-cov = "^4.0.0"
-pre-commit = "^3.7.0"
+pre-commit = "^4.2.0"
 pytest-asyncio = "^0.23.0"
 nonebot2 = { version = "^2.2.0", extras = ["fastapi"] }
 
@@ -26,20 +26,48 @@ addopts = "--cov=nonebot/adapters/minecraft --cov-report term-missing"
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "W", "F", "UP", "C", "PYI", "PT", "Q"]
-ignore = ["E402", "E501", "F401", "C901", "UP037", "UP035", "UP006", "PYI021"]
+select = [
+    "F",     # Pyflakes
+    "W",     # pycodestyle warnings
+    "E",     # pycodestyle errors
+    "I",     # isort
+    "UP",    # pyupgrade
+    "ASYNC", # flake8-async
+    "C4",    # flake8-comprehensions
+    "T10",   # flake8-debugger
+    "T20",   # flake8-print
+    "PYI",   # flake8-pyi
+    "PT",    # flake8-pytest-style
+    "Q",     # flake8-quotes
+    "RUF",   # Ruff-specific rules
+]
+ignore = [
+    "E402",
+    "E501",   # module-import-not-at-top-of-file
+    "UP037",  # quoted-annotation
+    "RUF001", # ambiguous-unicode-character-string
+    "RUF002", # ambiguous-unicode-character-docstring
+    "RUF003", # ambiguous-unicode-character-comment
+    "RUF006", # ambiguous-unicode-character-assignment
+]
+[tool.ruff.lint.per-file-ignores]
+"nonebot/adapters/minecraft/__init__.py" = ["F403"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
 extra-standard-library = ["typing_extensions"]
-
-[tool.ruff.lint.per-file-ignores]
-"nonebot/adapters/minecraft/__init__.py" = ["F403"]
-"nonebot/adapters/minecraft/bot.pyi" = ["UP007", "PYI020"]
-"nonebot/adapters/minecraft/collator.py" = ["C417"]
 
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false

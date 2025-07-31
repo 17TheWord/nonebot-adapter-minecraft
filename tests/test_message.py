@@ -1,6 +1,6 @@
 import pytest
 
-from nonebot.adapters.minecraft import Message, MessageSegment
+from nonebot.adapters.minecraft import Message, MessageSegment  # type: ignore
 
 
 @pytest.mark.asyncio
@@ -15,9 +15,5 @@ async def test_message_escape():
     a += "test"
     assert a == Message(MessageSegment.text("test"))
 
-    assert MessageSegment.text("test") + "test" == Message(
-        [MessageSegment.text("test"), MessageSegment.text("test")]
-    )
-    assert "test" + MessageSegment.text("test") == Message(
-        [MessageSegment.text("test"), MessageSegment.text("test")]
-    )
+    assert MessageSegment.text("test") + "test" == Message([MessageSegment.text("test"), MessageSegment.text("test")])
+    assert "test" + MessageSegment.text("test") == Message([MessageSegment.text("test"), MessageSegment.text("test")])
