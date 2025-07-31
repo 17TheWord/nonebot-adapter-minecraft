@@ -2,9 +2,10 @@ from typing import Literal
 
 import pytest
 
-from nonebot.adapters.minecraft import (
+from nonebot.adapters.minecraft import (  # type: ignore
     Adapter,
     Event,
+    Message,
     MessageSegment,
     SpigotAsyncPlayerChatEvent,
     SpigotPlayer,
@@ -22,6 +23,8 @@ async def test_event():
         timestamp=0,
         server_name="Server",
         post_type="message_self",
+        server_version="1.20.1",
+        server_type="spigot",
         event_name="MessageSelfEvent",
         sub_type="test",
     )
@@ -33,7 +36,7 @@ async def test_event():
 
 @pytest.mark.asyncio
 async def test_event_log():
-    msg = MessageSegment.text(text="[text]") + MessageSegment.actionbar(text="[actionbar]")
+    msg = Message(MessageSegment.text(text="[text]"))
     event = SpigotAsyncPlayerChatEvent(
         timestamp=0,
         post_type="message",
@@ -41,8 +44,9 @@ async def test_event_log():
         server_name="Server",
         sub_type="chat",
         message_id="",
+        server_version="1.20.1",
+        server_type="spigot",
         to_me=False,
-        ori_message=msg,
         player=SpigotPlayer(nickname="test"),
         message=msg,
     )
