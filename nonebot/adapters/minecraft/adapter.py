@@ -4,7 +4,7 @@ import contextlib
 import inspect
 import json
 from typing import Any, Optional
-import urllib
+from urllib.parse import quote_plus, unquote_plus
 
 from aiomcrcon import Client as RCONClient
 from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
@@ -122,7 +122,7 @@ class Adapter(BaseAdapter):
     async def _forward_ws(self, server_name: str, url: URL) -> None:
         assert url.host is not None
         headers = {
-            "x-self-name": urllib.parse.quote_plus(server_name),  # type: ignore
+            "x-self-name": quote_plus(server_name),
             "x-client-origin": "nonebot",
         }
         if self.minecraft_config.minecraft_access_token:
@@ -196,99 +196,81 @@ class Adapter(BaseAdapter):
         websocket = self.connections.get(bot.self_id, None)
         timeout: float = data.get("_timeout", self.config.api_timeout)
         log("DEBUG", f"Calling API <y>{api}</y>")
-        if websocket:
-            if api == "send_rcon_cmd":
-                try:
-                    if bot.rcon is None:
-                        raise RCONConnectionError(msg="RCON client is None")
-                    command = data.get("command")
-                    if not isinstance(command, str):
-                        raise RCONConnectionError(msg="Command must be a string")
-                    return await bot.rcon.send_cmd(cmd=command, timeout=timeout)
-                except BaseClientNotConnectedError:
-                    raise ClientNotConnectedError()
-                except Exception as e:
-                    raise RCONConnectionError(msg=str(e), error=e)
-            seq = self._result_store.get_seq()
-            json_data = json.dumps({"api": api, "data": zip_dict(data), "echo": str(seq)}, cls=DataclassEncoder)
-            await websocket.send(json_data)
+        if not websocket:
+            raise NetworkError(f"Bot {bot.self_id} is not connected.")
+        if api == "send_rcon_cmd":
             try:
-                return handle_api_result(await self._result_store.fetch(seq, timeout))
-            except asyncio.TimeoutError:
-                raise NetworkError(f"WebSocket call api {api} timeout") from None
+                if bot.rcon is None:
+                    raise RCONConnectionError(msg="RCON client is None")
+                command = data.get("command")
+                if not isinstance(command, str):
+                    raise RCONConnectionError(msg="Command must be a string")
+                return await bot.rcon.send_cmd(cmd=command, timeout=timeout)
+            except BaseClientNotConnectedError:
+                raise ClientNotConnectedError()
+            except Exception as e:
+                raise RCONConnectionError(msg=str(e), error=e)
+        seq = self._result_store.get_seq()
+        json_data = json.dumps({"api": api, "data": zip_dict(data), "echo": str(seq)}, cls=DataclassEncoder)
+        await websocket.send(json_data)
+        try:
+            return handle_api_result(await self._result_store.fetch(seq, timeout))
+        except asyncio.TimeoutError:
+            raise NetworkError(f"WebSocket call api {api} timeout") from None
 
     async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
-        if server := self.minecraft_config.minecraft_server_rcon.get(server_name):
-            server_host = server.rcon_host or server_host
-            rcon = RCONClient(
-                server_host,
-                server.rcon_port,
-                server.rcon_password,
-            )
-            if server.enable_rcon:
-                log(
-                    "INFO",
-                    f"<y>Connecting</y> RCON for <y>Bot {escape_tag(server_name)}</y>",
-                )
-                try:
-                    await rcon.connect(timeout=server.timeout)
-                except BaseIncorrectPasswordError:
-                    raise IncorrectPasswordError()
-                except BaseClientNotConnectedError:
-                    raise ClientNotConnectedError()
-                except BaseRCONConnectionError as e:
-                    raise RCONConnectionError(e.message, e.error)
-                else:
-                    log(
-                        "INFO",
-                        f"RCON for <y>Bot {escape_tag(server_name)}</y> <g>connected</g>",
-                    )
-                    return rcon
-            else:
-                log(
-                    "INFO",
-                    f"RCON for <y>Bot {escape_tag(server_name)}</y> is not enabled, will not connect",
-                )
-        else:
-            log(
-                "INFO",
-                f"RCON configuration for <y>Bot {escape_tag(server_name)}</y> not found, will not connect",
-            )
-        return None
+        if not (server_config := self.minecraft_config.minecraft_server_rcon.get(server_name)):
+            log("INFO", f"RCON configuration for <y>Bot {escape_tag(server_name)}</y> not found, will not connect")
+            return None
+
+        if not server_config.enable_rcon:
+            log("INFO", f"RCON for <y>Bot {escape_tag(server_name)}</y> is not enabled, will not connect")
+            return None
+
+        host = server_config.rcon_host or server_host
+        rcon = RCONClient(host, server_config.rcon_port, server_config.rcon_password)
+
+        log("INFO", f"<y>Connecting</y> RCON for <y>Bot {escape_tag(server_name)}</y>")
+        try:
+            await rcon.connect(timeout=server_config.timeout)
+        except BaseIncorrectPasswordError:
+            raise IncorrectPasswordError()
+        except BaseClientNotConnectedError:
+            raise ClientNotConnectedError()
+        except BaseRCONConnectionError as e:
+            raise RCONConnectionError(e.message, e.error)
+
+        log("INFO", f"RCON for <y>Bot {escape_tag(server_name)}</y> <g>connected</g>")
+        return rcon
 
     async def _handle_ws(self, websocket: WebSocket) -> None:
-        ori_self_id = websocket.request.headers.get("x-self-name")
-
-        # check ori_self_id
-        if not ori_self_id:
+        if not (ori_self_id := websocket.request.headers.get("x-self-name")):
             log("WARNING", "Missing X-Self-Name Header")
             await websocket.close(1008, "Missing X-Self-Name Header")
             return
 
-        if client_origin := websocket.request.headers.get("x-client-origin"):
-            if client_origin == "nonebot":
-                log("WARNING", "X-Client-Origin Header cannot be nonebot")
-                await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
-                return
+        if websocket.request.headers.get("x-client-origin") == "nonebot":
+            log("WARNING", "X-Client-Origin Header cannot be nonebot")
+            await websocket.close(1008, "X-Client-Origin Header cannot be nonebot")
+            return
 
-        self_id = urllib.parse.unquote_plus(ori_self_id)  # type: ignore
-
-        if self.minecraft_config.minecraft_access_token:
-            access_token = websocket.request.headers.get("Authorization")
-            if not access_token:
-                log("WARNING", "Missing Authorization Header")
-                await websocket.close(1008, "Missing Authorization Header")
-                return
-
-            if access_token != "Bearer " + self.minecraft_config.minecraft_access_token:
-                log("WARNING", "Invalid Authorization Header")
-                await websocket.close(1008, "Invalid Authorization Header")
-                return
+        self_id = unquote_plus(ori_self_id)
 
         if self_id in self.bots:
             log("WARNING", f"There's already a bot {self_id}, ignored")
             await websocket.close(1008, "Duplicate X-Self-Name")
             return
+
+        if token_config := self.minecraft_config.minecraft_access_token:
+            auth_header = websocket.request.headers.get("Authorization")
+            if not auth_header:
+                log("WARNING", "Missing Authorization Header")
+                await websocket.close(1008, "Missing Authorization Header")
+                return
+            if auth_header != f"Bearer {token_config}":
+                log("WARNING", "Invalid Authorization Header")
+                await websocket.close(1008, "Invalid Authorization Header")
+                return
 
         await websocket.accept()
 
