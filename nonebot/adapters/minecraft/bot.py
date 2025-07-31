@@ -1,5 +1,6 @@
+from collections.abc import Callable
 import re
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from aiomcrcon import Client
 
@@ -43,7 +44,7 @@ def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
 async def send(
     bot: "Bot",
     event: Event,
-    message: Union[str, Message, MessageSegment],
+    message: str | Message | MessageSegment,
     **kwargs,
 ) -> Any:
     return await bot.send_msg(message=message)
@@ -51,11 +52,11 @@ async def send(
 
 class Bot(BaseBot):
     @overrides(BaseBot)
-    def __init__(self, adapter: "Adapter", self_id: str, rcon: Optional[Client] = None):
+    def __init__(self, adapter: "Adapter", self_id: str, rcon: Client | None = None):
         super().__init__(adapter, self_id)
-        self.rcon: Optional[Client] = rcon
+        self.rcon: Client | None = rcon
 
-    send_handler: Callable[["Bot", Event, Union[str, Message, MessageSegment]], Any] = send
+    send_handler: Callable[["Bot", Event, str | Message | MessageSegment], Any] = send
 
     async def handle_event(self, event: Event) -> None:
         """处理收到的事件。"""
@@ -68,7 +69,7 @@ class Bot(BaseBot):
     async def send(
         self,
         event: Event,
-        message: Union[str, Message, MessageSegment],
+        message: str | Message | MessageSegment,
         **kwargs,
     ) -> Any:
         return await self.__class__.send_handler(self, event, message, **kwargs)

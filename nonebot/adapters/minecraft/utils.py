@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -21,7 +21,7 @@ class DataclassEncoder(BaseDataclassEncoder):
         return super().default(o)
 
 
-def zip_dict(data: Union[BaseModel, dict[str, Any]]) -> dict[str, Any]:
+def zip_dict(data: BaseModel | dict[str, Any]) -> dict[str, Any]:
     """
     将字典中的空值去除
     :param data: 字典数据
@@ -43,7 +43,7 @@ def zip_dict(data: Union[BaseModel, dict[str, Any]]) -> dict[str, Any]:
     return temp_dict
 
 
-def handle_api_result(result: Optional[dict[str, Any]]) -> Any:
+def handle_api_result(result: dict[str, Any] | None) -> Any:
     """处理 API 请求返回值。
 
     参数:

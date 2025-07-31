@@ -5,14 +5,12 @@ FrontMatter:
     description: minecraft.permission 模块
 """
 
-from typing import Union
-
 from nonebot.permission import Permission
 
 from .event import MessageEvent, NoticeEvent
 
 
-async def _is_op(event: Union[MessageEvent, NoticeEvent]) -> bool:
+async def _is_op(event: MessageEvent | NoticeEvent) -> bool:
     return bool(event.player.is_op)
 
 

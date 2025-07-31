@@ -3,7 +3,7 @@ from collections.abc import Generator
 import contextlib
 import inspect
 import json
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import quote_plus, unquote_plus
 
 from aiomcrcon import Client as RCONClient
@@ -129,7 +129,7 @@ class Adapter(BaseAdapter):
             headers["Authorization"] = f"Bearer {self.minecraft_config.minecraft_access_token}"
         request = Request("GET", url, headers=headers, timeout=30.0)
 
-        bot: Optional[Bot] = None
+        bot: Bot | None = None
 
         while True:
             try:
@@ -218,7 +218,7 @@ class Adapter(BaseAdapter):
         except asyncio.TimeoutError:
             raise NetworkError(f"WebSocket call api {api} timeout") from None
 
-    async def _connect_rcon(self, server_name: str, server_host: str) -> Optional[RCONClient]:
+    async def _connect_rcon(self, server_name: str, server_host: str) -> RCONClient | None:
         if not (server_config := self.minecraft_config.minecraft_server_rcon.get(server_name)):
             log("INFO", f"RCON configuration for <y>Bot {escape_tag(server_name)}</y> not found, will not connect")
             return None
@@ -329,7 +329,7 @@ class Adapter(BaseAdapter):
         yield from cls.event_models.get_model(data)
 
     @classmethod
-    def json_to_event(cls, json_data: Any, self_id: Optional[str] = None) -> Optional[Event]:
+    def json_to_event(cls, json_data: Any, self_id: str | None = None) -> Event | None:
         """将 json 数据转换为 Event 对象。
 
         如果为 API 调用返回数据且提供了 Event 对应 Bot，则将数据存入 ResultStore。

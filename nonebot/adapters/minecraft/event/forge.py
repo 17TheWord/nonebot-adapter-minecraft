@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from .base import (
     BaseChatEvent,
@@ -13,22 +13,22 @@ from .base import (
 class Player(BasePlayer):
     """Forge Player"""
 
-    display_name: Optional[str] = None
-    ipAddress: Optional[str] = None
+    display_name: str | None = None
+    ipAddress: str | None = None
 
-    speed: Optional[float] = None
-    flying_speed: Optional[float] = None
+    speed: float | None = None
+    flying_speed: float | None = None
 
-    is_flying: Optional[bool] = None
-    is_swimming: Optional[bool] = None
-    is_sleeping: Optional[bool] = None
-    is_blocking: Optional[bool] = None
+    is_flying: bool | None = None
+    is_swimming: bool | None = None
+    is_sleeping: bool | None = None
+    is_blocking: bool | None = None
 
-    game_mode: Optional[str] = None
+    game_mode: str | None = None
 
-    block_x: Optional[int] = None
-    block_y: Optional[int] = None
-    block_z: Optional[int] = None
+    block_x: int | None = None
+    block_y: int | None = None
+    block_z: int | None = None
 
 
 class ServerChatEvent(BaseChatEvent):

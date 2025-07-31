@@ -5,8 +5,7 @@ FrontMatter:
     description: minecraft.collator 模块
 """
 
-from typing import Any, Generic, Optional, TypeVar, Union
-from typing_extensions import get_origin
+from typing import Any, Generic, TypeVar, get_origin
 
 from pygtrie import StringTrie
 
@@ -24,7 +23,7 @@ class Collator(Generic[E]):
         self,
         name: str,
         models: list[type[E]],
-        keys: tuple[Union[str, tuple[str, ...]], ...],
+        keys: tuple[str | tuple[str, ...], ...],
     ):
         self.name = name
         self.logger = logger_wrapper(self.name)
@@ -55,7 +54,7 @@ class Collator(Generic[E]):
             self.tree[key] = model
 
     def _key_from_dict(self, data: dict[str, Any]) -> str:
-        keys: list[Optional[str]] = []
+        keys: list[str | None] = []
         for key in self.keys:
             if isinstance(key, tuple):
                 fields = list(filter(None, (data.get(k, None) for k in key)))
@@ -68,7 +67,7 @@ class Collator(Generic[E]):
         return self._generate_key(keys)
 
     def _key_from_model(self, model: type[E]) -> str:
-        keys: list[Optional[str]] = []
+        keys: list[str | None] = []
         for key in self.keys:
             if isinstance(key, tuple):
                 fields = list(filter(None, (self._get_model_field(model, k) for k in key)))
@@ -80,20 +79,20 @@ class Collator(Generic[E]):
             keys.append(field and self._get_literal_field_default(field))
         return self._generate_key(keys)
 
-    def _generate_key(self, keys: list[Optional[str]]) -> str:
+    def _generate_key(self, keys: list[str | None]) -> str:
         if not self._check_key_list(keys):
             raise ValueError(f"Invalid model with incorrect prefix keys: {dict(zip(self.keys, keys))}")
         tree_keys = ["", *list(filter(None, keys))]
         return SEPARATOR.join(tree_keys)
 
-    def _check_key_list(self, keys: list[Optional[str]]) -> bool:
+    def _check_key_list(self, keys: list[str | None]) -> bool:
         truthy = tuple(map(bool, keys))
         return all(truthy) or not any(truthy[truthy.index(False) :])
 
-    def _get_model_field(self, model: type[E], field: str) -> Optional[ModelField]:
+    def _get_model_field(self, model: type[E], field: str) -> ModelField | None:
         return next((f for f in model_fields(model) if f.name == field), None)
 
-    def _get_literal_field_default(self, field: ModelField) -> Optional[str]:
+    def _get_literal_field_default(self, field: ModelField) -> str | None:
         if not origin_is_literal(get_origin(field.annotation)):
             return
         allowed_values = all_literal_values(field.annotation)

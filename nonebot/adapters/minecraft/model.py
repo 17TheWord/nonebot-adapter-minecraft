@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -48,15 +48,15 @@ class BaseComponent(BaseModel):
     BaseComponent
     """
 
-    text: Optional[str] = None
-    color: Optional[Union[TextColor, str]] = None
-    font: Optional[Union[FontEnum, str]] = None
-    bold: Optional[bool] = None
-    italic: Optional[bool] = None
-    underlined: Optional[bool] = None
-    strikethrough: Optional[bool] = None
-    obfuscated: Optional[bool] = None
-    insertion: Optional[Union[str, dict[str, Any]]] = None
+    text: str | None = None
+    color: TextColor | str | None = None
+    font: FontEnum | str | None = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underlined: bool | None = None
+    strikethrough: bool | None = None
+    obfuscated: bool | None = None
+    insertion: str | dict[str, Any] | None = None
 
     def __str__(self):
         """
@@ -90,8 +90,8 @@ class ClickEvent(BaseModel):
     点击事件
     """
 
-    action: Optional[Union[ClickAction, str]] = None
-    value: Optional[str] = None
+    action: ClickAction | str | None = None
+    value: str | None = None
 
 
 class HoverAction(str, Enum):
@@ -109,13 +109,13 @@ class HoverItem(BaseModel):
     悬停事件中的物品
     """
 
-    id: Optional[str] = None
+    id: str | None = None
     """Spigot, Forge, Fabric"""
-    count: Optional[int] = None
+    count: int | None = None
     """Spigot, Forge, Fabric"""
-    tag: Optional[str] = None
+    tag: str | None = None
     """Spigot"""
-    key: Optional[str] = None
+    key: str | None = None
     """Velocity"""
 
 
@@ -124,13 +124,13 @@ class HoverEntity(BaseModel):
     悬停事件中的实体
     """
 
-    type: Optional[str] = None
+    type: str | None = None
     """Spigot, Forge, Fabric"""
-    id: Optional[str] = None
+    id: str | None = None
     """Spigot"""
-    name: Optional[list[BaseComponent]] = None
+    name: list[BaseComponent] | None = None
     """Spigot, Forge, Fabric"""
-    key: Optional[str] = None
+    key: str | None = None
     """Velocity"""
 
 
@@ -139,10 +139,10 @@ class HoverEvent(BaseModel):
     悬停事件，传参请传action 和 text/item/entity (三选一)
     """
 
-    action: Optional[Union[HoverAction, str]] = None
-    text: Optional[list[BaseComponent]] = None
-    item: Optional[HoverItem] = None
-    entity: Optional[HoverEntity] = None
+    action: HoverAction | str | None = None
+    text: list[BaseComponent] | None = None
+    item: HoverItem | None = None
+    entity: HoverEntity | None = None
 
 
 class TextComponent(BaseComponent):
@@ -150,8 +150,8 @@ class TextComponent(BaseComponent):
     TextComponent
     """
 
-    click_event: Optional[ClickEvent] = None
-    hover_event: Optional[HoverEvent] = None
+    click_event: ClickEvent | None = None
+    hover_event: HoverEvent | None = None
 
 
 class ChatImageModComponent(BaseModel):
@@ -159,8 +159,8 @@ class ChatImageModComponent(BaseModel):
     ChatImage Mod 图片
     """
 
-    url: Optional[str] = None
-    name: Optional[str] = "图片"
+    url: str | None = None
+    name: str | None = "图片"
 
     def __str__(self):
         return f"[[CICode,url={self.url},name={self.name}]]"
@@ -171,11 +171,11 @@ class TitleItem(BaseModel):
     SendTitle 消息体
     """
 
-    title: Optional[list[BaseComponent]] = None
-    subtitle: Optional[list[BaseComponent]] = None
-    fadein: Optional[int] = None
-    stay: Optional[int] = None
-    fadeout: Optional[int] = None
+    title: list[BaseComponent] | None = None
+    subtitle: list[BaseComponent] | None = None
+    fadein: int | None = None
+    stay: int | None = None
+    fadeout: int | None = None
 
 
 """
@@ -202,8 +202,8 @@ class RconHoverEvent(BaseModel):
     悬停事件
     """
 
-    action: Optional[HoverAction] = None
-    contents: Optional[Union[list[BaseComponent], str, dict[str, Any]]] = None
+    action: HoverAction | None = None
+    contents: list[BaseComponent] | str | dict[str, Any] | None = None
 
 
 class RconStyleComponent(BaseModel):
@@ -211,14 +211,14 @@ class RconStyleComponent(BaseModel):
     Rcon BaseComponent
     """
 
-    color: Optional[Union[TextColor, str]] = None
-    font: Optional[Union[FontEnum, str]] = None
-    bold: Optional[bool] = None
-    italic: Optional[bool] = None
-    underlined: Optional[bool] = None
-    strikethrough: Optional[bool] = None
-    obfuscated: Optional[bool] = None
-    insertion: Optional[str] = None
+    color: TextColor | str | None = None
+    font: FontEnum | str | None = None
+    bold: bool | None = None
+    italic: bool | None = None
+    underlined: bool | None = None
+    strikethrough: bool | None = None
+    obfuscated: bool | None = None
+    insertion: str | None = None
 
 
 class RconRichComponent(BaseModel):
@@ -226,8 +226,8 @@ class RconRichComponent(BaseModel):
     Rcon Text Component
     """
 
-    click_event: Optional[RconClickEvent] = None
-    hover_event: Optional[RconHoverEvent] = None
+    click_event: RconClickEvent | None = None
+    hover_event: RconHoverEvent | None = None
 
 
 class RconTextComponent(RconStyleComponent):
@@ -235,7 +235,7 @@ class RconTextComponent(RconStyleComponent):
     Rcon Text Component
     """
 
-    text: Optional[str] = None
+    text: str | None = None
 
 
 class RconRichTextComponent(RconTextComponent, RconRichComponent):
@@ -249,7 +249,7 @@ class RconSelectorComponent(RconStyleComponent):
     Rcon Selector Component
     """
 
-    selector: Optional[str] = None
+    selector: str | None = None
 
 
 class RconRichSelectorComponent(RconSelectorComponent, RconRichComponent):
@@ -263,8 +263,8 @@ class RconScoreboardObjective(BaseModel):
     Rcon Scoreboard Objective
     """
 
-    name: Optional[str] = None
-    objective: Optional[str] = None
+    name: str | None = None
+    objective: str | None = None
 
 
 class RconScoreboardComponent(RconStyleComponent):
@@ -272,7 +272,7 @@ class RconScoreboardComponent(RconStyleComponent):
     Rcon Scoreboard Component
     """
 
-    score: Optional[RconScoreboardObjective] = None
+    score: RconScoreboardObjective | None = None
 
 
 class RconRichScoreboardComponent(RconScoreboardComponent, RconRichComponent):
@@ -286,8 +286,8 @@ class RconNBTComponent(RconStyleComponent):
     Rcon NBT Component
     """
 
-    nbt: Optional[str] = None
-    interpret: Optional[bool] = None
+    nbt: str | None = None
+    interpret: bool | None = None
 
 
 class RconNBTStorageComponent(RconNBTComponent):
@@ -295,7 +295,7 @@ class RconNBTStorageComponent(RconNBTComponent):
     Rcon NBT Component
     """
 
-    storage: Optional[str] = None
+    storage: str | None = None
 
 
 class RconNBTEntityComponent(RconNBTComponent):
@@ -303,7 +303,7 @@ class RconNBTEntityComponent(RconNBTComponent):
     Rcon NBT Component
     """
 
-    entity: Optional[str] = None
+    entity: str | None = None
 
 
 class RconNBTBlockComponent(RconNBTComponent):
@@ -311,7 +311,7 @@ class RconNBTBlockComponent(RconNBTComponent):
     Rcon NBT Component
     """
 
-    block: Optional[str] = None
+    block: str | None = None
 
 
 class RconRichNBTStorageComponent(RconNBTStorageComponent, RconRichComponent):
@@ -337,7 +337,7 @@ class RconKeybindComponent(RconStyleComponent):
     Rcon Keybind Component
     """
 
-    keybind: Optional[str] = None
+    keybind: str | None = None
 
 
 class RconRichKeybindComponent(RconKeybindComponent, RconRichComponent):
@@ -351,20 +351,19 @@ class RconTranslateComponent(RconStyleComponent):
     Rcon Translate Component
     """
 
-    translate: Optional[str] = None
-    with_: Optional[
+    translate: str | None = None
+    with_: (
         list[
-            Union[
-                RconRichTextComponent,
-                RconRichSelectorComponent,
-                RconRichScoreboardComponent,
-                RconRichNBTStorageComponent,
-                RconRichNBTEntityComponent,
-                RconRichNBTBlockComponent,
-                RconRichKeybindComponent,
-            ]
+            RconRichTextComponent
+            | RconRichSelectorComponent
+            | RconRichScoreboardComponent
+            | RconRichNBTStorageComponent
+            | RconRichNBTEntityComponent
+            | RconRichNBTBlockComponent
+            | RconRichKeybindComponent
         ]
-    ] = Field(alias="with")
+        | None
+    ) = Field(alias="with")
 
 
 class RconRichTranslateComponent(RconTranslateComponent, RconRichComponent):

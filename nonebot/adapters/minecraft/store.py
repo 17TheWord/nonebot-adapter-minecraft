@@ -2,7 +2,7 @@
 
 import asyncio
 import sys
-from typing import Any, Optional
+from typing import Any
 
 
 class ResultStore:
@@ -25,7 +25,7 @@ class ResultStore:
             if future := self._futures.get(int(echo)):
                 future.set_result(result)
 
-    async def fetch(self, seq: int, timeout: Optional[float]) -> dict[str, Any]:
+    async def fetch(self, seq: int, timeout: float | None) -> dict[str, Any]:
         future = asyncio.get_event_loop().create_future()
         self._futures[seq] = future
         try:

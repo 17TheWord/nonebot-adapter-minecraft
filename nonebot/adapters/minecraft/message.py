@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-from typing import Optional
 
 from nonebot.adapters import Message as BaseMessage
 from nonebot.adapters import MessageSegment as BaseMessageSegment
@@ -44,17 +43,17 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @staticmethod
     def text(
-        text: Optional[str] = None,
-        color: Optional[TextColor] = None,
-        font: Optional[str] = None,
-        bold: Optional[bool] = False,
-        italic: Optional[bool] = False,
-        underlined: Optional[bool] = False,
-        strikethrough: Optional[bool] = False,
-        obfuscated: Optional[bool] = False,
-        insertion: Optional[str] = None,
-        click_event: Optional[ClickEvent] = None,
-        hover_event: Optional[HoverEvent] = None,
+        text: str | None = None,
+        color: TextColor | None = None,
+        font: str | None = None,
+        bold: bool | None = False,
+        italic: bool | None = False,
+        underlined: bool | None = False,
+        strikethrough: bool | None = False,
+        obfuscated: bool | None = False,
+        insertion: str | None = None,
+        click_event: ClickEvent | None = None,
+        hover_event: HoverEvent | None = None,
     ):
         text_component = TextComponent(
             text=text,
@@ -81,5 +80,5 @@ class Message(BaseMessage[MessageSegment]):
 
     @staticmethod
     @overrides(BaseMessage)
-    def _construct(msg: Optional[str] = None) -> Iterable[MessageSegment]:
+    def _construct(msg: str | None = None) -> Iterable[MessageSegment]:
         yield MessageSegment.text(msg)

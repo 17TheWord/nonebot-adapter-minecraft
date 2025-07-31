@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -63,8 +63,8 @@ class BasePlayer(BaseModel):
     """玩家基类"""
 
     nickname: str
-    uuid: Optional[UUID] = None
-    is_op: Optional[bool] = None
+    uuid: UUID | None = None
+    is_op: bool | None = None
 
     if PYDANTIC_V2:
         model_config = ConfigDict(extra="allow")
@@ -78,9 +78,9 @@ class BasePlayer(BaseModel):
 class MessageEvent(Event):
     """消息事件"""
 
-    message_id: Optional[str] = ""
-    to_me: Optional[bool] = False
-    ori_message: Optional[Message] = None
+    message_id: str | None = ""
+    to_me: bool | None = False
+    ori_message: Message | None = None
     post_type: Literal["message"]
     player: BasePlayer
     message: Message
