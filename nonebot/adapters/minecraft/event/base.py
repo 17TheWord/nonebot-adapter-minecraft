@@ -51,7 +51,7 @@ class Event(BaseEvent):
         return False
 
     if PYDANTIC_V2:
-        model_config = ConfigDict(extra="allow")
+        model_config = ConfigDict(extra="allow")  # type: ignore
     else:
 
         class Config(ConfigDict):
@@ -67,7 +67,7 @@ class BasePlayer(BaseModel):
     is_op: bool | None = None
 
     if PYDANTIC_V2:
-        model_config = ConfigDict(extra="allow")
+        model_config = ConfigDict(extra="allow")  # type: ignore
     else:
 
         class Config(ConfigDict):

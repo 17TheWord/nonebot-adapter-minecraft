@@ -309,8 +309,18 @@ class Adapter(BaseAdapter):
             with contextlib.suppress(Exception):
                 await websocket.close()
                 if rcon:
-                    await rcon.close()
-                    log("INFO", f"RCON for <y>Bot {escape_tag(self_id)}</y> closed")
+                    try:
+                        await asyncio.wait_for(rcon.close(), timeout=5.0)
+                        log("INFO", f"RCON for <y>Bot {escape_tag(bot.self_id)}</y> closed gracefully.")
+                    except asyncio.TimeoutError:
+                        log("WARNING", f"Closing RCON for <y>Bot {escape_tag(bot.self_id)}</y> timed out.")
+                    except Exception as e:
+                        log(
+                            "ERROR",
+                            f"An error occurred while closing RCON for <y>Bot {escape_tag(bot.self_id)}</y>.",
+                            e,
+                        )
+
             self.connections.pop(self_id, None)
             self.bot_disconnect(bot)
 
