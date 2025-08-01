@@ -18,8 +18,9 @@ _✨ Minecraft 协议适配 ✨_
 
 - [`原版端`](https://www.minecraft.net/zh-hans/download/server)
 - [`Spigot`](https://www.spigotmc.org/)
-- [`Fabric`](https://fabricmc.net/)
+- [`Folia`](https://papermc.io/software/folia)
 - [`Forge`](https://files.minecraftforge.net/)
+- [`Fabric`](https://fabricmc.net/)
 - [`NeoForge`](https://neoforged.net/)
 - [`Velocity`](https://papermc.io/software/velocity)
 
@@ -27,7 +28,7 @@ _✨ Minecraft 协议适配 ✨_
 
 ## Rcon支持
 
-对于命令采用 `rcon` 发送，`rcon` 库为 [`aio-mc-rcon`](https://github.com/Iapetus-11/aio-mc-rcon)
+命令采用 `rcon` 发送，`rcon` 库为 [`aio-mc-rcon`](https://github.com/Iapetus-11/aio-mc-rcon)
 
 ## 其他
 
