@@ -28,7 +28,6 @@ jobs:
       - name: Install Poetry
         run: |
           curl -sSL https://install.python-poetry.org | python -
-          poetry config pypi-token.pypi ${{ env.PYPI_API_TOKEN }}
 
       - name: Get version from pyproject.toml
         id: get_version
@@ -41,7 +40,9 @@ jobs:
 
       - name: Build and publish
         if: github.event_name == 'push'
-        run: poetry publish --build
+        run: |
+          poetry config pypi-token.pypi ${{ env.PYPI_API_TOKEN }}
+          poetry publish --build
 
       - name: Check if Release exists
         id: check-release
