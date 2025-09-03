@@ -1,31 +1,41 @@
-[tool.poetry]
+[project]
 name = "nonebot-adapter-minecraft"
 version = "1.5.1"
 description = "NoneBot2与MineCraft Server互通的适配器。"
-authors = ["17TheWord <17theword@gmail.com>"]
-license = "MIT"
+authors = [{ name = "17TheWord", email = "17theword@gmail.com" }]
+requires-python = ">=3.10,<4.0"
 readme = "README.md"
-packages = [{ include = "nonebot" }]
+license = "MIT"
+dependencies = [
+    "aio-mc-rcon>=3.4.1,<4",
+    "pydantic>=1.10.0,<3.0.0,!=2.5.0,!=2.5.1",
+    "nonebot2[fastapi, httpx, websockets]>=2.2.0,<3",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-aio-mc-rcon = "^3.4.1"
-pydantic = ">=1.10.0,<3.0.0,!=2.5.0,!=2.5.1"
-nonebot2 = { version = "^2.2.0", extras = ["fastapi"] }
+[dependency-groups]
+dev = ["pre-commit>=4.2.0,<5", "nonebot2[fastapi, httpx, websockets]>=2.2.0,<3"]
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.12.4"
-nonebug = "^0.3.5"
-pytest-cov = "^4.0.0"
-pre-commit = "^4.2.0"
-pytest-asyncio = "^0.23.0"
-nonebot2 = { version = "^2.2.0", extras = ["fastapi"] }
+lint = ["ruff>=0.12.4,<0.13", "pre-commit>=4.2.0,<5"]
+
+test = [
+    "nonebug>=0.3.5,<0.4",
+    "pytest-cov>=4.0.0,<5",
+    "pytest-asyncio>=0.23.0,<0.24",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["nonebot"]
+
+[tool.hatch.build.targets.wheel]
+include = ["nonebot"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = "--cov=nonebot/adapters/minecraft --cov-report term-missing"
-filterwarnings = [
-    "ignore:.*overrides.*:DeprecationWarning:nonebot.typing",
-]
+filterwarnings = ["ignore:.*overrides.*:DeprecationWarning:nonebot.typing"]
 
 [tool.ruff]
 line-length = 120
@@ -56,6 +66,7 @@ ignore = [
     "RUF003", # ambiguous-unicode-character-comment
     "RUF006", # ambiguous-unicode-character-assignment
 ]
+
 [tool.ruff.lint.per-file-ignores]
 "nonebot/adapters/minecraft/__init__.py" = ["F403"]
 
@@ -75,10 +86,6 @@ extra-standard-library = ["typing_extensions"]
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 mark-parentheses = false
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.data.packages]
 my_package = { path = "nonebot/adapters/minecraft" }
