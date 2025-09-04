@@ -30,15 +30,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install test dependencies
+        run: uv sync --group test --locked
+
       - name: Build package (sdist/wheel)
         run: uv build --no-sources
 
       - name: Run Pytest with coverage
-        run: |
-          uv run --no-sync pytest \
-            --cov=. \
-            --cov-report xml:coverage.xml \
-            --junitxml=junit.xml -o junit_family=legacy
+        run: uv run --no-sync pytest --cov=. --cov-report xml:coverage.xml --junitxml=junit.xml -o junit_family=legacy
 
       - name: Upload coverage to Codecov
         if: ${{ !cancelled() }}
