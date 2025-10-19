@@ -27,12 +27,13 @@ class ActionFailed(
     BaseActionFailed,
     MinecraftAdapterException,
 ):
-    def __init__(self, response: Response):
+    def __init__(self,**kwargs):
         super().__init__()
-        self.status_code: int = response.status_code
-        self.code: int | None = None
-        self.message: str | None = None
-        self.data: dict | None = None
+        self.info = kwargs
+        """所有错误信息"""
+
+    def __repr__(self):
+        return "ActionFailed(" + ", ".join(f"{k}={v!r}" for k, v in self.info.items()) + ")"
 
 
 class UnauthorizedException(ActionFailed):
