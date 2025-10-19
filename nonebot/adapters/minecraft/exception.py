@@ -26,8 +26,10 @@ class ActionFailed(
     BaseActionFailed,
     MinecraftAdapterException,
 ):
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__()
+        self.message: str = kwargs.get("message", "")
+        """错误信息"""
         self.info = kwargs
         """所有错误信息"""
 
