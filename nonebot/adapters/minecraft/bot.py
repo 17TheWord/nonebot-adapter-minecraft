@@ -2,8 +2,6 @@ from collections.abc import Callable
 import re
 from typing import TYPE_CHECKING, Any
 
-from aiomcrcon import Client
-
 from nonebot.adapters import Bot as BaseBot
 from nonebot.message import handle_event
 from nonebot.typing import overrides
@@ -52,9 +50,8 @@ async def send(
 
 class Bot(BaseBot):
     @overrides(BaseBot)
-    def __init__(self, adapter: "Adapter", self_id: str, rcon: Client | None = None):
+    def __init__(self, adapter: "Adapter", self_id: str):
         super().__init__(adapter, self_id)
-        self.rcon: Client | None = rcon
 
     send_handler: Callable[["Bot", Event, str | Message | MessageSegment], Any] = send
 

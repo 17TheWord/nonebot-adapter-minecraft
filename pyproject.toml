@@ -7,7 +7,6 @@ requires-python = ">=3.10,<4.0"
 readme = "README.md"
 license = "MIT"
 dependencies = [
-    "aio-mc-rcon>=3.4.1,<4",
     "pydantic>=1.10.0,<3.0.0,!=2.5.0,!=2.5.1",
     "nonebot2[fastapi, httpx, websockets]>=2.2.0,<3",
 ]

@@ -6,11 +6,6 @@ import json
 from typing import Any
 from urllib.parse import quote_plus, unquote_plus
 
-from aiomcrcon import Client as RCONClient
-from aiomcrcon import ClientNotConnectedError as BaseClientNotConnectedError
-from aiomcrcon import IncorrectPasswordError as BaseIncorrectPasswordError
-from aiomcrcon import RCONConnectionError as BaseRCONConnectionError
-
 from nonebot import get_plugin_config
 from nonebot.adapters import Adapter as BaseAdapter
 from nonebot.compat import type_validate_python
@@ -36,7 +31,6 @@ from .exception import (
     ClientNotConnectedError,
     IncorrectPasswordError,
     NetworkError,
-    RCONConnectionError,
 )
 from .store import ResultStore
 from .utils import DataclassEncoder, handle_api_result, log, zip_dict
@@ -138,10 +132,8 @@ class Adapter(BaseAdapter):
                         "DEBUG",
                         f"WebSocket Connection to {escape_tag(str(url))} established",
                     )
-                    # 连接 Rcon
-                    rcon = await self._connect_rcon(server_name, url.host)
                     if not bot:
-                        bot = Bot(self, server_name, rcon)
+                        bot = Bot(self, server_name)
                         self.bot_connect(bot)
                         self.connections[server_name] = ws
                         log(
@@ -175,8 +167,6 @@ class Adapter(BaseAdapter):
                         )
                     finally:
                         if bot:
-                            if rcon:
-                                await rcon.close()
                             self.connections.pop(bot.self_id, None)
                             self.bot_disconnect(bot)
                             bot = None
@@ -218,30 +208,13 @@ class Adapter(BaseAdapter):
         except asyncio.TimeoutError:
             raise NetworkError(f"WebSocket call api {api} timeout") from None
 
-    async def _connect_rcon(self, server_name: str, server_host: str) -> RCONClient | None:
-        if not (server_config := self.minecraft_config.minecraft_server_rcon.get(server_name)):
-            log("INFO", f"RCON configuration for <y>Bot {escape_tag(server_name)}</y> not found, will not connect")
-            return None
-
-        if not server_config.enable_rcon:
-            log("INFO", f"RCON for <y>Bot {escape_tag(server_name)}</y> is not enabled, will not connect")
-            return None
-
-        host = server_config.rcon_host or server_host
-        rcon = RCONClient(host, server_config.rcon_port, server_config.rcon_password)
-
-        log("INFO", f"<y>Connecting</y> RCON for <y>Bot {escape_tag(server_name)}</y>")
-        try:
-            await rcon.connect(timeout=server_config.timeout)
-        except BaseIncorrectPasswordError:
-            raise IncorrectPasswordError()
-        except BaseClientNotConnectedError:
-            raise ClientNotConnectedError()
-        except BaseRCONConnectionError as e:
-            raise RCONConnectionError(e.message, e.error)
-
-        log("INFO", f"RCON for <y>Bot {escape_tag(server_name)}</y> <g>connected</g>")
-        return rcon
+    @overrides(BaseAdapter)
+    async def _call_api(self, bot: Bot, api: str, **data: Any) -> Any:
+        log("DEBUG", f"Bot {bot.self_id} calling API <y>{api}</y>")
+        api_handler: API | None = getattr(bot.__class__, api, None)
+        if api_handler is None:
+            raise ApiNotAvailable(f"API {api} is not available.")
+        return await api_handler(bot, **data)
 
     async def _handle_ws(self, websocket: WebSocket) -> None:
         if not (ori_self_id := websocket.request.headers.get("x-self-name")):
@@ -282,9 +255,7 @@ class Adapter(BaseAdapter):
             log("WARNING", "Cannot get host from websocket, will try getting from configuration")
             host_from_websocket = ""
 
-        rcon = await self._connect_rcon(self_id, host_from_websocket)
-
-        bot = Bot(self, self_id, rcon)  # type: ignore
+        bot = Bot(self, self_id)
         self.connections[self_id] = websocket
         self.bot_connect(bot)
 
@@ -308,19 +279,6 @@ class Adapter(BaseAdapter):
         finally:
             with contextlib.suppress(Exception):
                 await websocket.close()
-                if rcon:
-                    try:
-                        await asyncio.wait_for(rcon.close(), timeout=5.0)
-                        log("INFO", f"RCON for <y>Bot {escape_tag(bot.self_id)}</y> closed gracefully.")
-                    except asyncio.TimeoutError:
-                        log("WARNING", f"Closing RCON for <y>Bot {escape_tag(bot.self_id)}</y> timed out.")
-                    except Exception as e:
-                        log(
-                            "ERROR",
-                            f"An error occurred while closing RCON for <y>Bot {escape_tag(bot.self_id)}</y>.",
-                            e,
-                        )
-
             self.connections.pop(self_id, None)
             self.bot_disconnect(bot)
 
