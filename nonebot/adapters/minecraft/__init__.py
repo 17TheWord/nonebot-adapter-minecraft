@@ -8,4 +8,3 @@ from .message import MessageSegment as MessageSegment
 from .permission import *
 from .utils import DataclassEncoder as DataclassEncoder
 from .utils import log as log
-from .utils import zip_dict as zip_dict
