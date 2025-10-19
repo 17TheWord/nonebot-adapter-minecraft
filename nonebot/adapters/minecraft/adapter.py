@@ -28,8 +28,7 @@ from .collator import Collator
 from .config import Config
 from .event import Event
 from .exception import (
-    ClientNotConnectedError,
-    IncorrectPasswordError,
+    ApiNotAvailable,
     NetworkError,
 )
 from .store import ResultStore
