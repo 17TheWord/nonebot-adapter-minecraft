@@ -28,6 +28,7 @@ class ActionFailed(
     MinecraftAdapterException,
 ):
     def __init__(self, response: Response):
+        super().__init__()
         self.status_code: int = response.status_code
         self.code: int | None = None
         self.message: str | None = None
@@ -43,4 +44,7 @@ class RateLimitException(ActionFailed):
 
 
 class ApiNotAvailable(BaseApiNotAvailable, MinecraftAdapterException):
-    pass
+    def __init__(self, msg: str | None = None):
+        super().__init__()
+        self.msg: str | None = msg
+        """错误原因"""
