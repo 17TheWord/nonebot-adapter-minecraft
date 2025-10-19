@@ -7,6 +7,7 @@ from nonebot.message import handle_event
 from nonebot.typing import overrides
 
 from .event import Event, MessageEvent
+from .exception import ActionFailed
 from .message import Message, MessageSegment
 from .utils import api, log
 
@@ -118,7 +119,8 @@ class Bot(BaseBot):
             None
         """
         if not title and not subtitle:
-            raise ValueError("At least one of title or subtitle must be provided.")
+            raise ActionFailed(message="At least one of title or subtitle must be provided.")
+
         data = {
             "title": _parse_message(title) if title else None,
             "subtitle": _parse_message(subtitle) if subtitle else None,
