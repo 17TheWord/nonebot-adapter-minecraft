@@ -32,7 +32,7 @@ from .exception import (
     NetworkError,
 )
 from .store import ResultStore
-from .utils import DataclassEncoder, handle_api_result, log, zip_dict
+from .utils import API, DataclassEncoder, handle_api_result, log
 
 RECONNECT_INTERVAL = 3.0
 DEFAULT_MODELS: list[type[Event]] = []
@@ -180,27 +180,12 @@ class Adapter(BaseAdapter):
 
             await asyncio.sleep(RECONNECT_INTERVAL)
 
-    @overrides(BaseAdapter)
-    async def _call_api(self, bot: Bot, api: str, **data: Any) -> Any:
-        websocket = self.connections.get(bot.self_id, None)
-        timeout: float = data.get("_timeout", self.config.api_timeout)
-        log("DEBUG", f"Calling API <y>{api}</y>")
-        if not websocket:
-            raise NetworkError(f"Bot {bot.self_id} is not connected.")
-        if api == "send_rcon_cmd":
-            try:
-                if bot.rcon is None:
-                    raise RCONConnectionError(msg="RCON client is None")
-                command = data.get("command")
-                if not isinstance(command, str):
-                    raise RCONConnectionError(msg="Command must be a string")
-                return await bot.rcon.send_cmd(cmd=command, timeout=timeout)
-            except BaseClientNotConnectedError:
-                raise ClientNotConnectedError()
-            except Exception as e:
-                raise RCONConnectionError(msg=str(e), error=e)
+    async def send_websocket_message(self, bot_id: str, api: str, data: Any) -> Any:
+        if not (websocket := self.connections.get(bot_id, None)):
+            raise NetworkError(f"Bot {bot_id} is not connected.")
         seq = self._result_store.get_seq()
-        json_data = json.dumps({"api": api, "data": zip_dict(data), "echo": str(seq)}, cls=DataclassEncoder)
+        timeout: float = data.get("_timeout", self.config.api_timeout)
+        json_data = json.dumps({"api": api, "data": data, "echo": str(seq)}, cls=DataclassEncoder)
         await websocket.send(json_data)
         try:
             return handle_api_result(await self._result_store.fetch(seq, timeout))

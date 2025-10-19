@@ -1,4 +1,6 @@
-from typing import Any
+from collections.abc import Awaitable, Callable
+from functools import partial
+from typing import Any, Concatenate, Generic, TypeVar, overload
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -6,10 +8,52 @@ from pydantic import BaseModel
 from nonebot.compat import PYDANTIC_V2
 from nonebot.utils import DataclassEncoder as BaseDataclassEncoder
 from nonebot.utils import logger_wrapper
+from typing_extensions import ParamSpec
 
 from .exception import ActionFailed
 
 log = logger_wrapper("Minecraft")
+
+T = TypeVar("T")
+TCallable = TypeVar("TCallable", bound=Callable[..., Any])
+B = TypeVar("B", bound="Bot")
+R = TypeVar("R")
+P = ParamSpec("P")
+
+
+class API(Generic[B, P, R]):
+    def __init__(self, func: Callable[Concatenate[B, P], Awaitable[R]]) -> None:
+        self.func = func
+
+    def __set_name__(self, owner: type[B], name: str) -> None:
+        self.name = name
+
+    @overload
+    def __get__(self, obj: None, objtype: type[B]) -> "API[B, P, R]": ...
+
+    @overload
+    def __get__(self, obj: B, objtype: type[B] | None) -> Callable[P, Awaitable[R]]: ...
+
+    def __get__(self, obj: B | None, objtype: type[B] | None = None) -> "API[B, P, R] | Callable[P, Awaitable[R]]":
+        if obj is None:
+            return self
+
+        return partial(obj.call_api, self.name)  # type: ignore
+
+    async def __call__(self, inst: B, *args: P.args, **kwds: P.kwargs) -> R:
+        return await self.func(inst, *args, **kwds)
+
+
+def api(func: TCallable) -> TCallable:
+    """装饰器，用于标记 API 方法。
+
+    Args:
+        func: 被装饰的函数
+
+    Returns:
+        API 实例
+    """
+    return API(func)  # type: ignore
 
 
 class DataclassEncoder(BaseDataclassEncoder):
