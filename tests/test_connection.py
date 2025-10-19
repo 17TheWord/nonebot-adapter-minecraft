@@ -14,7 +14,7 @@ async def test_ws_server(app: App):
 
     async with app.test_server() as ctx:
         client = ctx.get_client()
-        headers = {"x-self-name": quote_plus("Server")}
+        headers = {"x-self-name": quote_plus("Server"), "Authorization": "Bearer test_access_token"}
         client.headers.update(headers)
         async with client.websocket_connect("/minecraft/ws", headers=headers) as ws:
             await asyncio.sleep(1)
