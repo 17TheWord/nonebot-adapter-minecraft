@@ -1,15 +1,59 @@
-from typing import Any
+from collections.abc import Awaitable, Callable
+from functools import partial
+from typing import TYPE_CHECKING, Any, Concatenate, Generic, TypeVar, overload
+from typing_extensions import ParamSpec
 from uuid import UUID
 
-from pydantic import BaseModel
-
-from nonebot.compat import PYDANTIC_V2
 from nonebot.utils import DataclassEncoder as BaseDataclassEncoder
 from nonebot.utils import logger_wrapper
 
 from .exception import ActionFailed
 
 log = logger_wrapper("Minecraft")
+
+if TYPE_CHECKING:
+    from .bot import Bot
+
+T = TypeVar("T")
+TCallable = TypeVar("TCallable", bound=Callable[..., Any])
+B = TypeVar("B", bound="Bot")
+R = TypeVar("R")
+P = ParamSpec("P")
+
+
+class API(Generic[B, P, R]):
+    def __init__(self, func: Callable[Concatenate[B, P], Awaitable[R]]) -> None:
+        self.func = func
+
+    def __set_name__(self, owner: type[B], name: str) -> None:
+        self.name = name
+
+    @overload
+    def __get__(self, obj: None, objtype: type[B]) -> "API[B, P, R]": ...
+
+    @overload
+    def __get__(self, obj: B, objtype: type[B] | None) -> Callable[P, Awaitable[R]]: ...
+
+    def __get__(self, obj: B | None, objtype: type[B] | None = None) -> "API[B, P, R] | Callable[P, Awaitable[R]]":
+        if obj is None:
+            return self
+
+        return partial(obj.call_api, self.name)  # type: ignore
+
+    async def __call__(self, inst: B, *args: P.args, **kwds: P.kwargs) -> R:
+        return await self.func(inst, *args, **kwds)
+
+
+def api(func: TCallable) -> TCallable:
+    """装饰器，用于标记 API 方法。
+
+    Args:
+        func: 被装饰的函数
+
+    Returns:
+        API 实例
+    """
+    return API(func)  # type: ignore
 
 
 class DataclassEncoder(BaseDataclassEncoder):
@@ -21,38 +65,16 @@ class DataclassEncoder(BaseDataclassEncoder):
         return super().default(o)
 
 
-def zip_dict(data: BaseModel | dict[str, Any]) -> dict[str, Any]:
-    """
-    将字典中的空值去除
-    :param data: 字典数据
-    :return: 处理后的字典数据
-    """
-    temp_dict = {}
-    if isinstance(data, BaseModel):
-        data = data.model_dump() if PYDANTIC_V2 else data.dict()
-    else:
-        data = data.copy()
-    for k, v in data.items():
-        if v:
-            if isinstance(v, dict):
-                temp_dict[k] = zip_dict(v)
-            elif isinstance(v, list):
-                temp_dict[k] = [zip_dict(i) for i in v]
-            else:
-                temp_dict[k] = v
-    return temp_dict
-
-
 def handle_api_result(result: dict[str, Any] | None) -> Any:
     """处理 API 请求返回值。
 
-    参数:
+    Args:
         result: API 返回数据
 
-    返回:
+    Returns:
         API 调用返回数据
 
-    异常:
+    Raises:
         ActionFailed: API 调用失败
     """
     if isinstance(result, dict):

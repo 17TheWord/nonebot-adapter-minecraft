@@ -1,8 +1,3 @@
-from aiomcrcon.errors import ClientNotConnectedError as BaseClientNotConnectedError
-from aiomcrcon.errors import IncorrectPasswordError as BaseIncorrectPasswordError
-from aiomcrcon.errors import RCONConnectionError as BaseRCONConnectionError
-
-from nonebot.drivers import Response
 from nonebot.exception import ActionFailed as BaseActionFailed
 from nonebot.exception import AdapterException
 from nonebot.exception import ApiNotAvailable as BaseApiNotAvailable
@@ -31,30 +26,15 @@ class ActionFailed(
     BaseActionFailed,
     MinecraftAdapterException,
 ):
-    def __init__(self, response: Response):
-        self.status_code: int = response.status_code
-        self.code: int | None = None
-        self.message: str | None = None
-        self.data: dict | None = None
-
-
-class RCONConnectionError(NetworkError, BaseRCONConnectionError):
-    def __init__(self, msg: str | None = None, error: Exception | None = None):
-        self.msg = msg
-        self.message = msg
-        self.error = error
-
-
-class IncorrectPasswordError(NetworkError, BaseIncorrectPasswordError):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.msg = "The password provided to the client was incorrect according to the server."
+        self.message: str = kwargs.get("message", "")
+        """错误信息"""
+        self.info = kwargs
+        """所有错误信息"""
 
-
-class ClientNotConnectedError(NetworkError, BaseClientNotConnectedError):
-    def __init__(self):
-        super().__init__()
-        self.msg = "The client isn't connected. (Looks like you forgot to call the connect() coroutine!)"
+    def __repr__(self):
+        return "ActionFailed(" + ", ".join(f"{k}={v!r}" for k, v in self.info.items()) + ")"
 
 
 class UnauthorizedException(ActionFailed):
@@ -66,4 +46,7 @@ class RateLimitException(ActionFailed):
 
 
 class ApiNotAvailable(BaseApiNotAvailable, MinecraftAdapterException):
-    pass
+    def __init__(self, msg: str | None = None):
+        super().__init__()
+        self.msg: str | None = msg
+        """错误原因"""

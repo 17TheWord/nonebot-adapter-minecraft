@@ -15,13 +15,7 @@ from nonebot.adapters.minecraft import Adapter  # type: ignore
 
 def pytest_configure(config: pytest.Config) -> None:
     config.stash[NONEBOT_INIT_KWARGS] = {
-        "minecraft_server_rcon": {
-            "Server": {
-                "enable_rcon": False,
-                "rcon_port": 25575,
-                "rcon_password": "password",
-            }
-        },
+        "minecraft_access_token": "test_access_token",
     }
 
 

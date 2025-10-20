@@ -1,19 +1,18 @@
 [project]
 name = "nonebot-adapter-minecraft"
-version = "1.5.2"
+version = "1.6.0"
 description = "NoneBot2与MineCraft Server互通的适配器。"
 authors = [{ name = "17TheWord", email = "17theword@gmail.com" }]
 requires-python = ">=3.10,<4.0"
 readme = "README.md"
 license = "MIT"
 dependencies = [
-    "aio-mc-rcon>=3.4.1,<4",
     "pydantic>=1.10.0,<3.0.0,!=2.5.0,!=2.5.1",
     "nonebot2[fastapi, httpx, websockets]>=2.2.0,<3",
 ]
 
 [dependency-groups]
-dev = ["pre-commit>=4.2.0,<5", "nonebot2[fastapi, httpx, websockets]>=2.2.0,<3"]
+dev = ["nonebot2[fastapi, httpx, websockets]>=2.2.0,<3"]
 
 lint = ["ruff>=0.12.4,<0.13", "pre-commit>=4.2.0,<5"]
 
@@ -23,6 +22,12 @@ test = [
     "pytest-asyncio>=0.23.0,<0.24",
     "pytest>=8.4.1",
 ]
+
+[tool.nonebot]
+adapters = [{ name = "Minecraft", module_name = "nonebot.adapters.minecraft" }]
+plugins = []
+plugin_dirs = []
+builtin_plugins = []
 
 [tool.hatch.build.targets.sdist]
 include = ["nonebot"]
@@ -34,7 +39,11 @@ include = ["nonebot"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.uv]
+default-groups = ["dev", "test", "lint"]
+
 [tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "session"
 addopts = "--cov=nonebot/adapters/minecraft --cov-report term-missing"
 filterwarnings = ["ignore:.*overrides.*:DeprecationWarning:nonebot.typing"]
 

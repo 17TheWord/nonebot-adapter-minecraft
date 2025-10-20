@@ -14,21 +14,9 @@ _✨ Minecraft 协议适配 ✨_
 
 前往 [Wiki](https://github.com/17TheWord/nonebot-adapter-minecraft/wiki)
 
-## 服务端支持
+## 服务端对接
 
-- [`原版端`](https://www.minecraft.net/zh-hans/download/server)
-- [`Spigot`](https://www.spigotmc.org/)
-- [`Folia`](https://papermc.io/software/folia)
-- [`Forge`](https://files.minecraftforge.net/)
-- [`Fabric`](https://fabricmc.net/)
-- [`NeoForge`](https://neoforged.net/)
-- [`Velocity`](https://papermc.io/software/velocity)
-
-服务器端插件/Mod下载：[`鹊桥`](https://github.com/17TheWord/QueQiao)
-
-## Rcon支持
-
-命令采用 `rcon` 发送，`rcon` 库为 [`aio-mc-rcon`](https://github.com/Iapetus-11/aio-mc-rcon)
+服务器端插件/Mod：[`鹊桥`](https://github.com/17TheWord/QueQiao)
 
 ## 其他
 
