@@ -226,6 +226,9 @@ class DisplayModel(BaseModel):
 class AchievementModel(BaseModel):
     """成就信息模型"""
 
+    key: str | None = None
+    """成就的关键字"""
+
     display: DisplayModel | None = None
     """成就显示信息"""
 
