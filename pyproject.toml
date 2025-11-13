@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-adapter-minecraft"
-version = "1.7.0"
+version = "1.7.1"
 description = "NoneBot2与MineCraft Server互通的适配器。"
 authors = [{ name = "17TheWord", email = "17theword@gmail.com" }]
 requires-python = ">=3.10,<4.0"
