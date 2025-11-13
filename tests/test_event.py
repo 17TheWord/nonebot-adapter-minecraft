@@ -7,8 +7,8 @@ from nonebot.adapters.minecraft import (  # type: ignore
     Event,
     Message,
     MessageSegment,
-    SpigotAsyncPlayerChatEvent,
-    SpigotPlayer,
+    Player,
+    PlayerChatEvent,
 )
 from nonebot.compat import model_dump
 from nonebot.log import logger
@@ -37,17 +37,17 @@ async def test_event():
 @pytest.mark.asyncio
 async def test_event_log():
     msg = Message(MessageSegment.text(text="[text]"))
-    event = SpigotAsyncPlayerChatEvent(
+    event = PlayerChatEvent(
         timestamp=0,
         post_type="message",
-        event_name="AsyncPlayerChatEvent",
+        event_name="PlayerChatEvent",
         server_name="Server",
-        sub_type="chat",
+        sub_type="player_chat",
         message_id="",
         server_version="1.20.1",
         server_type="spigot",
         to_me=False,
-        player=SpigotPlayer(nickname="test"),
+        player=Player(nickname="test"),
         message=msg,
     )
     logger.opt(colors=True).success(f"{event.get_event_name()}: {event.get_event_description()}")

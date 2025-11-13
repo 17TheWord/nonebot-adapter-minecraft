@@ -6,7 +6,7 @@ from nonebot.adapters import Bot as BaseBot
 from nonebot.message import handle_event
 from nonebot.typing import overrides
 
-from .event import Event, MessageEvent
+from .event import Event, PlayerChatEvent
 from .exception import ActionFailed
 from .message import Message, MessageSegment
 from .utils import api, log
@@ -15,12 +15,12 @@ if TYPE_CHECKING:
     from .adapter import Adapter
 
 
-def _check_nickname(bot: "Bot", event: MessageEvent) -> None:
+def _check_nickname(bot: "Bot", event: PlayerChatEvent) -> None:
     """检查消息开头是否存在昵称，去除并赋值 `event.to_me`。
 
     参数:
         bot: Bot 对象
-        event: MessageEvent 对象
+        event: PlayerChatEvent 对象
     """
     first_msg_seg = event.message[0]
     if first_msg_seg.type != "text":
@@ -68,7 +68,7 @@ class Bot(BaseBot):
 
     async def handle_event(self, event: Event) -> None:
         """处理收到的事件。"""
-        if isinstance(event, MessageEvent):
+        if isinstance(event, PlayerChatEvent):
             _check_nickname(self, event)
 
         await handle_event(self, event)

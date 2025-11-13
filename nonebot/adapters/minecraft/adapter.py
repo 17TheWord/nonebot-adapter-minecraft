@@ -50,7 +50,7 @@ class Adapter(BaseAdapter):
         (
             "post_type",
             "event_name",
-            # "sub_type",
+            "sub_type",
         ),
     )
 
