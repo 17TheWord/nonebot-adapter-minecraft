@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from nonebot.compat import PYDANTIC_V2
 
@@ -176,7 +176,7 @@ class Component(BaseModel):
     """附加的子文本组件，会依次拼接显示。"""
 
     if PYDANTIC_V2:
-        model_config = {"populate_by_name": True}
+        model_config = ConfigDict(populate_by_name=True)
     else:
 
         class Config:
