@@ -1,9 +1,8 @@
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
-
 from nonebot.compat import PYDANTIC_V2
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ScoreComponent(BaseModel):

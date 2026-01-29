@@ -1,7 +1,5 @@
 from typing import Literal
 
-import pytest
-
 from nonebot.adapters.minecraft import (  # type: ignore
     Adapter,
     Event,
@@ -12,6 +10,7 @@ from nonebot.adapters.minecraft import (  # type: ignore
 )
 from nonebot.compat import model_dump
 from nonebot.log import logger
+import pytest
 
 
 @pytest.mark.asyncio

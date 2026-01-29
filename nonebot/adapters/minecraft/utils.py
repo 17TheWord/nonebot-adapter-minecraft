@@ -1,11 +1,11 @@
 from collections.abc import Awaitable, Callable
 from functools import partial
 from typing import TYPE_CHECKING, Any, Concatenate, Generic, TypeVar, overload
-from typing_extensions import ParamSpec
 from uuid import UUID
 
 from nonebot.utils import DataclassEncoder as BaseDataclassEncoder
 from nonebot.utils import logger_wrapper
+from typing_extensions import ParamSpec
 
 from .exception import ActionFailed
 

@@ -91,7 +91,7 @@ keep-runtime-typing = true
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
-extra-standard-library = ["typing_extensions"]
+known-third-party = ["nonebot"]
 
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false

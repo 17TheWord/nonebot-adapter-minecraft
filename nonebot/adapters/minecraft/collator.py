@@ -7,12 +7,11 @@ FrontMatter:
 
 from typing import Any, Generic, TypeVar, get_origin
 
-from pygtrie import StringTrie
-
 from nonebot.adapters import Event
 from nonebot.compat import ModelField, model_fields
 from nonebot.typing import all_literal_values, origin_is_literal
 from nonebot.utils import logger_wrapper
+from pygtrie import StringTrie
 
 E = TypeVar("E", bound=Event)
 SEPARATOR = "/"

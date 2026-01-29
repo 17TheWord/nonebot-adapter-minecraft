@@ -1,13 +1,12 @@
 from typing import Literal
-from typing_extensions import deprecated
 from uuid import UUID
 
+from nonebot.adapters import Event as BaseEvent
 from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump
 from nonebot.typing import overrides
 from nonebot.utils import escape_tag
 from pydantic import BaseModel
-
-from nonebot.adapters import Event as BaseEvent
+from typing_extensions import deprecated
 
 from .message import Message
 

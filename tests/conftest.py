@@ -1,10 +1,9 @@
 from pathlib import Path
 
-from nonebug import NONEBOT_INIT_KWARGS
-import pytest
-
 import nonebot
 import nonebot.adapters
+from nonebug import NONEBOT_INIT_KWARGS
+import pytest
 
 nonebot.adapters.__path__.append(  # type: ignore
     str((Path(__file__).parent.parent / "nonebot" / "adapters").resolve())

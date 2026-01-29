@@ -1,6 +1,5 @@
-import pytest
-
 from nonebot.adapters.minecraft import Message, MessageSegment  # type: ignore
+import pytest
 
 
 @pytest.mark.asyncio
