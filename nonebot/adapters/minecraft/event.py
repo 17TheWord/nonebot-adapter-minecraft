@@ -249,6 +249,7 @@ class AchievementModel(BaseModel):
     translate: Translate | None = None
     """成就翻译信息"""
 
+
 class PlayerAchievementEvent(NoticeEvent):
     """玩家成就事件"""
 
@@ -258,4 +259,4 @@ class PlayerAchievementEvent(NoticeEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"@{self.player.nickname} Achievement on [{self.server_name}]: {self.achievement.translate.text if self.achievement.translate else f'{self.player.nickname} has earned an achievement'}"
+        return f"@{self.player.nickname} Achievement on [{self.server_name}]: {self.achievement.translate.text if self.achievement.translate and self.achievement.translate.text else f'{self.player.nickname} has earned an achievement'}"
