@@ -1,6 +1,6 @@
 [project]
 name = "nonebot-adapter-minecraft"
-version = "1.7.1"
+version = "1.8.0"
 description = "NoneBot2与MineCraft Server互通的适配器。"
 authors = [{ name = "17TheWord", email = "17theword@gmail.com" }]
 requires-python = ">=3.10,<4.0"
@@ -91,7 +91,7 @@ keep-runtime-typing = true
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
-extra-standard-library = ["typing_extensions"]
+known-third-party = ["nonebot"]
 
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false

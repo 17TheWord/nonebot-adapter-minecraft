@@ -1,12 +1,12 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel
-
 from nonebot.adapters import Event as BaseEvent
 from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump
 from nonebot.typing import overrides
 from nonebot.utils import escape_tag
+from pydantic import BaseModel
+from typing_extensions import deprecated
 
 from .message import Message
 
@@ -56,6 +56,19 @@ class Event(BaseEvent):
 
         class Config(ConfigDict):
             extra = "allow"
+
+
+class Translate(BaseModel):
+    """翻译信息模型"""
+
+    key: str | None = None
+    """翻译的关键字"""
+
+    args: list["Translate"] | None = None
+    """翻译的参数列表"""
+
+    text: str | None = None
+    """翻译文本内容"""
 
 
 # Models
@@ -185,6 +198,7 @@ class PlayerQuitEvent(NoticeEvent):
         return f"@{self.player.nickname} Quit [{self.server_name}]"
 
 
+@deprecated("Use Translate model instead.")
 class DeathModel(BaseModel):
     """死亡信息模型"""
 
@@ -203,7 +217,7 @@ class PlayerDeathEvent(NoticeEvent):
 
     event_name: Literal["PlayerDeathEvent"]
     sub_type: Literal["player_death"]
-    death: DeathModel
+    death: Translate
 
     @overrides(Event)
     def get_event_description(self) -> str:
@@ -213,10 +227,10 @@ class PlayerDeathEvent(NoticeEvent):
 class DisplayModel(BaseModel):
     """成就显示信息模型"""
 
-    title: str | None = None
+    title: Translate | None = None
     """显示标题"""
 
-    description: str | None = None
+    description: Translate | None = None
     """显示描述"""
 
     frame: str | None = None
@@ -232,8 +246,8 @@ class AchievementModel(BaseModel):
     display: DisplayModel | None = None
     """成就显示信息"""
 
-    text: str | None = None
-    """成就文本描述"""
+    translate: Translate | None = None
+    """成就翻译信息"""
 
 
 class PlayerAchievementEvent(NoticeEvent):
@@ -245,4 +259,4 @@ class PlayerAchievementEvent(NoticeEvent):
 
     @overrides(Event)
     def get_event_description(self) -> str:
-        return f"@{self.player.nickname} Achievement on [{self.server_name}]: {self.achievement.text if self.achievement.text else f'{self.player.nickname} has earned an achievement'}"
+        return f"@{self.player.nickname} Achievement on [{self.server_name}]: {self.achievement.translate.text if self.achievement.translate and self.achievement.translate.text else f'{self.player.nickname} has earned an achievement'}"

@@ -1,11 +1,10 @@
 import asyncio
 from urllib.parse import quote_plus
 
-from nonebug import App
-import pytest
-
 import nonebot
 from nonebot.adapters.minecraft import Adapter  # type: ignore
+from nonebug import App
+import pytest
 
 
 @pytest.mark.asyncio
