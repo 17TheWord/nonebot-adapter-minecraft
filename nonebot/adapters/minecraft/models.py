@@ -76,7 +76,15 @@ class HoverEvent(BaseModel):
     """悬停事件类型。"""
 
     contents: "Component | str | list[Component] | HoverShowItem | HoverShowEntity | None" = None
-    """悬停显示内容，可为文本、物品或实体信息。"""
+    """悬停显示内容，可为文本、物品或实体信息。1.16及以上"""
+
+    value: "Component | str | list[Component] | HoverShowItem | HoverShowEntity | None" = None
+    """悬停显示内容，可为文本、物品或实体信息。1.15及以下"""
+
+    def __setattr__(self, name: str, value: Any):
+        super().__setattr__(name, value)
+        if name == "contents" and value is not None:
+            super().__setattr__("value", value)
 
 
 class Color(str, Enum):
