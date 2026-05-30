@@ -61,7 +61,7 @@ class Adapter(BaseAdapter):
         super().__init__(driver, **kwargs)
         self.minecraft_config: Config = get_plugin_config(Config)
         self.connections: dict[str, WebSocket] = {}
-        self.tasks: list["asyncio.Task"] = []
+        self.tasks: set[asyncio.Task] = set()
         self._setup()
 
     @classmethod
@@ -93,7 +93,9 @@ class Adapter(BaseAdapter):
             for url in self.minecraft_config.minecraft_ws_urls[server_name]:
                 try:
                     ws_url = URL(url)
-                    self.tasks.append(asyncio.create_task(self._forward_ws(server_name, ws_url)))
+                    task = asyncio.create_task(self._forward_ws(server_name, ws_url))
+                    task.add_done_callback(self.tasks.discard)
+                    self.tasks.add(task)
                 except Exception as e:
                     log(
                         "ERROR",
@@ -242,7 +244,9 @@ class Adapter(BaseAdapter):
                 data = await websocket.receive()
                 json_data = json.loads(data)
                 if event := self.json_to_event(json_data, self_id):
-                    asyncio.create_task(bot.handle_event(event))
+                    task = asyncio.create_task(bot.handle_event(event))
+                    task.add_done_callback(self.tasks.discard)
+                    self.tasks.add(task)
         except WebSocketClosed:
             log("WARNING", f"WebSocket for Bot {escape_tag(self_id)} closed by peer")
         except Exception as e:
