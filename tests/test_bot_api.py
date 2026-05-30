@@ -1,9 +1,10 @@
 import asyncio
 import json
 
+from fakes import FakeWebSocket
 import nonebot
 from nonebot.adapters.minecraft import Adapter, Bot, Message, MessageSegment
-from nonebot.adapters.minecraft.exception import ActionFailed, NetworkError
+from nonebot.adapters.minecraft.exception import ActionFailed, ApiNotAvailable, NetworkError
 from nonebot.adapters.minecraft.store import ResultStore
 from nonebug import App
 import pytest
@@ -18,14 +19,6 @@ class FakeAdapter:
         if api == "send_rcon_command":
             return "command result"
         return None
-
-
-class FakeWebSocket:
-    def __init__(self):
-        self.messages = []
-
-    async def send(self, data):
-        self.messages.append(data)
 
 
 def make_bot():
@@ -103,6 +96,33 @@ async def test_send_rcon_command_returns_result():
 
     assert result == "command result"
     assert bot.adapter.calls == [("Server", "send_rcon_command", {"command": "list"})]
+
+
+@pytest.mark.asyncio
+async def test_call_api_dispatches_bot_api(app: App, monkeypatch):
+    adapter = nonebot.get_adapter(Adapter)
+    bot = Bot(adapter, "Server")
+    calls = []
+
+    async def fake_send_websocket_message(bot_id, api, data):
+        calls.append((bot_id, api, data))
+        return "command result"
+
+    monkeypatch.setattr(adapter, "send_websocket_message", fake_send_websocket_message)
+
+    result = await adapter._call_api(bot, "send_rcon_command", command="list")
+
+    assert result == "command result"
+    assert calls == [("Server", "send_rcon_command", {"command": "list"})]
+
+
+@pytest.mark.asyncio
+async def test_call_api_raises_api_not_available(app: App):
+    adapter = nonebot.get_adapter(Adapter)
+    bot = Bot(adapter, "Server")
+
+    with pytest.raises(ApiNotAvailable):
+        await adapter._call_api(bot, "unknown_api")
 
 
 @pytest.mark.asyncio

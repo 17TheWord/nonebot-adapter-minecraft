@@ -2,6 +2,7 @@ import asyncio
 import json
 from urllib.parse import quote_plus
 
+from fakes import FakeWebSocket, FakeWebSocketContext
 import nonebot
 from nonebot.adapters.minecraft import (
     Adapter,  # type: ignore
@@ -13,43 +14,6 @@ from nonebug import App
 import pytest
 
 ORIGINAL_ASYNCIO_SLEEP = asyncio.sleep
-
-
-class FakeRequest:
-    def __init__(self, headers: dict[str, str]):
-        self.headers = headers
-
-
-class FakeWebSocket:
-    def __init__(self, headers: dict[str, str], messages: list[str] | None = None):
-        self.request = FakeRequest(headers)
-        self.messages = messages or []
-        self.accepted = False
-        self.close_code = None
-        self.close_reason = None
-
-    async def accept(self):
-        self.accepted = True
-
-    async def receive(self):
-        if self.messages:
-            return self.messages.pop(0)
-        raise WebSocketClosed(1000, "closed")
-
-    async def close(self, code: int = 1000, reason: str | None = None):
-        self.close_code = code
-        self.close_reason = reason
-
-
-class FakeWebSocketContext:
-    def __init__(self, websocket: FakeWebSocket):
-        self.websocket = websocket
-
-    async def __aenter__(self):
-        return self.websocket
-
-    async def __aexit__(self, exc_type, exc, tb):
-        return False
 
 
 @pytest.mark.asyncio
@@ -92,6 +56,24 @@ async def test_ws_server_rejects_invalid_handshake(app: App, headers: dict[str, 
 
     assert websocket.close_code == 1008
     assert websocket.close_reason == reason
+
+
+@pytest.mark.asyncio
+async def test_ws_server_rejects_duplicate_self_name(app: App):
+    adapter = nonebot.get_adapter(Adapter)
+    headers = {"x-self-name": quote_plus("Server"), "Authorization": "Bearer test_access_token"}
+    websocket = FakeWebSocket(headers)
+    bot = Bot(adapter, "Server")
+    adapter.bot_connect(bot)
+
+    try:
+        await adapter._handle_ws(websocket)  # type: ignore[arg-type]
+    finally:
+        adapter.bot_disconnect(bot)
+
+    assert websocket.accepted is False
+    assert websocket.close_code == 1008
+    assert websocket.close_reason == "Duplicate X-Self-Name"
 
 
 @pytest.mark.asyncio
@@ -193,3 +175,25 @@ async def test_forward_ws_tracks_event_task(app: App, monkeypatch):
     assert adapter.tasks == set()
     assert "Server" not in adapter.connections
     assert "Server" not in adapter.bots
+
+
+@pytest.mark.asyncio
+async def test_stop_forward_cancels_tracked_tasks(app: App):
+    adapter = nonebot.get_adapter(Adapter)
+    started = asyncio.Event()
+
+    async def wait_forever():
+        started.set()
+        await asyncio.Event().wait()
+
+    task = asyncio.create_task(wait_forever())
+    task.add_done_callback(adapter.tasks.discard)
+    adapter.tasks.add(task)
+
+    await asyncio.wait_for(started.wait(), timeout=1)
+
+    await adapter._stop_forward()
+    await ORIGINAL_ASYNCIO_SLEEP(0)
+
+    assert task.cancelled()
+    assert adapter.tasks == set()
