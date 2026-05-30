@@ -148,7 +148,9 @@ class Adapter(BaseAdapter):
                             event = self.json_to_event(json_data)
                             if not event:
                                 continue
-                            asyncio.create_task(bot.handle_event(event))
+                            task = asyncio.create_task(bot.handle_event(event))
+                            task.add_done_callback(self.tasks.discard)
+                            self.tasks.add(task)
                     except WebSocketClosed as e:
                         log(
                             "ERROR",
