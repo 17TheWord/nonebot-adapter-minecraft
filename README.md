@@ -21,7 +21,7 @@ _✨ Minecraft 协议适配 ✨_
 ## 其他
 
 - [17TheWord/nonebot-plugin-mcqq](https://github.com/17TheWord/nonebot-plugin-mcqq) 使用插件与MineCraft Server通信，较为完善
-- [17TheWord/nonebot-plugin-mcping](https://github.com/17TheWord/nonebot-plugin-mcqq) 获取 MineCraft Server Motd 信息并返回图片
+- [17TheWord/nonebot-plugin-mcping](https://github.com/17TheWord/nonebot-plugin-mcping) 获取 MineCraft Server Motd 信息并返回图片
 
 # 特别感谢
 
