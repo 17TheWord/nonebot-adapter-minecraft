@@ -7,6 +7,22 @@ from nonebug import App
 import pytest
 
 
+class FakeRequest:
+    def __init__(self, headers: dict[str, str]):
+        self.headers = headers
+
+
+class FakeWebSocket:
+    def __init__(self, headers: dict[str, str]):
+        self.request = FakeRequest(headers)
+        self.close_code = None
+        self.close_reason = None
+
+    async def close(self, code: int = 1000, reason: str | None = None):
+        self.close_code = code
+        self.close_reason = reason
+
+
 @pytest.mark.asyncio
 async def test_ws_server(app: App):
     adapter = nonebot.get_adapter(Adapter)
@@ -24,3 +40,26 @@ async def test_ws_server(app: App):
         await asyncio.sleep(1)
         assert "Server" not in nonebot.get_bots()
         assert "Server" not in adapter.bots
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("headers", "reason"),
+    [
+        ({}, "Missing X-Self-Name Header"),
+        (
+            {"x-self-name": quote_plus("Server"), "x-client-origin": "nonebot"},
+            "X-Client-Origin Header cannot be nonebot",
+        ),
+        ({"x-self-name": quote_plus("Server")}, "Missing Authorization Header"),
+        ({"x-self-name": quote_plus("Server"), "Authorization": "Bearer wrong"}, "Invalid Authorization Header"),
+    ],
+)
+async def test_ws_server_rejects_invalid_handshake(app: App, headers: dict[str, str], reason: str):
+    adapter = nonebot.get_adapter(Adapter)
+    websocket = FakeWebSocket(headers)
+
+    await adapter._handle_ws(websocket)  # type: ignore[arg-type]
+
+    assert websocket.close_code == 1008
+    assert websocket.close_reason == reason
