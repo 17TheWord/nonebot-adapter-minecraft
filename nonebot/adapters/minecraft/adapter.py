@@ -231,14 +231,6 @@ class Adapter(BaseAdapter):
 
         await websocket.accept()
 
-        try:
-            log("DEBUG", "Try getting host from websocket")
-            host_from_websocket = websocket.__dict__["websocket"].__dict__["scope"]["client"][0]
-            log("DEBUG", "Host from websocket: " + host_from_websocket)
-        except Exception:
-            log("WARNING", "Cannot get host from websocket, will try getting from configuration")
-            host_from_websocket = ""
-
         bot = Bot(self, self_id)
         self.connections[self_id] = websocket
         self.bot_connect(bot)
