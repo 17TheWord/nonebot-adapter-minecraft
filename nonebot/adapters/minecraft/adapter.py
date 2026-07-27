@@ -3,7 +3,7 @@ from collections.abc import Generator
 import contextlib
 import inspect
 import json
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote_plus, unquote_plus
 
 from nonebot import get_plugin_config
@@ -188,7 +188,9 @@ class Adapter(BaseAdapter):
         if not (websocket := self.connections.get(bot_id, None)):
             raise NetworkError(f"Bot {bot_id} is not connected.")
         seq = self._result_store.get_seq()
-        timeout: float = data.get("_timeout", self.config.api_timeout)
+        timeout = cast(float, self.config.api_timeout)
+        if isinstance(data, dict) and data.get("_timeout") is not None:
+            timeout = cast(float, data["_timeout"])
         json_data = json.dumps({"api": api, "data": data, "echo": str(seq)}, cls=DataclassEncoder)
         await websocket.send(json_data)
         try:

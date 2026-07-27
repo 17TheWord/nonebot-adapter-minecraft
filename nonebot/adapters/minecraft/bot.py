@@ -3,12 +3,14 @@ import re
 from typing import TYPE_CHECKING, Any
 
 from nonebot.adapters import Bot as BaseBot
+from nonebot.compat import type_validate_python
 from nonebot.message import handle_event
 from nonebot.typing import overrides
 
 from .event import Event, PlayerChatEvent
 from .exception import ActionFailed
 from .message import Message, MessageSegment
+from .models import Status
 from .utils import api, log
 
 if TYPE_CHECKING:
@@ -153,3 +155,14 @@ class Bot(BaseBot):
             命令的执行结果字符串。
         """
         return await self.adapter.send_websocket_message(self.self_id, "send_rcon_command", {"command": command})  # type: ignore
+
+    @api
+    async def get_status(self) -> Status:
+        """
+        获取服务器状态。
+
+        Returns:
+            服务器状态信息。
+        """
+        data = await self.adapter.send_websocket_message(self.self_id, "get_status", None)
+        return type_validate_python(Status, data)

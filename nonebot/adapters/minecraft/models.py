@@ -108,6 +108,142 @@ class HoverEvent(BaseModel):
                 super().__setattr__("contents", value)
 
 
+class StatusServerVersion(BaseModel):
+    """服务器列表 Ping 的版本信息。"""
+
+    name: str
+    """服务器版本名称。"""
+
+    protocol: int | float
+    """协议版本号。"""
+
+
+class StatusServerPlayers(BaseModel):
+    """服务器列表 Ping 的玩家数量信息。"""
+
+    max: int | float
+    """最大玩家数量。"""
+
+    online: int | float
+    """当前在线玩家数量。"""
+
+
+class StatusServerListPing(BaseModel):
+    """Minecraft Server List Ping 信息。"""
+
+    available: bool
+    """服务器列表 Ping 是否可用。"""
+
+    host: str
+    """服务器列表 Ping 地址。"""
+
+    port: int
+    """服务器列表 Ping 端口。"""
+
+    reason: str
+    """服务器列表 Ping 状态原因。"""
+
+    error: str | None = None
+    """服务器列表 Ping 错误信息。"""
+
+    version: StatusServerVersion | None = None
+    """服务器版本信息。"""
+
+    players: StatusServerPlayers | None = None
+    """玩家数量信息。"""
+
+    description: Any | None = None
+    """服务器描述，可能是字符串、JSON 对象或数组。"""
+
+    favicon: str | None = None
+    """服务器图标，通常是 base64 data URI。"""
+
+    if PYDANTIC_V2:
+        model_config = ConfigDict(extra="allow")  # type: ignore
+    else:
+
+        class Config:
+            extra = "allow"
+
+
+class StatusCpuInformation(BaseModel):
+    """CPU 状态信息。"""
+
+    cpu_cores: int
+    """CPU 核心数。"""
+
+    load_average: int | float
+    """系统平均负载。"""
+
+    system_load: int | float
+    """系统 CPU 负载。"""
+
+    process_load: int | float
+    """当前进程 CPU 负载。"""
+
+
+class StatusMemoryUsage(BaseModel):
+    """内存使用信息。"""
+
+    total: int | float
+    """总内存。"""
+
+    free: int | float
+    """空闲内存。"""
+
+    used: int | float
+    """已用内存。"""
+
+    percentage: int | float
+    """使用百分比。"""
+
+
+class StatusJvmMemoryUsage(StatusMemoryUsage):
+    """JVM 内存使用信息。"""
+
+    max: int | float
+    """JVM 最大可用内存。"""
+
+
+class StatusMemoryInformation(BaseModel):
+    """内存状态信息。"""
+
+    physical_memory: StatusMemoryUsage
+    """物理内存信息。"""
+
+    jvm_memory: StatusJvmMemoryUsage
+    """JVM 内存信息。"""
+
+
+class Status(BaseModel):
+    """服务器状态信息。"""
+
+    timestamp: int
+    """状态采集时间戳。"""
+
+    server_type: str
+    """服务器类型。"""
+
+    server_version: str
+    """服务器版本。"""
+
+    server_list_ping: StatusServerListPing
+    """服务器列表 Ping 信息。"""
+
+    cpu_information: StatusCpuInformation
+    """CPU 状态信息。"""
+
+    memory_information: StatusMemoryInformation
+    """内存状态信息。"""
+
+    if PYDANTIC_V2:
+        model_config = ConfigDict(extra="allow")  # type: ignore
+    else:
+
+        class Config:
+            extra = "allow"
+
+
 class Color(str, Enum):
     black = "black"
     dark_blue = "dark_blue"
