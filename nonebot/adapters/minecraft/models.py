@@ -4,6 +4,8 @@ from typing import Any
 from nonebot.compat import PYDANTIC_V2
 from pydantic import BaseModel, ConfigDict, Field
 
+from .compat import model_validator
+
 
 class ScoreComponent(BaseModel):
     """计分板文本组件，显示玩家或实体的计分板数值。"""
@@ -81,10 +83,29 @@ class HoverEvent(BaseModel):
     value: "Component | str | list[Component] | HoverShowItem | HoverShowEntity | None" = None
     """悬停显示内容，可为文本、物品或实体信息。1.15及以下"""
 
+    @model_validator(mode="before")
+    def sync_hover_content(cls, values: Any):
+        if not isinstance(values, dict):
+            return values
+
+        contents = values.get("contents")
+        value = values.get("value")
+
+        if contents is not None and value is None:
+            values["value"] = contents
+        elif value is not None and contents is None:
+            values["contents"] = value
+
+        return values
+
     def __setattr__(self, name: str, value: Any):
         super().__setattr__(name, value)
         if name == "contents" and value is not None:
-            super().__setattr__("value", value)
+            if getattr(self, "value", None) is None:
+                super().__setattr__("value", value)
+        elif name == "value" and value is not None:
+            if getattr(self, "contents", None) is None:
+                super().__setattr__("contents", value)
 
 
 class Color(str, Enum):

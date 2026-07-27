@@ -1,4 +1,5 @@
 from nonebot.adapters.minecraft import Message, MessageSegment  # type: ignore
+from nonebot.adapters.minecraft.models import HoverEvent
 import pytest
 
 
@@ -16,3 +17,16 @@ async def test_message_escape():
 
     assert MessageSegment.text("test") + "test" == Message([MessageSegment.text("test"), MessageSegment.text("test")])
     assert "test" + MessageSegment.text("test") == Message([MessageSegment.text("test"), MessageSegment.text("test")])
+
+
+def test_message_segment_text_serializes_hover_event_value_compat():
+    segment = MessageSegment.text("hover", hover_event=HoverEvent(action="show_text", contents="tooltip"))
+
+    assert segment.dump() == {
+        "text": "hover",
+        "hoverEvent": {
+            "action": "show_text",
+            "contents": "tooltip",
+            "value": "tooltip",
+        },
+    }
