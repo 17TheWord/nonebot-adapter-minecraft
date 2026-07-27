@@ -1,5 +1,4 @@
 from nonebot.adapters.minecraft.models import HoverEvent, HoverShowItem
-import pytest
 
 
 def test_hover_event_syncs_value_from_contents():
