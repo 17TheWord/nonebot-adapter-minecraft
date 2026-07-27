@@ -3,7 +3,7 @@ from collections.abc import Generator
 import contextlib
 import inspect
 import json
-from typing import Any
+from typing import Any, cast
 from urllib.parse import quote_plus, unquote_plus
 
 from nonebot import get_plugin_config
@@ -61,7 +61,7 @@ class Adapter(BaseAdapter):
         super().__init__(driver, **kwargs)
         self.minecraft_config: Config = get_plugin_config(Config)
         self.connections: dict[str, WebSocket] = {}
-        self.tasks: list["asyncio.Task"] = []
+        self.tasks: set[asyncio.Task] = set()
         self._setup()
 
     @classmethod
@@ -93,7 +93,9 @@ class Adapter(BaseAdapter):
             for url in self.minecraft_config.minecraft_ws_urls[server_name]:
                 try:
                     ws_url = URL(url)
-                    self.tasks.append(asyncio.create_task(self._forward_ws(server_name, ws_url)))
+                    task = asyncio.create_task(self._forward_ws(server_name, ws_url))
+                    task.add_done_callback(self.tasks.discard)
+                    self.tasks.add(task)
                 except Exception as e:
                     log(
                         "ERROR",
@@ -146,7 +148,9 @@ class Adapter(BaseAdapter):
                             event = self.json_to_event(json_data)
                             if not event:
                                 continue
-                            asyncio.create_task(bot.handle_event(event))
+                            task = asyncio.create_task(bot.handle_event(event))
+                            task.add_done_callback(self.tasks.discard)
+                            self.tasks.add(task)
                     except WebSocketClosed as e:
                         log(
                             "ERROR",
@@ -184,7 +188,9 @@ class Adapter(BaseAdapter):
         if not (websocket := self.connections.get(bot_id, None)):
             raise NetworkError(f"Bot {bot_id} is not connected.")
         seq = self._result_store.get_seq()
-        timeout: float = data.get("_timeout", self.config.api_timeout)
+        timeout = cast(float, self.config.api_timeout)
+        if isinstance(data, dict) and data.get("_timeout") is not None:
+            timeout = cast(float, data["_timeout"])
         json_data = json.dumps({"api": api, "data": data, "echo": str(seq)}, cls=DataclassEncoder)
         await websocket.send(json_data)
         try:
@@ -231,14 +237,6 @@ class Adapter(BaseAdapter):
 
         await websocket.accept()
 
-        try:
-            log("DEBUG", "Try getting host from websocket")
-            host_from_websocket = websocket.__dict__["websocket"].__dict__["scope"]["client"][0]
-            log("DEBUG", "Host from websocket: " + host_from_websocket)
-        except Exception:
-            log("WARNING", "Cannot get host from websocket, will try getting from configuration")
-            host_from_websocket = ""
-
         bot = Bot(self, self_id)
         self.connections[self_id] = websocket
         self.bot_connect(bot)
@@ -250,7 +248,9 @@ class Adapter(BaseAdapter):
                 data = await websocket.receive()
                 json_data = json.loads(data)
                 if event := self.json_to_event(json_data, self_id):
-                    asyncio.create_task(bot.handle_event(event))
+                    task = asyncio.create_task(bot.handle_event(event))
+                    task.add_done_callback(self.tasks.discard)
+                    self.tasks.add(task)
         except WebSocketClosed:
             log("WARNING", f"WebSocket for Bot {escape_tag(self_id)} closed by peer")
         except Exception as e:

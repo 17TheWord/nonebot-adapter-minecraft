@@ -1,8 +1,11 @@
 from enum import Enum
 from typing import Any
+from uuid import UUID
 
 from nonebot.compat import PYDANTIC_V2
 from pydantic import BaseModel, ConfigDict, Field
+
+from .compat import model_validator
 
 
 class ScoreComponent(BaseModel):
@@ -81,11 +84,209 @@ class HoverEvent(BaseModel):
     value: "Component | str | list[Component] | HoverShowItem | HoverShowEntity | None" = None
     """悬停显示内容，可为文本、物品或实体信息。1.15及以下"""
 
+    @model_validator(mode="before")
+    def sync_hover_content(cls, values: Any):
+        if not isinstance(values, dict):
+            return values
+
+        contents = values.get("contents")
+        value = values.get("value")
+
+        if contents is not None and value is None:
+            values["value"] = contents
+        elif value is not None and contents is None:
+            values["contents"] = value
+
+        return values
+
     def __setattr__(self, name: str, value: Any):
         super().__setattr__(name, value)
         if name == "contents" and value is not None:
-            super().__setattr__("value", value)
+            if getattr(self, "value", None) is None:
+                super().__setattr__("value", value)
+        elif name == "value" and value is not None:
+            if getattr(self, "contents", None) is None:
+                super().__setattr__("contents", value)
 
+
+class Player(BaseModel):
+    """玩家信息。"""
+
+    nickname: str
+    """玩家昵称。"""
+
+    uuid: UUID | None = None
+    """玩家 UUID。"""
+
+    is_op: bool | None = None
+    """玩家是否为管理员。"""
+
+    address: str | None = None
+    """玩家 IP 地址。"""
+
+    health: float | None = None
+    """玩家当前生命值。"""
+
+    max_health: float | None = None
+    """玩家最大生命值。"""
+
+    experience_level: int | None = None
+    """玩家经验等级。"""
+
+    experience_progress: float | None = None
+    """当前经验进度，0.0-1.0 之间的浮点数。"""
+
+    total_experience: int | None = None
+    """玩家总经验值。"""
+
+    walk_speed: float | None = None
+    """玩家行走速度。"""
+
+    x: float | None = None
+    """玩家坐标 X 轴。"""
+
+    y: float | None = None
+    """玩家坐标 Y 轴。"""
+
+    z: float | None = None
+    """玩家坐标 Z 轴。"""
+
+class StatusServerVersion(BaseModel):
+    """服务器列表 Ping 的版本信息。"""
+
+    name: str
+    """服务器版本名称。"""
+
+    protocol: int | float
+    """协议版本号。"""
+
+
+class StatusServerPlayers(BaseModel):
+    """服务器列表 Ping 的玩家数量信息。"""
+
+    max: int | float
+    """最大玩家数量。"""
+
+    online: int | float
+    """当前在线玩家数量。"""
+
+
+class StatusServerListPing(BaseModel):
+    """Minecraft Server List Ping 信息。"""
+
+    available: bool
+    """服务器列表 Ping 是否可用。"""
+
+    host: str
+    """服务器列表 Ping 地址。"""
+
+    port: int
+    """服务器列表 Ping 端口。"""
+
+    reason: str
+    """服务器列表 Ping 状态原因。"""
+
+    error: str | None = None
+    """服务器列表 Ping 错误信息。"""
+
+    version: StatusServerVersion | None = None
+    """服务器版本信息。"""
+
+    players: StatusServerPlayers | None = None
+    """玩家数量信息。"""
+
+    description: Any | None = None
+    """服务器描述，可能是字符串、JSON 对象或数组。"""
+
+    favicon: str | None = None
+    """服务器图标，通常是 base64 data URI。"""
+
+    if PYDANTIC_V2:
+        model_config = ConfigDict(extra="allow")  # type: ignore
+    else:
+
+        class Config:
+            extra = "allow"
+
+
+class StatusCpuInformation(BaseModel):
+    """CPU 状态信息。"""
+
+    cpu_cores: int
+    """CPU 核心数。"""
+
+    load_average: int | float
+    """系统平均负载。"""
+
+    system_load: int | float
+    """系统 CPU 负载。"""
+
+    process_load: int | float
+    """当前进程 CPU 负载。"""
+
+
+class StatusMemoryUsage(BaseModel):
+    """内存使用信息。"""
+
+    total: int | float
+    """总内存。"""
+
+    free: int | float
+    """空闲内存。"""
+
+    used: int | float
+    """已用内存。"""
+
+    percentage: int | float
+    """使用百分比。"""
+
+
+class StatusJvmMemoryUsage(StatusMemoryUsage):
+    """JVM 内存使用信息。"""
+
+    max: int | float
+    """JVM 最大可用内存。"""
+
+
+class StatusMemoryInformation(BaseModel):
+    """内存状态信息。"""
+
+    physical_memory: StatusMemoryUsage
+    """物理内存信息。"""
+
+    jvm_memory: StatusJvmMemoryUsage
+    """JVM 内存信息。"""
+
+
+class Status(BaseModel):
+    """服务器状态信息。"""
+
+    timestamp: int
+    """状态采集时间戳。"""
+
+    server_type: str
+    """服务器类型。"""
+
+    server_version: str
+    """服务器版本。"""
+
+    server_list_ping: StatusServerListPing
+    """服务器列表 Ping 信息。"""
+
+    cpu_information: StatusCpuInformation
+    """CPU 状态信息。"""
+
+    memory_information: StatusMemoryInformation
+    """内存状态信息。"""
+
+class PrivateMessageResult(BaseModel):
+    """私聊消息发送结果。"""
+
+    target_player: Player
+    """目标玩家信息。"""
+
+    message: str
+    """发送结果消息。"""
 
 class Color(str, Enum):
     black = "black"

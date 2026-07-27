@@ -1,5 +1,4 @@
 from typing import Literal
-from uuid import UUID
 
 from nonebot.adapters import Event as BaseEvent
 from nonebot.compat import PYDANTIC_V2, ConfigDict, model_dump
@@ -9,6 +8,7 @@ from pydantic import BaseModel
 from typing_extensions import deprecated
 
 from .message import Message
+from .models import Player
 
 
 class Event(BaseEvent):
@@ -69,49 +69,6 @@ class Translate(BaseModel):
 
     text: str | None = None
     """翻译文本内容"""
-
-
-# Models
-class Player(BaseModel):
-    """玩家信息"""
-
-    nickname: str
-    """玩家昵称"""
-    uuid: UUID | None = None
-    """玩家UUID"""
-    is_op: bool | None = None
-    """玩家是否为管理员"""
-    address: str | None = None
-    """玩家IP地址"""
-
-    health: float | None = None
-    """玩家当前生命值"""
-    max_health: float | None = None
-    """玩家最大生命值"""
-
-    experience_level: int | None = None
-    """玩家经验等级"""
-    experience_progress: float | None = None
-    """当前经验进度，0.0-1.0 之间的浮点数"""
-    total_experience: int | None = None
-    """玩家总经验值"""
-
-    walk_speed: float | None = None
-    """玩家行走速度"""
-
-    x: float | None = None
-    """玩家坐标X轴"""
-    y: float | None = None
-    """玩家坐标Y轴"""
-    z: float | None = None
-    """玩家坐标Z轴"""
-
-    if PYDANTIC_V2:
-        model_config = ConfigDict(extra="allow")  # type: ignore
-    else:
-
-        class Config(ConfigDict):
-            extra = "allow"
 
 
 # Message Events

@@ -31,4 +31,4 @@ class ResultStore:
         try:
             return await asyncio.wait_for(future, timeout)
         finally:
-            del self._futures[seq]
+            self._futures.pop(seq, None)
