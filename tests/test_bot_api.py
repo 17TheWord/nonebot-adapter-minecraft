@@ -5,7 +5,7 @@ from fakes import FakeWebSocket
 import nonebot
 from nonebot.adapters.minecraft import Adapter, Bot, Message, MessageSegment
 from nonebot.adapters.minecraft.exception import ActionFailed, ApiNotAvailable, NetworkError
-from nonebot.adapters.minecraft.models import Status
+from nonebot.adapters.minecraft.models import PrivateMessageResult, Status
 from nonebot.adapters.minecraft.store import ResultStore
 from nonebug import App
 import pytest
@@ -55,6 +55,25 @@ STATUS_DATA = {
     },
 }
 
+PRIVATE_MESSAGE_RESULT_DATA = {
+    "target_player": {
+        "nickname": "17TheWord",
+        "uuid": "12345678-1234-5678-1234-567812345678",
+        "is_op": True,
+        "address": "127.0.0.1",
+        "health": 20,
+        "max_health": 20,
+        "experience_level": 1,
+        "experience_progress": 0.5,
+        "total_experience": 10,
+        "walk_speed": 0.1,
+        "x": 1,
+        "y": 64,
+        "z": 2,
+    },
+    "message": "Send private message success.",
+}
+
 
 class FakeAdapter:
     def __init__(self):
@@ -67,6 +86,8 @@ class FakeAdapter:
             return "command result"
         if api == "get_status":
             return self.status
+        if api == "send_private_msg":
+            return PRIVATE_MESSAGE_RESULT_DATA
         return None
 
 
@@ -97,6 +118,61 @@ async def test_send_msg_serializes_message():
             {"message": [{"text": "hello"}, {"text": "world", "color": "gold"}]},
         )
     ]
+
+
+@pytest.mark.asyncio
+async def test_send_private_msg_serializes_payload_and_returns_result():
+    bot = make_bot()
+
+    result = await Bot.send_private_msg(bot, "hello", nickname="17TheWord")
+
+    assert isinstance(result, PrivateMessageResult)
+    assert result.target_player.nickname == "17TheWord"
+    assert str(result.target_player.uuid) == "12345678-1234-5678-1234-567812345678"
+    assert result.message == "Send private message success."
+    assert bot.adapter.calls == [
+        (
+            "Server",
+            "send_private_msg",
+            {
+                "uuid": None,
+                "nickname": "17TheWord",
+                "message": {"text": "hello"},
+            },
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_send_private_msg_serializes_message_segment():
+    bot = make_bot()
+
+    await Bot.send_private_msg(
+        bot,
+        MessageSegment.text("hello", color="aqua"),
+        uuid="12345678-1234-5678-1234-567812345678",
+        nickname="17TheWord",
+    )
+
+    assert bot.adapter.calls == [
+        (
+            "Server",
+            "send_private_msg",
+            {
+                "uuid": "12345678-1234-5678-1234-567812345678",
+                "nickname": "17TheWord",
+                "message": {"text": "hello", "color": "aqua"},
+            },
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_send_private_msg_requires_uuid_or_nickname():
+    bot = make_bot()
+
+    with pytest.raises(ActionFailed, match="uuid or nickname"):
+        await Bot.send_private_msg(bot, "hello")
 
 
 @pytest.mark.asyncio
@@ -200,6 +276,35 @@ async def test_call_api_dispatches_get_status(app: App, monkeypatch):
     assert result.server_list_ping.players is not None
     assert result.server_list_ping.players.max == 20.0
     assert calls == [("Server", "get_status", None)]
+
+
+@pytest.mark.asyncio
+async def test_call_api_dispatches_send_private_msg(app: App, monkeypatch):
+    adapter = nonebot.get_adapter(Adapter)
+    bot = Bot(adapter, "Server")
+    calls = []
+
+    async def fake_send_websocket_message(bot_id, api, data):
+        calls.append((bot_id, api, data))
+        return PRIVATE_MESSAGE_RESULT_DATA
+
+    monkeypatch.setattr(adapter, "send_websocket_message", fake_send_websocket_message)
+
+    result = await adapter._call_api(bot, "send_private_msg", message="hello", nickname="17TheWord")
+
+    assert isinstance(result, PrivateMessageResult)
+    assert result.target_player.nickname == "17TheWord"
+    assert calls == [
+        (
+            "Server",
+            "send_private_msg",
+            {
+                "uuid": None,
+                "nickname": "17TheWord",
+                "message": {"text": "hello"},
+            },
+        )
+    ]
 
 
 @pytest.mark.asyncio

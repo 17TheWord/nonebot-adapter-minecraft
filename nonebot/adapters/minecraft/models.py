@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Any
+from uuid import UUID
 
 from nonebot.compat import PYDANTIC_V2
 from pydantic import BaseModel, ConfigDict, Field
@@ -107,6 +108,48 @@ class HoverEvent(BaseModel):
             if getattr(self, "contents", None) is None:
                 super().__setattr__("contents", value)
 
+
+class Player(BaseModel):
+    """玩家信息。"""
+
+    nickname: str
+    """玩家昵称。"""
+
+    uuid: UUID | None = None
+    """玩家 UUID。"""
+
+    is_op: bool | None = None
+    """玩家是否为管理员。"""
+
+    address: str | None = None
+    """玩家 IP 地址。"""
+
+    health: float | None = None
+    """玩家当前生命值。"""
+
+    max_health: float | None = None
+    """玩家最大生命值。"""
+
+    experience_level: int | None = None
+    """玩家经验等级。"""
+
+    experience_progress: float | None = None
+    """当前经验进度，0.0-1.0 之间的浮点数。"""
+
+    total_experience: int | None = None
+    """玩家总经验值。"""
+
+    walk_speed: float | None = None
+    """玩家行走速度。"""
+
+    x: float | None = None
+    """玩家坐标 X 轴。"""
+
+    y: float | None = None
+    """玩家坐标 Y 轴。"""
+
+    z: float | None = None
+    """玩家坐标 Z 轴。"""
 
 class StatusServerVersion(BaseModel):
     """服务器列表 Ping 的版本信息。"""
@@ -236,13 +279,14 @@ class Status(BaseModel):
     memory_information: StatusMemoryInformation
     """内存状态信息。"""
 
-    if PYDANTIC_V2:
-        model_config = ConfigDict(extra="allow")  # type: ignore
-    else:
+class PrivateMessageResult(BaseModel):
+    """私聊消息发送结果。"""
 
-        class Config:
-            extra = "allow"
+    target_player: Player
+    """目标玩家信息。"""
 
+    message: str
+    """发送结果消息。"""
 
 class Color(str, Enum):
     black = "black"

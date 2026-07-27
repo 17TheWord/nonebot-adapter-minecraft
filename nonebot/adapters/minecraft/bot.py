@@ -10,7 +10,7 @@ from nonebot.typing import overrides
 from .event import Event, PlayerChatEvent
 from .exception import ActionFailed
 from .message import Message, MessageSegment
-from .models import Status
+from .models import PrivateMessageResult, Status
 from .utils import api, log
 
 if TYPE_CHECKING:
@@ -98,6 +98,37 @@ class Bot(BaseBot):
             None
         """
         return await self.adapter.send_websocket_message(self.self_id, "send_msg", {"message": _parse_message(message)})  # type: ignore
+
+    @api
+    async def send_private_msg(
+        self,
+        message: str | MessageSegment | Message,
+        uuid: str | None = None,
+        nickname: str | None = None,
+    ) -> PrivateMessageResult:
+        """
+        发送私聊消息。
+
+        Args:
+            message: 要发送的私聊消息内容。
+            uuid: 接收者 UUID，优先使用。
+            nickname: 接收者昵称，当 uuid 为空时使用。
+        Returns:
+            私聊消息发送结果。
+        """
+        if not uuid and not nickname:
+            raise ActionFailed(message="At least one of uuid or nickname must be provided.")
+
+        data = await self.adapter.send_websocket_message(
+            self.self_id,
+            "send_private_msg",
+            {
+                "uuid": uuid,
+                "nickname": nickname,
+                "message": _parse_message(message),
+            },
+        )
+        return type_validate_python(PrivateMessageResult, data)
 
     @api
     async def send_title(
